@@ -1,82 +1,61 @@
 package sample.Model;
 
+import sample.Model.Parser.DocParser;
+import sample.Model.Parser.IParser;
+
 import java.io.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+
 
 public class ReadFile {
     private final String corpusPath;
+    private final IParser parser;
+    private final HashSet<String> STOP_WORD_BAG;
 
-    public ReadFile(String corpusPath) {
+    public ReadFile(String corpusPath, HashSet<String> stopWords, HashSet<String> months) {
         this.corpusPath = corpusPath;
+        this.parser = new DocParser(false, stopWords, months);
+        this.STOP_WORD_BAG = stopWords;
+//        readStopWordsFile();
     }
+
+    public void run(){
+
+    }
+
+
 
     //  prepare file for parsing by extract fields and create object of doc.
     public void prepareDocToParse(String path) {
-
         BufferedReader br = null;
-        String docNo = null;
-        String date1;
-        String t1;
-
+        String fullDoc = "";
         try {
             // stream to file
             br = new BufferedReader(new InputStreamReader(new FileInputStream(path), "UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        String line = " ";
-
-        while (line != null) {
-            try {
-                line = br.readLine();
-
-                while (line != null && !line.equals("<DOC>"))
-                    line = br.readLine();
-
-                //check if we reach to the end of file.
-                if (line == null)
-                    break;
-
-                StringBuilder text = new StringBuilder(); // for text field of current doc.
-                //start new doc. define by "<DOC>"
-
-                line = br.readLine();
-                //extract DocNo
-                if (line.startsWith("<DOCNO>")) {
-                    docNo = line.replaceAll("<DOCNO>", "");
-                    docNo = docNo.replaceAll("</DOCNO>", "");
-                }
-                while (!line.startsWith("<DATE1>")) {
+            String line = br.readLine();
+            while (line != null) {
+                if(line.equals("") || line.equals("\n") || line.equals(" ")){
                     line = br.readLine();
                 }
-                //extract Date1
-                date1 = line.replaceAll("<DATE1>", "");
-                date1 = date1.replaceAll("</DATE1>", "");
-
-                while (!line.contains("<TEXT>")) {
+                else if (line.equals("<DOC>")){
                     line = br.readLine();
                 }
-                //extract Text
-                line = br.readLine();
-
-                while (!line.equals("</TEXT>")) {
-                    text.append(line);
-                    line = br.readLine();
+                else{
+                    // we're inside a doc, read it all
+                    if (line.equals("</DOC>")){
+                        //we've reached the end of the doc.
+                        this.parser.Parse(fullDoc);
+                        line = br.readLine();
+                    }
+                    else{
+                        fullDoc += " "+line;
+                        line = br.readLine();
+                    }
                 }
-
-                //just for testing
-                System.out.println(path);
-                System.out.println(text);
-                System.out.println("----------------");
-                Document doc = new Document(docNo, date1, text);
-                //parser.parse(doc);
-
-
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
 

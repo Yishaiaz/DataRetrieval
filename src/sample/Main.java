@@ -25,16 +25,17 @@ public class Main extends Application {
 
     public static void main(String[] args) {
    //     launch(args);
-
-      /*  CorpusHandler manger = new CorpusHandler("C:\\Users\\Sahar Ben Baruch\\Desktop\\corpus");
+        String ZabaryFileAddress = "/Users/yishaiazabary/Desktop/University/שנה ד/DataRetrieval/corpus";
+        String SababiFileAddress = "C:\\Users\\Sahar Ben Baruch\\Desktop\\corpus";
+        CorpusHandler manger = new CorpusHandler(ZabaryFileAddress);
         manger.initListOfFilesPaths();
         try {
             manger.findTextInDocs();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        }*/
+        }
 
-        Number numdd= new Number("10,123");   //10.123 K
+//        Number numdd= new Number("10,123");   //10.123 K
   //      Number numdd= new Number("123 Thousand");    //123K
   //      Number numdd= new Number("1010.56");     //1.01 K
  //     Number numdd= new Number("10,123,000");   //10.123 M
@@ -75,11 +76,11 @@ public class Main extends Application {
 
 
 
-        numdd.prepareTerm();
-
-       System.out.println("Value is :" +numdd.content);
-        System.out.println("unit is :"+ numdd.unit);
-       System.out.println("mark is :"+ numdd.mark);
+//        numdd.prepareTerm();
+//
+//       System.out.println("Value is :" +numdd.content);
+//        System.out.println("unit is :"+ numdd.unit);
+//       System.out.println("mark is :"+ numdd.mark);
 
 
 

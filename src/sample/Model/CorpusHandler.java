@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -12,12 +14,18 @@ import java.util.stream.Stream;
 public class CorpusHandler {
     private String corpusPath;
     private ArrayList<String> filesPaths; //list contains all paths in Corpus dir.
-    private ReadFile readFile;
+    public HashSet<String> stopWords = new HashSet<>();
+    public HashSet<String> months = new HashSet<>();
 
     public CorpusHandler(String corpusPath) {
         this.corpusPath = corpusPath;
         this.filesPaths = new ArrayList<>();
-
+        this.stopWords = readStopWordsFile();
+        this.months = new HashSet<String>(Arrays.asList(
+                "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER",
+                "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
+                "JAN", "FEB", "MAR", "APR", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"));
     }
 
     // This function add to 'filesPath' list with files paths.
@@ -55,12 +63,36 @@ public class CorpusHandler {
     }
 
     public void findTextInDocs() throws FileNotFoundException {
-        readFile = new ReadFile(corpusPath);
+
+        ReadFile readFile = new ReadFile(this.corpusPath, this.stopWords, this.months);
         //send every file to ReadFile for preparation for parsing.
         for (String path : filesPaths) {
-            readFile.prepareDocToParse(path);
+            if(path.endsWith(".DS_Store")){
+                System.out.println("you and your mac");
+            }
+            else{
+                readFile.prepareDocToParse(path);
+            }
         }
 
+    }
+    private HashSet<String> readStopWordsFile(){
+        HashSet<String> stopWords = new HashSet<>();
+        BufferedReader br = null;
+        try{
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(this.corpusPath+"/05 stop_words.txt"), "UTF-8"));
+            String line = "";
+            while(line != null){
+                line = br.readLine();
+                if (line != null){
+                    stopWords.add(line);
+//                    System.out.println(line);
+                }
+            }
+        }catch (Exception e){
+            System.out.println(e);
+        }
+        return stopWords;
     }
 
 
