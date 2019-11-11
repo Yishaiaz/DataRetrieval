@@ -8,8 +8,6 @@ public class TermHashMapDataStructure {
     public class TermHashMapEntry {
         public String value;
         public int TF=0;
-
-
         public ArrayList<Integer> termLocations = new ArrayList<>();
 
         public TermHashMapEntry(String value) {
@@ -35,7 +33,7 @@ public class TermHashMapDataStructure {
         if (termsEntries.containsKey(key)){
             // אם אני בפנים, תעדכן לפי הצורך
             TermHashMapEntry entry = termsEntries.get(key);
-            entry.update();
+//            entry.update();
         }else{
 
         }

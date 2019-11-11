@@ -30,15 +30,13 @@ public class DocParser implements IParser{
 
     @Override
     public void Parse(String fullDoc) throws Exception {
-        HashMap<String, TermHashMapEntry> docTermsMap = new HashMap<>();
+//        HashMap<String, TermHashMapEntry> docTermsMap = new HashMap<>();
         String[] docData = getDocData(fullDoc);
         Document doc = new Document(docData[0], docData[1], docData[2]);
         //todo: remove unnecessary tags e.g. <F..>
         //todo: remove unnecessary chars : '[' , ']' ,'"', '?' '...'
         String[] docText = fullDoc.substring(fullDoc.indexOf("<TEXT>")+6, fullDoc.indexOf("</TEXT>")).split(" | \n");
         ArrayList<String> terms= new ArrayList<>();
-        boolean withDollar = false;
-        boolean justANumber= false;
 
         int textIterator=0;
         while(textIterator<docText.length){
