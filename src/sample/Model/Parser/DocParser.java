@@ -38,7 +38,7 @@ public class DocParser implements IParser{
         //todo: remove unnecessary tags e.g. <F..>
         //todo: remove unnecessary chars : '[' , ']' ,'"', '?' '...'
         String[] docText = fullDoc.substring(fullDoc.indexOf("<TEXT>")+6, fullDoc.indexOf("</TEXT>")).split(" | \n ");
-        ArrayList<String> terms= new ArrayList<>();
+
 
         int textIterator=0;
         int termLocation = 0;
@@ -59,7 +59,7 @@ public class DocParser implements IParser{
             StringBuilder stringBuilder = new StringBuilder();
             StringBuilder stringNumberBuilder = new StringBuilder();
             ////////////////// RANGES ////////////////////
-            if(docText[textIterator].contains("-")){
+            if(docText[textIterator].contains("-") && docText[textIterator].split("-").length > 1){
                 //term-term / word-word-word
                 String[] seperated = docText[textIterator].split("-");
                 if (seperated.length>=3){
@@ -410,13 +410,15 @@ public class DocParser implements IParser{
                 //todo remove things here like special characters - the regex = .replaceAll("\\.|,","")
                 Pattern regex = Pattern.compile("[^A-Za-z0-9]");
                 String word = docText[textIterator].replaceAll(regex.toString(), "");
+                termHashMapDataStructure.insert(word, termLocation);
+                termLocation+=1;
                 textIterator += 1;
             }
         }
 //        System.out.println(fullDoc);
         // todo create a real Doc here
         for (int i = 0; i < termHashMapDataStructure.termsEntries.size(); i++) {
-            System.out.println(terms.get(i));
+            System.out.println(termHashMapDataStructure.termsEntries.get(i));
         }
     }
 
