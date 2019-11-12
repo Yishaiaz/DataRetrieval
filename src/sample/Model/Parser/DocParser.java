@@ -12,6 +12,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.regex.Pattern;
 
 import static jdk.nashorn.internal.objects.NativeMath.round;
 
@@ -407,6 +408,8 @@ public class DocParser implements IParser{
             }else {
                 //not a number/percent/price for sure
                 //todo remove things here like special characters - the regex = .replaceAll("\\.|,","")
+                Pattern regex = Pattern.compile("[^A-Za-z0-9]");
+                String word = docText[textIterator].replaceAll(regex.toString(), "");
                 textIterator += 1;
             }
         }
