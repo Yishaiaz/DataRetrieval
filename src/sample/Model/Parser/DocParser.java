@@ -30,31 +30,81 @@ public class DocParser implements IParser{
 
     @Override
     public void Parse(String fullDoc) throws Exception {
-//        HashMap<String, TermHashMapEntry> docTermsMap = new HashMap<>();
+        TermHashMapDataStructure termHashMapDataStructure = new TermHashMapDataStructure();
         String[] docData = getDocData(fullDoc);
+        String treatedFullDoc =""; // NOT IN USE YET
         Document doc = new Document(docData[0], docData[1], docData[2]);
         //todo: remove unnecessary tags e.g. <F..>
         //todo: remove unnecessary chars : '[' , ']' ,'"', '?' '...'
-        String[] docText = fullDoc.substring(fullDoc.indexOf("<TEXT>")+6, fullDoc.indexOf("</TEXT>")).split(" | \n");
+        String[] docText = fullDoc.substring(fullDoc.indexOf("<TEXT>")+6, fullDoc.indexOf("</TEXT>")).split(" | \n ");
         ArrayList<String> terms= new ArrayList<>();
 
         int textIterator=0;
+        int termLocation = 0;
         while(textIterator<docText.length){
             // ignore here from any invalid entry
             if (docText[textIterator].equals("")){
-                textIterator++;
+                textIterator+=1;
                 continue;
             }
             //remove all ',' if exists at the end of the word
             if(docText[textIterator].endsWith(",")){
                 docText[textIterator] = docText[textIterator].replaceAll(",", "");
+            }// if the word/number is comprised of ',' remove them.  THIS IS FOR NUMBERS ONLY
+            else if(isANumber(docText[textIterator])==-1 && isANumber(docText[textIterator].replaceAll(",",""))!=-1){
+                docText[textIterator] = docText[textIterator].replaceAll(",", "");
             }
 
             StringBuilder stringBuilder = new StringBuilder();
             StringBuilder stringNumberBuilder = new StringBuilder();
-
+            ////////////////// RANGES ////////////////////
+            if(docText[textIterator].contains("-")){
+                //term-term / word-word-word
+                String[] seperated = docText[textIterator].split("-");
+                if (seperated.length>=3){
+                    if(isANumber(seperated[0]) == -1 && isANumber(seperated[1]) == -1 && isANumber(seperated[2]) == -1){
+                        //word-word-word pass as single term
+                        termHashMapDataStructure.insert(docText[textIterator], termLocation);
+                        termLocation+=1;
+                    }
+                    else{
+                        //not eligible for a range, split and pass as differnet terms
+                        for (int i = 0; i < seperated.length; i++) {
+                            termHashMapDataStructure.insert(seperated[i], termLocation);
+                            termLocation+=1;
+                        }
+                    }
+                    textIterator+=1;
+                }else if(seperated.length==2){
+                    // word-word number-word word-number number number
+                    termHashMapDataStructure.insert(docText[textIterator],termLocation);
+                    termLocation+=1;
+                    if(isANumber(seperated[0]) != -1){
+                        //number-number divide into two number and add them as terms
+                        termHashMapDataStructure.insert(seperated[0],termLocation);
+                        termLocation+=1;
+                    }if (isANumber(seperated[1]) != -1){
+                        termHashMapDataStructure.insert(seperated[1],termLocation);
+                        termLocation+=1;
+                    }
+                    textIterator+=1;
+                }
+            }else if(textIterator+3 < docText.length &&
+                    docText[textIterator].toLowerCase().equals("between") &&
+                    docText[textIterator+2].toLowerCase().equals("and") &&
+                    (isANumber(docText[textIterator+1]) != -1 && isANumber(docText[textIterator+3]) != -1)){
+                    // BETWEEN value and value
+                double firstNum = isANumber(docText[textIterator+1]);
+                double secondNum = isANumber(docText[textIterator+3 ]);
+                stringBuilder.append(firstNum);
+                stringBuilder.append("-");
+                stringBuilder.append(secondNum);
+                termHashMapDataStructure.insert(stringBuilder.toString(), termLocation);
+                termLocation+=1;
+                textIterator+=4;
+            }
             ////////////////// DATES ///////////////////// this is for the MM DD / MM YYYY format, NOT the DD MM format
-            if(this.months.contains(docText[textIterator])){
+            else if(this.months.contains(docText[textIterator].replaceAll("\\.|,",""))){
                 //look for the DD or YYYY
                 if(textIterator+1 < docText.length &&  isANumber(docText[textIterator+1]) != -1){
                     // found a full date
@@ -90,12 +140,10 @@ public class DocParser implements IParser{
                     stringBuilder.append(docText[textIterator]);
                     textIterator+=1;
                 }
-                terms.add(stringBuilder.toString());
+                termHashMapDataStructure.insert(stringBuilder.toString(), termLocation);
+                termLocation+=1;
             }
-            // if the word/number is comprised of ',' remove them.  THIS IS FOR NUMBERS ONLY
-            else if(docText[textIterator].contains(",")){
-                docText[textIterator] = docText[textIterator].replaceAll(",", "");
-            }
+
             /////////////////numbers, percentages and prices/////////////////
             ////DOLLAR NUMBERS/////
             else if(docText[textIterator].startsWith("$")){
@@ -139,12 +187,14 @@ public class DocParser implements IParser{
                     stringNumberBuilder.append(this.transformNumber(Double.parseDouble(docText[textIterator]), false));
                     textIterator+=1;
                 }
-                terms.add(stringNumberBuilder.toString());
+                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
+                termLocation+=1;
             }else if(docText[textIterator].contains("%")){
                 //Number%
                 stringNumberBuilder.append(docText[textIterator]);
                 textIterator+=1;
-                terms.add(stringNumberBuilder.toString());
+                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
+                termLocation+=1;
             }else if((docText[textIterator].contains("bn") || docText[textIterator].contains("m"))&&startsWithNum(docText[textIterator])){
                 // Number[m/bn]
                 String replace_with="";
@@ -178,7 +228,8 @@ public class DocParser implements IParser{
                     System.out.println(e);
                     textIterator+=1;
                 }
-                terms.add(stringNumberBuilder.toString());
+                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
+                termLocation+=1;
 
             }else if(textIterator+1 < docText.length && (docText[textIterator+1].toLowerCase().equals("percent") || docText[textIterator+1].toLowerCase().equals("percentage") )){
                 // Number percent /percentage
@@ -198,7 +249,8 @@ public class DocParser implements IParser{
                     System.out.println(e);
                     textIterator+=1;
                 }
-                terms.add(stringNumberBuilder.toString());
+                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
+                termLocation+=1;
             }else if(textIterator+1 < docText.length && (docText[textIterator+1].contains("/") && startsWithNum(docText[textIterator+1])) &&
                     textIterator+2 < docText.length && docText[textIterator+2].toLowerCase().equals("dollars") && isANumber(docText[textIterator])!=-1){
                 // Number fraction dollars
@@ -207,7 +259,8 @@ public class DocParser implements IParser{
                 stringNumberBuilder.append(docText[textIterator+1]);
                 stringNumberBuilder.append(" Dollars");
                 textIterator+=3;
-                terms.add(stringNumberBuilder.toString());
+                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
+                termLocation+=1;
             }else if(textIterator+1 < docText.length && (docText[textIterator+1].toLowerCase().equals("thousand"))){
                 // Number Thousand
                 String replace_with="";
@@ -225,7 +278,8 @@ public class DocParser implements IParser{
                     System.out.println(e);
                     textIterator+=1;
                 }
-                terms.add(stringNumberBuilder.toString());
+                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
+                termLocation+=1;
             }else if(textIterator+1 < docText.length && (docText[textIterator+1].toLowerCase().equals("dollars"))){
                 // Number Dollars
                 String replace_with="";
@@ -243,7 +297,8 @@ public class DocParser implements IParser{
                     System.out.println(e);
                     textIterator+=1;
                 }
-                terms.add(stringNumberBuilder.toString());
+                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
+                termLocation+=1;
             }else if(textIterator+1 < docText.length && (docText[textIterator+1].toLowerCase().equals("m") || docText[textIterator+1].toLowerCase().equals("bn") )){
                 // Number m/bn
                 String replace_with="";
@@ -275,13 +330,18 @@ public class DocParser implements IParser{
                     System.out.println(e);
                     textIterator+=1;
                 }
-                terms.add(stringNumberBuilder.toString());
-            }else if(textIterator+1 < docText.length && (docText[textIterator+1].toLowerCase().equals("million") || docText[textIterator+1].toLowerCase().equals("billion"))){
+                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
+                termLocation+=1;
+            }else if(textIterator+1 < docText.length && (docText[textIterator+1].toLowerCase().equals("million") ||
+                    docText[textIterator+1].toLowerCase().equals("billion") ||
+                    docText[textIterator+1].toLowerCase().equals("trillion"))){
                 //number million/billion
                 String replace_with="";
                 double num=1;
                 String toConcat="";
-                if (docText[textIterator+1].contains("billion")){
+                if (docText[textIterator+1].contains("trillion")){
+                    num = Math.pow(10,12);
+                }else if(docText[textIterator+1].contains("billion")){
                     num = Math.pow(10,9);
                 }else{
                     num = Math.pow(10,6);
@@ -306,38 +366,42 @@ public class DocParser implements IParser{
                     System.out.println(e);
                     textIterator+=1;
                 }
-                terms.add(stringNumberBuilder.toString());
+                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
+                termLocation+=1;
             }else if(isANumber(docText[textIterator])!=-1){
                 //this is a number
 //                String num = this.transformNumber(Double.parseDouble(docText[textIterator]), true);
                 double num = isANumber(docText[textIterator]);
 //                stringNumberBuilder.append(this.transformNumber(Double.parseDouble(docText[textIterator]), true));
                 // checks if there is a month name after it, meaning it is a date.
-                if(textIterator+1 < docText.length && months.contains(docText[textIterator+1])){
+                if(textIterator+1 < docText.length &&
+                        months.contains(docText[textIterator+1].replaceAll("\\.|,",""))){
                     //checks if it is a YYYY or a DD
                     if(num<=31){
                         // its DD
-                        stringNumberBuilder.append(this.monthIntoNumber(docText[textIterator+1]));
+                        stringNumberBuilder.append(this.monthIntoNumber(docText[textIterator+1].replaceAll(", | . ", "")));
                         stringNumberBuilder.append("-");
                         stringNumberBuilder.append(this.daysInDatesFormatter(num));
                     }else if(num>=1000 && num<=9999){
                         // its YYYY
-                        stringNumberBuilder.append(docText[textIterator+1]);
+                        stringNumberBuilder.append(this.monthIntoNumber(docText[textIterator+1].replaceAll(", | . ", "")));
                         stringNumberBuilder.append("-");
                         stringNumberBuilder.append(num);
                     }
                     textIterator+=2;
                 }else{
                     //here should be all the rest of the cases of just a number
+                    stringNumberBuilder.append(num);
                     textIterator+=1;
                 }
 
-                terms.add(stringNumberBuilder.toString());
+                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
+                termLocation+=1;
 
-            }else{
+            }else {
                 //not a number/percent/price for sure
-
-                textIterator+=1;
+                //todo remove things here like special characters - the regex = .replaceAll("\\.|,","")
+                textIterator += 1;
             }
         }
 //        System.out.println(fullDoc);
