@@ -12,6 +12,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.regex.Pattern;
 
 import static jdk.nashorn.internal.objects.NativeMath.round;
 
@@ -37,7 +38,7 @@ public class DocParser implements IParser{
         //todo: remove unnecessary tags e.g. <F..>
         //todo: remove unnecessary chars : '[' , ']' ,'"', '?' '...'
         String[] docText = fullDoc.substring(fullDoc.indexOf("<TEXT>")+6, fullDoc.indexOf("</TEXT>")).split(" | \n ");
-        ArrayList<String> terms= new ArrayList<>();
+
 
         int textIterator=0;
         int termLocation = 0;
@@ -58,7 +59,7 @@ public class DocParser implements IParser{
             StringBuilder stringBuilder = new StringBuilder();
             StringBuilder stringNumberBuilder = new StringBuilder();
             ////////////////// RANGES ////////////////////
-            if(docText[textIterator].contains("-")){
+            if(docText[textIterator].contains("-") && docText[textIterator].split("-").length > 1){
                 //term-term / word-word-word
                 String[] seperated = docText[textIterator].split("-");
                 if (seperated.length>=3){
@@ -407,16 +408,28 @@ public class DocParser implements IParser{
             }else {
                 //not a number/percent/price for sure
                 //todo remove things here like special characters - the regex = .replaceAll("\\.|,","")
+                Pattern regex = Pattern.compile("[^A-Za-z0-9]");
+                String word = docText[textIterator].replaceAll(regex.toString(), "");
+                termHashMapDataStructure.insert(word, termLocation);
+                termLocation+=1;
                 textIterator += 1;
             }
         }
 //        System.out.println(fullDoc);
         // todo create a real Doc here
         for (int i = 0; i < termHashMapDataStructure.termsEntries.size(); i++) {
-            System.out.println(terms.get(i));
+            System.out.println(termHashMapDataStructure.termsEntries.get(i));
         }
     }
 
+    /**
+     * detects all meta data documents' data and parses it. returns a 1D 3 sized array of:
+     * DOCNO - the documents' number
+     * DATE1 - the documents' date
+     * TI - the documents' header
+     * @param fullDoc
+     * @return
+     */
     private String[] getDocData(String fullDoc){
         //DOCNO tag info
         int startIndex = fullDoc.indexOf("<DOCNO>")+7;
@@ -436,6 +449,16 @@ public class DocParser implements IParser{
         docData[2] = docTI;
         return docData;
     }
+
+    /**
+     * if needed a private function that removes all the spaces leading to
+     * a character and keeps the rest of the string
+     * (including the spaces appearing after the first character).
+     *
+     * e.g. trimRedundantSpaces("   hello world") => "hello world"
+     * @param s
+     * @return
+     */
     private String trimRedundantSpaces(String s){
         String trimmedString="";
         StringBuilder sB = new StringBuilder();
@@ -454,28 +477,6 @@ public class DocParser implements IParser{
         }
         trimmedString = sB.toString();
         return trimmedString;
-    }
-
-    private double trimRegularToUnit(double num, String unit){
-        DecimalFormat df = new DecimalFormat("#.###");
-        df.setRoundingMode(RoundingMode.CEILING);
-        switch (unit){
-            case "M":
-            {
-                return Double.parseDouble(df.format(num/Math.pow(10,6)));
-            }
-            case "B":
-            {
-                return Double.parseDouble(df.format(num/Math.pow(10,9)));
-            }
-            case "T":
-            {
-                return Double.parseDouble(df.format(num/Math.pow(10,12)));
-            }
-
-        }
-        return 2;
-
     }
 
     /**
@@ -556,6 +557,12 @@ public class DocParser implements IParser{
         return num;
     }
 
+    /**
+     * receives a string month, trims it to the first 3 letters (e.g. January=>jan, etc.)
+     * matches it to the month's numerical presentation and returns it.
+     * @param s - the months name (e.g. [January, JAN, Jan, jan] all applicable)
+     * @return String
+     */
     private String monthIntoNumber(String s){
         StringBuilder stringBuilder = new StringBuilder();
         s = s.toLowerCase().substring(0,3);
@@ -612,6 +619,14 @@ public class DocParser implements IParser{
         return stringBuilder.toString();
     }
 
+    /**
+     * transforms a days representing number to a string.
+     * E.g.:
+     * daysInDatesFormatter(15) => "15"
+     * daysInDatesFormatter(5) => "05"
+     * @param num
+     * @return String
+     */
     private String daysInDatesFormatter(double num){
         int intNum = (int) num;
         StringBuilder stringBuilder = new StringBuilder();
