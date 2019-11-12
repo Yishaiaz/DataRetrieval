@@ -1,45 +1,58 @@
 package sample.Model.DataStructures;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
-
 public class TermHashMapDataStructure {
-    public class TermHashMapEntry {
-        public String value;
-        public int TF=0;
-        public ArrayList<Integer> termLocations = new ArrayList<>();
-
-        public TermHashMapEntry(String value) {
-            this.value = value;
-        }
-
-        public void addLocation(int location){
-            TF++;
-            termLocations.add(location);
-        }
-    }
-
-    public String value;
-    public int TF=0;
     public HashMap<String, TermHashMapEntry> termsEntries = new HashMap<>();
 
-    public TermHashMapDataStructure() {
+    public TermHashMapDataStructure() {}
 
+    //change value to new low case value
+    public void updateValueToLowCastValue(String newValue) {
+        String key = newValue.toLowerCase();
+        TermHashMapEntry entry = termsEntries.get(key);
+        TermHashMapEntry newEntry = new TermHashMapEntry(newValue);
+        newEntry.setTF(entry.getTF());
+        newEntry.termLocations = entry.termLocations;
+        termsEntries.replace(key, entry, newEntry);
     }
-    public void insert(String s, int iDFLocation){
+
+    public void insert(String s, int iDFLocation) {
         String entryValue = s;
         String key = s.toLowerCase();
-        if (termsEntries.containsKey(key)){
-            // אם אני בפנים, תעדכן לפי הצורך
+        // Term exist in structure.
+        if (termsEntries.containsKey(key)) {
             TermHashMapEntry entry = termsEntries.get(key);
-//            entry.update();
-        }else{
+            // if we found term in low case while his current value is in upper case-
+            //change to low case.
+            if (isStringLowerCase(s) && !entry.getValue().equals(s))
+                updateValueToLowCastValue(s);
 
+            termsEntries.get(key).addLocation(iDFLocation);
+        } else {
+            // in case its new Term in Structure.
+            TermHashMapEntry newEntry = new TermHashMapEntry(s);
+            newEntry.addLocation(iDFLocation);
+            termsEntries.put(key, newEntry);
         }
     }
 
-    public void SaveToQueue(){
+    private static boolean isStringLowerCase(String str) {
+
+        //convert String to char array
+        char[] charArray = str.toCharArray();
+
+        for (int i = 0; i < charArray.length; i++) {
+
+            //if any character is not in lower case, return false
+            if (!Character.isLowerCase(charArray[i]))
+                return false;
+        }
+
+        return true;
+    }
+
+    public void SaveToQueue() {
         return;
     }
 }

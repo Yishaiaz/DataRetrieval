@@ -1,6 +1,6 @@
 package sample.Model.Parser;
 
-import sample.Model.DataStructures.TermHashMapEntry;
+import sample.Model.DataStructures.TermHashMapDataStructure;
 import sample.Model.Document;
 import sample.Model.Number;
 import sample.Model.Term;
@@ -69,18 +69,20 @@ public class DocParser implements IParser{
                         stringBuilder.append("-");
                         if(isNextANumber<10){
                             stringBuilder.append("0");
+                            stringBuilder.append((int)(isNextANumber));
                         }else{
-                            stringBuilder.append(isNextANumber);
+                            stringBuilder.append((int)isNextANumber);
                         }
                         textIterator+=2;
-                    }else if(isNextANumber>1000){ //todo ask roiki, this is very shady.
+                    }else if(isNextANumber>=1000 && isNextANumber<=9999){ //todo ask roiki, this is very shady.
                         // YYYY format
-                        stringBuilder.append(isNextANumber);
+                        stringBuilder.append((int)isNextANumber);
                         stringBuilder.append("-");
                         stringBuilder.append(monthRep);
                         textIterator+=2;
                     }else{
                         //the number has nothing to do with the month name, pass as a regular word
+                        stringBuilder.append(docText[textIterator]);
                         textIterator+=1;
                     }
                 }else{
@@ -88,8 +90,9 @@ public class DocParser implements IParser{
                     stringBuilder.append(docText[textIterator]);
                     textIterator+=1;
                 }
+                terms.add(stringBuilder.toString());
             }
-            // if the word/number is comprised of ',' remove them.
+            // if the word/number is comprised of ',' remove them.  THIS IS FOR NUMBERS ONLY
             else if(docText[textIterator].contains(",")){
                 docText[textIterator] = docText[textIterator].replaceAll(",", "");
             }
@@ -224,7 +227,7 @@ public class DocParser implements IParser{
                 }
                 terms.add(stringNumberBuilder.toString());
             }else if(textIterator+1 < docText.length && (docText[textIterator+1].toLowerCase().equals("dollars"))){
-                // Number Thousand
+                // Number Dollars
                 String replace_with="";
                 double num=1;
                 String toConcat="";
@@ -306,8 +309,29 @@ public class DocParser implements IParser{
                 terms.add(stringNumberBuilder.toString());
             }else if(isANumber(docText[textIterator])!=-1){
                 //this is a number
-                stringNumberBuilder.append(this.transformNumber(Double.parseDouble(docText[textIterator]), true));
-                textIterator+=1;
+//                String num = this.transformNumber(Double.parseDouble(docText[textIterator]), true);
+                double num = isANumber(docText[textIterator]);
+//                stringNumberBuilder.append(this.transformNumber(Double.parseDouble(docText[textIterator]), true));
+                // checks if there is a month name after it, meaning it is a date.
+                if(textIterator+1 < docText.length && months.contains(docText[textIterator+1])){
+                    //checks if it is a YYYY or a DD
+                    if(num<=31){
+                        // its DD
+                        stringNumberBuilder.append(this.monthIntoNumber(docText[textIterator+1]));
+                        stringNumberBuilder.append("-");
+                        stringNumberBuilder.append(this.daysInDatesFormatter(num));
+                    }else if(num>=1000 && num<=9999){
+                        // its YYYY
+                        stringNumberBuilder.append(docText[textIterator+1]);
+                        stringNumberBuilder.append("-");
+                        stringNumberBuilder.append(num);
+                    }
+                    textIterator+=2;
+                }else{
+                    //here should be all the rest of the cases of just a number
+                    textIterator+=1;
+                }
+
                 terms.add(stringNumberBuilder.toString());
 
             }else{
@@ -454,41 +478,63 @@ public class DocParser implements IParser{
         switch (s){
             case "jan":{
                 stringBuilder.append("01");
+                break;
             }
             case "feb":{
                 stringBuilder.append("02");
+                break;
             }
             case "mar":{
                 stringBuilder.append("03");
+                break;
             }
             case "apr":{
                 stringBuilder.append("04");
+                break;
             }
             case "may":{
                 stringBuilder.append("05");
+                break;
             }
             case "jun":{
                 stringBuilder.append("06");
+                break;
             }
             case "jul":{
                 stringBuilder.append("07");
+                break;
             }
             case "aug":{
                 stringBuilder.append("08");
+                break;
             }
             case "sep":{
                 stringBuilder.append("09");
+                break;
             }
             case "oct":{
                 stringBuilder.append("10");
+                break;
             }
             case "nov":{
                 stringBuilder.append("11");
+                break;
             }
             case "dec":{
                 stringBuilder.append("12");
+                break;
             }
         }
+        return stringBuilder.toString();
+    }
+
+    private String daysInDatesFormatter(double num){
+        int intNum = (int) num;
+        StringBuilder stringBuilder = new StringBuilder();
+        if(intNum<10){
+            stringBuilder.append("0");
+        }
+        stringBuilder.append(intNum);
         return stringBuilder.toString();
     }
 }
