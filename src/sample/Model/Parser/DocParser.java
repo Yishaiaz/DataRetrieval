@@ -251,14 +251,20 @@ public class DocParser implements IParser{
                 }
                 termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
                 termLocation+=1;
-            }else if(textIterator+1 < docText.length && (docText[textIterator+1].contains("/") && startsWithNum(docText[textIterator+1])) &&
-                    textIterator+2 < docText.length && docText[textIterator+2].toLowerCase().equals("dollars") && isANumber(docText[textIterator])!=-1){
+            }else if(textIterator+1 < docText.length &&
+                    (docText[textIterator+1].contains("/") &&
+                    startsWithNum(docText[textIterator+1])) &&
+                    isANumber(docText[textIterator])!=-1){
                 // Number fraction dollars
                 stringNumberBuilder.append(isANumber(docText[textIterator]));
                 stringNumberBuilder.append(" ");
                 stringNumberBuilder.append(docText[textIterator+1]);
-                stringNumberBuilder.append(" Dollars");
-                textIterator+=3;
+                if(textIterator+2 < docText.length && docText[textIterator+2].toLowerCase().equals("dollars") ) {
+                    stringNumberBuilder.append(" Dollars");
+                    textIterator+=3;
+                }else{
+                    textIterator+=2;
+                }
                 termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
                 termLocation+=1;
             }else if(textIterator+1 < docText.length && (docText[textIterator+1].toLowerCase().equals("thousand"))){
@@ -406,7 +412,7 @@ public class DocParser implements IParser{
         }
 //        System.out.println(fullDoc);
         // todo create a real Doc here
-        for (int i = 0; i < terms.size(); i++) {
+        for (int i = 0; i < termHashMapDataStructure.termsEntries.size(); i++) {
             System.out.println(terms.get(i));
         }
     }
@@ -449,6 +455,7 @@ public class DocParser implements IParser{
         trimmedString = sB.toString();
         return trimmedString;
     }
+
     private double trimRegularToUnit(double num, String unit){
         DecimalFormat df = new DecimalFormat("#.###");
         df.setRoundingMode(RoundingMode.CEILING);
@@ -470,6 +477,12 @@ public class DocParser implements IParser{
         return 2;
 
     }
+
+    /**
+     * checks if the first char of the string is a number
+     * @param s
+     * @return
+     */
     private Boolean startsWithNum(String s){
         try{
             Double.parseDouble(s.substring(0,1));
@@ -479,6 +492,13 @@ public class DocParser implements IParser{
         }
     }
 
+    /**
+     *  receives a number and a boolean indicating whether this is a price term.
+     *  acts according to the rules and concatenates the unit and measure accordingly.
+     * @param s
+     * @param regNumber
+     * @return String
+     */
     private String transformNumber(double s, boolean regNumber){
         StringBuilder sb = new StringBuilder();
         DecimalFormat df = new DecimalFormat("#.###");
