@@ -28,7 +28,9 @@ public class ReadFile {
 
     //  prepare file for parsing by extract fields and create object of doc.
     public void prepareDocToParse(String path) {
+        long total_start_time = System.currentTimeMillis();
         BufferedReader br = null;
+        StringBuilder fullDocStringBuilder = new StringBuilder();
         String fullDoc = "";
         try {
             // stream to file
@@ -39,6 +41,7 @@ public class ReadFile {
                     line = br.readLine();
                 }
                 else if (line.equals("<DOC>")){
+                    fullDocStringBuilder.setLength(0);
                     line = br.readLine();
                 }
                 else{
@@ -47,7 +50,7 @@ public class ReadFile {
                         //we've reached the end of the doc.
                         //with timer
                         long start_time = System.currentTimeMillis();
-                        Document doc = this.parser.Parse(fullDoc);
+                        Document doc = this.parser.Parse(fullDocStringBuilder.toString());
 //                        Document doc = this.parser.Parse(fullDoc);
 //                        this.indexer.index(doc);
 
@@ -55,7 +58,8 @@ public class ReadFile {
                         line = br.readLine();
                     }
                     else{
-                        fullDoc += " "+line;
+//                        fullDoc += " "+line;
+                        fullDocStringBuilder.append(line);
                         line = br.readLine();
                     }
                 }
@@ -63,6 +67,7 @@ public class ReadFile {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println(String.format("Total parsing took: %d Ms", (System.currentTimeMillis() - total_start_time)));
 
 
     }
