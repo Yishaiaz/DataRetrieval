@@ -46,6 +46,8 @@ public class ReadFile {
                     if (line.equals("</DOC>")){
                         //we've reached the end of the doc.
                         this.parser.Parse(fullDoc);
+//                        Document doc = this.parser.Parse(fullDoc);
+//                        this.indexer.index(doc);
                         line = br.readLine();
                     }
                     else{
