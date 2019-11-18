@@ -1,9 +1,11 @@
 package sample.Model.Parser;
 
+import sample.Model.Document;
+
 import java.io.BufferedReader;
 
 public interface IParser {
 
-    public void Parse(String fullDoc) throws Exception;
+    public Document Parse(String fullDoc) throws Exception;
 
 }

@@ -7,6 +7,7 @@ import sample.Model.Term;
 import sample.Model.Word;
 import sun.font.TrueTypeFont;
 
+import javax.print.Doc;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -26,12 +27,11 @@ public class DocParser implements IParser{
         this.wordStemming = wordStemming;
         this.stopWords = stopWords;
         this.months = months;
-        //todo: receive stemming boolean paramter
     }
 
 
     @Override
-    public void Parse(String fullDoc) throws Exception {
+    public Document Parse(String fullDoc) throws Exception {
         TermHashMapDataStructure termHashMapDataStructure = new TermHashMapDataStructure();
         if(this.wordStemming){
             //todo: fullDoc to stemmer
@@ -41,7 +41,6 @@ public class DocParser implements IParser{
         String treatedFullDoc =""; // NOT IN USE YET
         Document doc = new Document(docData[0], docData[1], docData[2]);
         //todo: remove unnecessary tags e.g. <F..>
-        //todo: remove unnecessary chars : '[' , ']' ,'"', '?' '...'
         String[] docText = fullDoc.substring(fullDoc.indexOf("<TEXT>")+6, fullDoc.indexOf("</TEXT>")).split(" | \n ");
 
 
@@ -53,12 +52,33 @@ public class DocParser implements IParser{
                 textIterator+=1;
                 continue;
             }
+
             //remove all ',' if exists at the end of the word
             if(docText[textIterator].endsWith(",")){
                 docText[textIterator] = docText[textIterator].replaceAll(",", "");
             }// if the word/number is comprised of ',' remove them.  THIS IS FOR NUMBERS ONLY
             else if(isANumber(docText[textIterator])==-1 && isANumber(docText[textIterator].replaceAll(",",""))!=-1){
                 docText[textIterator] = docText[textIterator].replaceAll(",", "");
+            }else if(docText[textIterator].endsWith(".")){
+                docText[textIterator] = docText[textIterator].replaceAll("\\.", "");
+            }else if(docText[textIterator].endsWith("?")){
+                docText[textIterator] = docText[textIterator].replaceAll("\\?", "");
+            }else if(docText[textIterator].contains("[")){
+                docText[textIterator] = docText[textIterator].replaceAll("\\[", "");
+            }else if(docText[textIterator].contains("]")){
+                docText[textIterator] = docText[textIterator].replaceAll("]", "");
+            }
+//            else if(docText[textIterator].contains("\"")){
+//                docText[textIterator] = docText[textIterator].replaceAll(""", "");
+//            }
+            else if(docText[textIterator].contains("'")){
+                docText[textIterator] = docText[textIterator].replaceAll("'", "");
+            }else if(docText[textIterator].contains("\\|")){
+                docText[textIterator] = docText[textIterator].replaceAll("\\|", "");
+            }else if(docText[textIterator].contains(":")){
+                docText[textIterator] = docText[textIterator].replaceAll(":", "");
+            }else if(docText[textIterator].contains(";")){
+                docText[textIterator] = docText[textIterator].replaceAll(";", "");
             }
 
             StringBuilder stringBuilder = new StringBuilder();
@@ -130,7 +150,7 @@ public class DocParser implements IParser{
                             stringBuilder.append((int)isNextANumber);
                         }
                         textIterator+=2;
-                    }else if(isNextANumber>=1000 && isNextANumber<=9999){ //todo ask roiki, this is very shady.
+                    }else if(isNextANumber>=1000 && isNextANumber<=9999){
                         // YYYY format
                         stringBuilder.append((int)isNextANumber);
                         stringBuilder.append("-");
@@ -412,20 +432,25 @@ public class DocParser implements IParser{
 
             }else {
                 //not a number/percent/price/range/date for sure
-                //todo remove things here like special characters - the regex = .replaceAll("\\.|,","")
                 Pattern regex = Pattern.compile("[^A-Za-z0-9]");
                 String word = docText[textIterator].replaceAll(regex.toString(), "");
-                termHashMapDataStructure.insert(word, termLocation);
-                termLocation+=1;
-                textIterator += 1;
+                if(this.stopWords.contains(word.toLowerCase())){
+                    //a stop word, ignore it.
+                    textIterator += 1;
+                }else{
+                    termHashMapDataStructure.insert(word, termLocation);
+                    termLocation+=1;
+                    textIterator += 1;
+                }
             }
         }
-//        System.out.println(fullDoc);
-        // todo create a real Doc here - done, check with sahar.
+        //adding it into the Document object.
         doc.setParsedTerms(termHashMapDataStructure);
-        for (int i = 0; i < termHashMapDataStructure.termsEntries.size(); i++) {
-            System.out.println(termHashMapDataStructure.termsEntries.get(i));
-        }
+        //todo for MultiThreading: push doc into parsed docs queue instead of returning it.
+//        for (int i = 0; i < termHashMapDataStructure.termsEntries.size(); i++) {
+//            System.out.println(termHashMapDataStructure.termsEntries.get(i));
+//        }
+        return doc;
     }
 
     /**
