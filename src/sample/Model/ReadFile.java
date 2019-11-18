@@ -45,9 +45,13 @@ public class ReadFile {
                     // we're inside a doc, read it all
                     if (line.equals("</DOC>")){
                         //we've reached the end of the doc.
-                        this.parser.Parse(fullDoc);
+                        //with timer
+                        long start_time = System.currentTimeMillis();
+                        Document doc = this.parser.Parse(fullDoc);
 //                        Document doc = this.parser.Parse(fullDoc);
 //                        this.indexer.index(doc);
+
+                        System.out.println(String.format("Time to parse doc- %s, took: %d Ms", doc.getDocNo(), (System.currentTimeMillis() - start_time)));
                         line = br.readLine();
                     }
                     else{
