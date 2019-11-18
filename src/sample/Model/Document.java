@@ -1,9 +1,12 @@
 package sample.Model;
 
+import sample.Model.DataStructures.TermHashMapDataStructure;
+
 public class Document {
     public String DocNo;
     public String date;
     public String headline;
+    public TermHashMapDataStructure parsedTerms;
 
 
 
@@ -11,6 +14,38 @@ public class Document {
         this.DocNo = docNo;
         this.date = date;
         this.headline = headline;
+    }
 
+
+    public String getDocNo() {
+        return DocNo;
+    }
+
+    public void setDocNo(String docNo) {
+        DocNo = docNo;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getHeadline() {
+        return headline;
+    }
+
+    public void setHeadline(String headline) {
+        this.headline = headline;
+    }
+
+    public TermHashMapDataStructure getParsedTerms() {
+        return parsedTerms;
+    }
+
+    public void setParsedTerms(TermHashMapDataStructure parsedTerms) {
+        this.parsedTerms = parsedTerms;
     }
 }

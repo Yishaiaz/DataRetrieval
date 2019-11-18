@@ -416,7 +416,8 @@ public class DocParser implements IParser{
             }
         }
 //        System.out.println(fullDoc);
-        // todo create a real Doc here
+        // todo create a real Doc here - done, check with sahar.
+        doc.setParsedTerms(termHashMapDataStructure);
         for (int i = 0; i < termHashMapDataStructure.termsEntries.size(); i++) {
             System.out.println(termHashMapDataStructure.termsEntries.get(i));
         }
