@@ -26,12 +26,17 @@ public class DocParser implements IParser{
         this.wordStemming = wordStemming;
         this.stopWords = stopWords;
         this.months = months;
+        //todo: receive stemming boolean paramter
     }
 
 
     @Override
     public void Parse(String fullDoc) throws Exception {
         TermHashMapDataStructure termHashMapDataStructure = new TermHashMapDataStructure();
+        if(this.wordStemming){
+            //todo: fullDoc to stemmer
+//            fullDoc = stemmer.stem(fullDoc);
+        }
         String[] docData = getDocData(fullDoc);
         String treatedFullDoc =""; // NOT IN USE YET
         Document doc = new Document(docData[0], docData[1], docData[2]);
@@ -96,7 +101,7 @@ public class DocParser implements IParser{
                     (isANumber(docText[textIterator+1]) != -1 && isANumber(docText[textIterator+3]) != -1)){
                     // BETWEEN value and value
                 double firstNum = isANumber(docText[textIterator+1]);
-                double secondNum = isANumber(docText[textIterator+3 ]);
+                double secondNum = isANumber(docText[textIterator+3]);
                 stringBuilder.append(firstNum);
                 stringBuilder.append("-");
                 stringBuilder.append(secondNum);
@@ -406,7 +411,7 @@ public class DocParser implements IParser{
                 termLocation+=1;
 
             }else {
-                //not a number/percent/price for sure
+                //not a number/percent/price/range/date for sure
                 //todo remove things here like special characters - the regex = .replaceAll("\\.|,","")
                 Pattern regex = Pattern.compile("[^A-Za-z0-9]");
                 String word = docText[textIterator].replaceAll(regex.toString(), "");
