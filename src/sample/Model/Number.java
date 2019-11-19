@@ -1,6 +1,5 @@
 package sample.Model;
 
-import java.text.DecimalFormat;
 
 public class Number extends Term {
 

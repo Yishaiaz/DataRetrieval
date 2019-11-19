@@ -10,9 +10,10 @@ import sample.Model.*;
 import sample.Model.DataStructures.TermHashMapDataStructure;
 import sample.Model.DataStructures.TermHashMapEntry;
 import sample.Model.Number;
+import sample.Model.Parser.DocParser;
 import sample.View.MyView;
 
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.util.Observer;
 
 public class Main extends Application {
@@ -26,9 +27,9 @@ public class Main extends Application {
         primaryStage.show();
         MyView view = fxmlLoader.getController();
         MyModel model = new MyModel();
-        Controller controller = new Controller(model,view);
+        Controller controller = new Controller(model, view);
         model.addObserver(controller);
-        view.setController (controller);
+        view.setController(controller);
 
 
     }
@@ -36,6 +37,8 @@ public class Main extends Application {
 
     public static void main(String[] args) {
         launch(args);
+
+
 //        String ZabaryFileAddress = "/Users/yishaiazabary/Desktop/University/שנה ד/DataRetrieval/corpus";
 //        String SababiFileAddress = "C:\\Users\\Sahar Ben Baruch\\Desktop\\corpus";
 //        CorpusHandler manger = new CorpusHandler(SababiFileAddress);
@@ -86,7 +89,6 @@ public class Main extends Application {
 //            Word numdd=new Word("child");
 
 
-
 //        numdd.prepareTerm();
 //
 //       System.out.println("Value is :" +numdd.content);
@@ -102,9 +104,10 @@ public class Main extends Application {
         System.exit(0);
 
     }
-
-
-
-
-
 }
+
+
+
+
+
+
