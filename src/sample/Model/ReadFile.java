@@ -1,5 +1,6 @@
 package sample.Model;
 
+import sample.Model.Indexer.DocIndexer;
 import sample.Model.Parser.DocParser;
 import sample.Model.Parser.IParser;
 
@@ -12,10 +13,12 @@ public class ReadFile {
     private final String corpusPath;
     private final IParser parser;
     private final HashSet<String> STOP_WORD_BAG;
+    private DocIndexer indexer;
 
     public ReadFile(String corpusPath, HashSet<String> stopWords, HashSet<String> months) {
         this.corpusPath = corpusPath;
         this.parser = new DocParser(false, stopWords, months);
+        indexer=new DocIndexer();
         this.STOP_WORD_BAG = stopWords;
 //        readStopWordsFile();
     }
@@ -51,6 +54,7 @@ public class ReadFile {
                         //with timer
                         long start_time = System.currentTimeMillis();
                         Document doc = this.parser.Parse(fullDocStringBuilder.toString());
+                         this.indexer.index(doc);
 //                        Document doc = this.parser.Parse(fullDoc);
 //                        this.indexer.index(doc);
 
