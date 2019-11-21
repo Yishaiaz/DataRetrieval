@@ -9,11 +9,13 @@ import sample.Controller.Controller;
 import sample.Model.*;
 import sample.Model.DataStructures.TermHashMapDataStructure;
 import sample.Model.DataStructures.TermHashMapEntry;
+import sample.Model.Indexer.DocIndexer;
 import sample.Model.Number;
 import sample.Model.Parser.DocParser;
 import sample.View.MyView;
 
 import java.io.*;
+import java.nio.file.Paths;
 import java.util.Observer;
 
 public class Main extends Application {
@@ -36,7 +38,8 @@ public class Main extends Application {
 
 
     public static void main(String[] args) {
-        launch(args);
+   //   launch(args);
+
 
 
 //        String ZabaryFileAddress = "/Users/yishaiazabary/Desktop/University/שנה ד/DataRetrieval/corpus";
@@ -100,6 +103,12 @@ public class Main extends Application {
 //        structure.insert("boy",9);
 //        structure.insert("child",10);
 //        structure.insert("boy",15);
+
+
+      DocIndexer indexer=new DocIndexer();
+       // new File(Paths.get("").toAbsolutePath().toString()+"\\tempFiles").mkdir();
+        indexer.mergeTwoDocuments(Paths.get("").toAbsolutePath().toString()+"\\tempFiles\\FBIS3-1.txt","tempFiles\\FBIS3-2.txt");
+
 
         System.exit(0);
 

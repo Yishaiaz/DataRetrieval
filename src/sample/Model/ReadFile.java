@@ -5,7 +5,6 @@ import sample.Model.Parser.DocParser;
 import sample.Model.Parser.IParser;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.HashSet;
 
 
@@ -54,7 +53,7 @@ public class ReadFile {
                         //with timer
                         long start_time = System.currentTimeMillis();
                         Document doc = this.parser.Parse(fullDocStringBuilder.toString());
-                         this.indexer.index(doc);
+                         this.indexer.indexOneDoc(doc);
 //                        Document doc = this.parser.Parse(fullDoc);
 //                        this.indexer.index(doc);
 
