@@ -5,6 +5,7 @@ import sample.Model.Document;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.regex.Pattern;
 
@@ -12,28 +13,29 @@ public class DocParser implements IParser{
     private Boolean wordStemming;
     private HashSet<String> stopWords;
     private HashSet<String> months;
+    private Stemmer stemmer;
 //    private Document doc;
 
     public DocParser(Boolean wordStemming, HashSet<String> stopWords, HashSet<String> months) {
         this.wordStemming = wordStemming;
         this.stopWords = stopWords;
         this.months = months;
+        if(this.wordStemming){
+            this.stemmer = new Stemmer();
+        }
     }
 
 
     @Override
     public Document Parse(String fullDoc) throws Exception {
         TermHashMapDataStructure termHashMapDataStructure = new TermHashMapDataStructure();
-        if(this.wordStemming){
-            //todo: fullDoc to stemmer
-//            fullDoc = stemmer.stem(fullDoc);
-        }
+
         String[] docData = getDocData(fullDoc);
         String treatedFullDoc =""; // NOT IN USE YET
         Document doc = new Document(docData[0], docData[1], docData[2]);
         //todo: remove unnecessary tags e.g. <F..>
         String[] docText = fullDoc.substring(fullDoc.indexOf("<TEXT>")+6, fullDoc.indexOf("</TEXT>")).split(" | \n ");
-
+        docText = initialBadCharacterRemoval(docText);
 
         int textIterator=0;
         int termLocation = 0;
@@ -43,41 +45,11 @@ public class DocParser implements IParser{
                 textIterator+=1;
                 continue;
             }
-            docText[textIterator] = docText[textIterator].replaceAll("[()]", "");
-            //remove all ',' if exists at the end of the word
-            if(docText[textIterator].endsWith(",")){
-                docText[textIterator] = docText[textIterator].replaceAll(",", "");
-            }// if the word/number is comprised of ',' remove them.  THIS IS FOR NUMBERS ONLY
-            else if(isANumber(docText[textIterator])==-1 && isANumber(docText[textIterator].replaceAll(",",""))!=-1){
-                docText[textIterator] = docText[textIterator].replaceAll(",", "");
-            }else if(docText[textIterator].endsWith(".")){
-                docText[textIterator] = docText[textIterator].replaceAll("\\.", "");
-            }else if(docText[textIterator].endsWith("?")){
-                docText[textIterator] = docText[textIterator].replaceAll("\\?", "");
-            }else if(docText[textIterator].contains("[")){
-                docText[textIterator] = docText[textIterator].replaceAll("\\[", "");
-            }else if(docText[textIterator].contains("]")){
-                docText[textIterator] = docText[textIterator].replaceAll("]", "");
-            }
-//            else if(docText[textIterator].contains("\"")){
-//                docText[textIterator] = docText[textIterator].replaceAll(""", "");
-//            }
-            else if(docText[textIterator].contains("'")){
-                docText[textIterator] = docText[textIterator].replaceAll("'", "");
-            }else if(docText[textIterator].contains("\\|")){
-                docText[textIterator] = docText[textIterator].replaceAll("\\|", "");
-            }else if(docText[textIterator].contains(":")){
-                docText[textIterator] = docText[textIterator].replaceAll(":", "");
-            }else if(docText[textIterator].contains(";")){
-                docText[textIterator] = docText[textIterator].replaceAll(";", "");
-            }else if(docText[textIterator].contains("(")){
-                docText[textIterator] = docText[textIterator].replaceAll("\\(", "");
-            }else if(docText[textIterator].contains(")")){
-                docText[textIterator] = docText[textIterator].replaceAll("\\)", "");
-            }
+
 
             StringBuilder stringBuilder = new StringBuilder();
             StringBuilder stringNumberBuilder = new StringBuilder();
+
             ////////////////// RANGES ////////////////////
             if(docText[textIterator].contains("-") && docText[textIterator].split("-").length > 1){
                 //term-term / word-word-word
@@ -124,6 +96,47 @@ public class DocParser implements IParser{
                 termLocation+=1;
                 textIterator+=4;
             }
+            ////////////////// ENTITIES AND ACRONYMS /////
+            else if(textIterator+2< docText.length &&
+                    Character.isUpperCase(docText[textIterator].charAt(0)) &&
+                    docText[textIterator+1].toLowerCase().equals("of") && (!docText[textIterator+2].equals("")) &&
+                    Character.isUpperCase(docText[textIterator+2].charAt(0))){
+                // Emtities - Llll of Llll , capital letter at both words 1st and 3rd.
+                // adding each word as a seperate term
+                termHashMapDataStructure.insert(docText[textIterator], termLocation);
+                termLocation+=1;
+                termHashMapDataStructure.insert(docText[textIterator+2], termLocation);
+                termLocation+=1;
+                // adding the entire entity as a term
+                stringBuilder.append(docText[textIterator]);
+                stringBuilder.append(" ");
+                stringBuilder.append(docText[textIterator + 1]);
+                stringBuilder.append(" ");
+                stringBuilder.append(docText[textIterator + 2]);
+                termHashMapDataStructure.insert(stringBuilder.toString(), termLocation);
+                termLocation+=1;
+                textIterator+=3;
+            }
+            else if(textIterator+1< docText.length &&
+                    Character.isUpperCase(docText[textIterator].charAt(0)) && (!docText[textIterator+1].equals("")) &&
+                    Character.isUpperCase(docText[textIterator+1].charAt(0))){
+                // Emtities - Llll Llll , capital letter at both words 1st and 2rd.
+                // adding each word as a seperate term
+                termHashMapDataStructure.insert(docText[textIterator], termLocation);
+                termLocation+=1;
+                termHashMapDataStructure.insert(docText[textIterator+1], termLocation);
+                termLocation+=1;
+                // adding the entire entity as a term
+                stringBuilder.append(docText[textIterator]);
+                stringBuilder.append(" ");
+                stringBuilder.append(docText[textIterator + 1]);
+                termHashMapDataStructure.insert(stringBuilder.toString(), termLocation);
+                termLocation+=1;
+                textIterator+=2;
+            }
+//            else if(){
+//               todo: //acronyms
+//            }
             ////////////////// DATES ///////////////////// this is for the MM DD / MM YYYY format, NOT the DD MM format
             else if(this.months.contains(docText[textIterator].replaceAll("\\.|,",""))){
                 //look for the DD or YYYY
@@ -453,11 +466,27 @@ public class DocParser implements IParser{
 
             }else {
                 //not a number/percent/price/range/date for sure
-                Pattern regex = Pattern.compile("[^A-Za-z0-9]");
-                String word = docText[textIterator].replaceAll(regex.toString(), "");
+                String word = docText[textIterator];
+                if(this.stopWords.contains(word.toLowerCase())) {
+                    //a stop word, ignore it.
+                    textIterator += 1;
+                    continue;
+                }
+                if(this.wordStemming){
+                    char[] wordInChars = word.toCharArray();
+                    this.stemmer.add(wordInChars, wordInChars.length);
+                    this.stemmer.stem();
+                    word = this.stemmer.toString();
+                    this.stemmer.resetStemer();
+
+                }else{
+                    Pattern regex = Pattern.compile("[^A-Za-z0-9]");
+                    word = docText[textIterator].replaceAll(regex.toString(), "");
+                }
                 if(this.stopWords.contains(word.toLowerCase())){
                     //a stop word, ignore it.
                     textIterator += 1;
+
                 }else{
                     termHashMapDataStructure.insert(word, termLocation);
                     termLocation+=1;
@@ -709,5 +738,61 @@ public class DocParser implements IParser{
         }
         stringBuilder.append(intNum);
         return stringBuilder.toString();
+    }
+
+    /**
+     * removes from all strings in a given array (docText) "bad characters" that we know we have no
+     * need for. returns the string array.
+     * @param docText String[]
+     * @return String[]
+     */
+    private String[] initialBadCharacterRemoval(String[] docText){
+//        ArrayList
+        int textIterator =0;
+        while(textIterator<docText.length){
+            docText[textIterator] = docText[textIterator].replaceAll("[()]", "");
+            //remove all ',' if e  xists at the end of the word
+            if(docText[textIterator].endsWith(",")){
+                docText[textIterator] = docText[textIterator].replaceAll(",", "");
+            }// if the word/number is comprised of ',' remove them.  THIS IS FOR NUMBERS ONLY
+            if(isANumber(docText[textIterator])==-1 && isANumber(docText[textIterator].replaceAll(",",""))!=-1){
+                docText[textIterator] = docText[textIterator].replaceAll(",", "");
+            }if(docText[textIterator].endsWith(".")){
+                docText[textIterator] = docText[textIterator].replaceAll("\\.", "");
+            }if(docText[textIterator].endsWith("?")){
+                docText[textIterator] = docText[textIterator].replaceAll("\\?", "");
+            }if(docText[textIterator].contains("[")){
+                docText[textIterator] = docText[textIterator].replaceAll("\\[", "");
+            }if(docText[textIterator].contains("]")){
+                docText[textIterator] = docText[textIterator].replaceAll("]", "");
+            }if(docText[textIterator].endsWith("'s")) {
+                docText[textIterator] = docText[textIterator].replaceAll("'s", "");
+            }if(docText[textIterator].endsWith("s'")) {
+                docText[textIterator] = docText[textIterator].replaceAll("s'", "");
+            }if(docText[textIterator].contains("'")){
+                docText[textIterator] = docText[textIterator].replaceAll("'", "");
+            }if(docText[textIterator].contains("\\|")){
+                docText[textIterator] = docText[textIterator].replaceAll("\\|", "");
+            }if(docText[textIterator].contains(":")){
+                docText[textIterator] = docText[textIterator].replaceAll(":", "");
+            }if(docText[textIterator].contains(";")){
+                docText[textIterator] = docText[textIterator].replaceAll(";", "");
+            }if(docText[textIterator].contains("<")){
+                docText[textIterator] = docText[textIterator].replaceAll("<", "");
+            }if(docText[textIterator].contains(">")){
+                docText[textIterator] = docText[textIterator].replaceAll(">", "");
+            }if(docText[textIterator].contains("=")){
+                docText[textIterator] = docText[textIterator].replaceAll("=", "");
+            }if(docText[textIterator].contains("\"")){
+                docText[textIterator] = docText[textIterator].replace("\"", "");
+                if(docText[textIterator].contains("\"")){
+                    docText[textIterator] = docText[textIterator].replace("\"", "");
+                }
+            }if(docText[textIterator].contains("/")){
+                docText[textIterator] = docText[textIterator].replaceAll("/", "");
+            }
+            textIterator++;
+        }
+        return docText;
     }
 }
