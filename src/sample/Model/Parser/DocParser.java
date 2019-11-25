@@ -34,7 +34,7 @@ public class DocParser implements IParser{
         String treatedFullDoc =""; // NOT IN USE YET
         Document doc = new Document(docData[0], docData[1], docData[2]);
         //todo: remove unnecessary tags e.g. <F..>
-        String[] docText = fullDoc.substring(fullDoc.indexOf("<TEXT>")+6, fullDoc.indexOf("</TEXT>")).split(" | \n ");
+        String[] docText = fullDoc.substring(fullDoc.indexOf("<TEXT>")+6, fullDoc.indexOf("</TEXT>")).split(" | \n | \t");
         docText = initialBadCharacterRemoval(docText);
 
         int textIterator=0;

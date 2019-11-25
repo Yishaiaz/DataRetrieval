@@ -33,7 +33,7 @@ public class ReadFile {
         long total_start_time = System.currentTimeMillis();
         BufferedReader br = null;
         StringBuilder fullDocStringBuilder = new StringBuilder();
-        String fullDoc = "";
+//        String fullDoc = "";
         try {
             // stream to file
             br = new BufferedReader(new InputStreamReader(new FileInputStream(path), "UTF-8"));
