@@ -8,7 +8,7 @@
 <GridPane alignment="center" hgap="10" vgap="10" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.View.MyView">
    <children>
       <BorderPane prefHeight="600.0" prefWidth="900.0">
-         <left>
+         <right>
             <AnchorPane prefHeight="600.0" prefWidth="900.0" BorderPane.alignment="CENTER">
                <children>
                   <Button id="btn_browse" fx:id="btn_browse" layoutX="663.0" layoutY="165.0" mnemonicParsing="false" onAction="#chooseCorpusPath" text="Browse">
@@ -16,24 +16,24 @@
                         <Font name="Aharoni Bold" size="12.0" />
                      </font>
                   </Button>
-                  <TextField fx:id="txtField_path" layoutX="147.0" layoutY="164.0" prefHeight="26.0" prefWidth="500.0" />
+                  <TextField fx:id="txtField_corpusPath" layoutX="147.0" layoutY="164.0" prefHeight="26.0" prefWidth="500.0" />
                   <Label layoutX="35.0" layoutY="169.0" prefHeight="18.0" prefWidth="90.0" text="Corpus Path">
                      <font>
                         <Font name="Aharoni Bold" size="12.0" />
                      </font>
                   </Label>
-                  <Button id="btn_Parse" fx:id="btn_parse" layoutX="667.0" layoutY="206.0" mnemonicParsing="false" text="Parse">
+                  <Button id="btn_parse" fx:id="btn_parse" layoutX="676.0" layoutY="337.0" mnemonicParsing="false" onAction="#activate" text="parse">
                      <font>
                         <Font name="Aharoni Bold" size="12.0" />
                      </font>
                   </Button>
-                  <TextField id="txtField_testInput" fx:id="txtField_testInput" layoutX="147.0" layoutY="248.0" prefHeight="26.0" prefWidth="500.0" />
-                  <Label layoutX="22.0" layoutY="252.0" text="free text for test">
+                  <TextField id="txtField_testInput" fx:id="txtField_postingFilesInput" layoutX="147.0" layoutY="209.0" prefHeight="26.0" prefWidth="500.0" />
+                  <Label layoutX="20.0" layoutY="213.0" text="Path for Posting Files">
                      <font>
                         <Font name="System Bold Italic" size="12.0" />
                      </font>
                   </Label>
-                  <Button id="btn_test" fx:id="btn_test" layoutX="666.0" layoutY="248.0" mnemonicParsing="false" text="Test">
+                  <Button id="btn_test" fx:id="btn_test" layoutX="663.0" layoutY="211.0" mnemonicParsing="false" onAction="#choosePostingFilesPath" text="Browse">
                      <font>
                         <Font name="Aharoni Bold" size="12.0" />
                      </font>
@@ -63,9 +63,21 @@
                       </Menu>
                     </menus>
                   </MenuBar>
+                  <CheckBox fx:id="stemming_cp" layoutX="653.0" layoutY="255.0" mnemonicParsing="false" text="Stemming">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </CheckBox>
+                  <Button fx:id="reset_btn" layoutX="676.0" layoutY="300.0" mnemonicParsing="false" text="Reset" onAction="#reset">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                  </Button>
+                  <Button layoutX="20.0" layoutY="287.0" mnemonicParsing="false" text="Show Dictionary" />
+                  <Button layoutX="21.0" layoutY="323.0" mnemonicParsing="false" text="Load Dictionary" />
                </children>
             </AnchorPane>
-         </left>
+         </right>
       </BorderPane>
    </children>
    <columnConstraints>
