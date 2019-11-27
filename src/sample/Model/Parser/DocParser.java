@@ -1,11 +1,13 @@
 package sample.Model.Parser;
 
+import org.apache.commons.lang3.text.StrBuilder;
 import sample.Model.DataStructures.TermHashMapDataStructure;
 import sample.Model.Document;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.HashSet;
+import org.apache.commons.lang3.StringUtils;
 import java.util.regex.Pattern;
 
 public class DocParser implements IParser{
@@ -27,13 +29,13 @@ public class DocParser implements IParser{
 
     @Override
     public Document Parse(String fullDoc) throws Exception {
+//        StringUtils stringUtils = new StringUtils();
         TermHashMapDataStructure termHashMapDataStructure = new TermHashMapDataStructure();
-
         String[] docData = getDocData(fullDoc);
         String treatedFullDoc =""; // NOT IN USE YET
         Document doc = new Document(docData[0], docData[1], docData[2]);
         //todo: remove unnecessary tags e.g. <F..>
-        String[] docText = fullDoc.substring(fullDoc.indexOf("<TEXT>")+6, fullDoc.indexOf("</TEXT>")).split(" | \n | \t");
+        String[] docText = StringUtils.substring(fullDoc,fullDoc.indexOf("<TEXT>")+6, fullDoc.indexOf("</TEXT>")).split(" | \n | \t");
         docText = initialBadCharacterRemoval(docText);
 
         int textIterator=0;
@@ -46,8 +48,8 @@ public class DocParser implements IParser{
             }
 
 
-            StringBuilder stringBuilder = new StringBuilder();
-            StringBuilder stringNumberBuilder = new StringBuilder();
+            StrBuilder stringBuilder = new StrBuilder();
+            StrBuilder stringNumberBuilder = new StrBuilder();
 
             ////////////////// RANGES ////////////////////
             if(docText[textIterator].contains("-") && docText[textIterator].split("-").length > 1){
@@ -524,7 +526,7 @@ public class DocParser implements IParser{
         if (endIndex<0 || startIndex-7 < 0){
             docNo = "";
         }else{
-            docNo = fullDoc.substring(startIndex, endIndex).replace(" ", "");
+            docNo = StringUtils.substring(fullDoc, startIndex, endIndex).replace(" ", "");
         }
 
         //DATE1 tag info
@@ -536,10 +538,10 @@ public class DocParser implements IParser{
             if (endIndex<0 || startIndex-7 < 0){
                 docDate = "";
             }else{
-                docDate = fullDoc.substring(startIndex, endIndex).replace(" ", "");
+                docDate = StringUtils.substring(fullDoc, startIndex, endIndex).replace(" ", "");
             }
         }else{
-            docDate = fullDoc.substring(startIndex, endIndex).replace(" ", "");
+            docDate = StringUtils.substring(fullDoc, startIndex, endIndex).replace(" ", "");
         }
         //DATE1 tag info
         startIndex = fullDoc.indexOf("<TI>")+4;
@@ -547,7 +549,7 @@ public class DocParser implements IParser{
         if (endIndex<0 || startIndex-7 < 0){
             docTI = "";
         }else{
-            docTI = this.trimRedundantSpaces(fullDoc.substring(startIndex, endIndex));
+            docTI = this.trimRedundantSpaces(StringUtils.substring(fullDoc,startIndex, endIndex));
         }
         String[] docData = new String[4];
         docData[0] = docNo;
@@ -594,7 +596,7 @@ public class DocParser implements IParser{
      */
     private Boolean startsWithNum(String s){
         try{
-            Double.parseDouble(s.substring(0,1));
+            Double.parseDouble(StringUtils.substring(s,0,1));
             return true;
         }catch(NumberFormatException e){
             return false;
@@ -673,7 +675,7 @@ public class DocParser implements IParser{
      */
     private String monthIntoNumber(String s){
         StringBuilder stringBuilder = new StringBuilder();
-        s = s.toLowerCase().substring(0,3);
+        s = StringUtils.substring(s.toLowerCase(), 0,3);
         switch (s){
             case "jan":{
                 stringBuilder.append("01");
