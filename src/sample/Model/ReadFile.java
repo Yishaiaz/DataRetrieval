@@ -12,12 +12,12 @@ public class ReadFile {
     private final String corpusPath;
     private final IParser parser;
     private final HashSet<String> STOP_WORD_BAG;
-    private DocIndexer indexer;
+    public DocIndexer indexer;
 
-    public ReadFile(String corpusPath, HashSet<String> stopWords, HashSet<String> months) {
+    public ReadFile(String corpusPath, HashSet<String> stopWords, HashSet<String> months, boolean withStemming,String postingFilesPath) {
         this.corpusPath = corpusPath;
-        this.parser = new DocParser(false, stopWords, months);
-        indexer=new DocIndexer();
+        this.parser = new DocParser(withStemming, stopWords, months);
+        indexer=new DocIndexer(postingFilesPath);
         this.STOP_WORD_BAG = stopWords;
 //        readStopWordsFile();
     }
@@ -29,14 +29,14 @@ public class ReadFile {
 
 
     //  prepare file for parsing by extract fields and create object of doc.
-    public void prepareDocToParse(String path) {
+    public void prepareDocToParse(String corpusPath) {
         long total_start_time = System.currentTimeMillis();
         BufferedReader br = null;
         StringBuilder fullDocStringBuilder = new StringBuilder();
 //        String fullDoc = "";
         try {
             // stream to file
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(path), "UTF-8"));
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(corpusPath), "UTF-8"));
             String line = br.readLine();
             while (line != null) {
                 if(line.equals("") || line.equals("\n") || line.equals(" ")){
@@ -71,8 +71,6 @@ public class ReadFile {
             e.printStackTrace();
         }
         System.out.println(String.format("Total parsing took: %d Ms", (System.currentTimeMillis() - total_start_time)));
-
-
     }
 
 }

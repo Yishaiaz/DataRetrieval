@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 public class CorpusHandler {
     private String corpusPath;
+    public String postingFilesPath="";
     private ArrayList<String> filesPaths; //list contains all paths in Corpus dir.
     public HashSet<String> stopWords = new HashSet<>();
     public HashSet<String> months = new HashSet<>();
@@ -26,6 +27,9 @@ public class CorpusHandler {
                 "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December",
                 "JAN", "FEB", "MAR", "APR", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC",
                 "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"));
+    }
+    public void setPostingFilesPath(String postingFilesPath) {
+        this.postingFilesPath = postingFilesPath;
     }
 
     // This function add to 'filesPath' list with files paths.
@@ -62,9 +66,9 @@ public class CorpusHandler {
             System.out.println("Path doesn't exist.");
     }
 
-    public void findTextInDocs() throws FileNotFoundException {
+    public void findTextInDocs(boolean withStemming) throws FileNotFoundException {
 
-        ReadFile readFile = new ReadFile(this.corpusPath, this.stopWords, this.months);
+        ReadFile readFile = new ReadFile(this.corpusPath, this.stopWords, this.months,withStemming,postingFilesPath);
         //send every file to ReadFile for preparation for parsing.
         for (String path : filesPaths) {
             if(path.endsWith(".DS_Store")){
