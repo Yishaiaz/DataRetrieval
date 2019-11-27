@@ -5,7 +5,6 @@ import sample.Model.Document;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.regex.Pattern;
 
@@ -97,6 +96,12 @@ public class DocParser implements IParser{
                 textIterator+=4;
             }
             ////////////////// ENTITIES AND ACRONYMS /////
+            else if(docText[textIterator].matches("(?:[a-zA-Z]\\.){2,}")){
+                //Acronyms, if the word is char.char.char. ...
+                termHashMapDataStructure.insert(docText[textIterator], termLocation);
+                termLocation+=1;
+                textIterator+=1;
+            }
             else if(textIterator+2< docText.length &&
                     Character.isUpperCase(docText[textIterator].charAt(0)) &&
                     docText[textIterator+1].toLowerCase().equals("of") && (!docText[textIterator+2].equals("")) &&
@@ -134,9 +139,7 @@ public class DocParser implements IParser{
                 termLocation+=1;
                 textIterator+=2;
             }
-//            else if(){
-//               todo: //acronyms
-//            }
+
             ////////////////// DATES ///////////////////// this is for the MM DD / MM YYYY format, NOT the DD MM format
             else if(this.months.contains(docText[textIterator].replaceAll("\\.|,",""))){
                 //look for the DD or YYYY
@@ -546,10 +549,12 @@ public class DocParser implements IParser{
         }else{
             docTI = this.trimRedundantSpaces(fullDoc.substring(startIndex, endIndex));
         }
-        String[] docData = new String[3];
+        String[] docData = new String[4];
         docData[0] = docNo;
         docData[1] = docDate;
         docData[2] = docTI;
+        int fullDocLength = fullDoc.length();
+        //todo return the doc full lenght as well
         return docData;
     }
 
