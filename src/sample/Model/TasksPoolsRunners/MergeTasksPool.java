@@ -42,6 +42,13 @@ public class MergeTasksPool {
 
         return toMergePaths;
     }
+    public boolean areTasksLeft(){
+        return this.toMergePath.size()>1;
+    }
+
+    public void updateFilesList(){
+        this.toMergePath = getCurrentFilesInDir(this.tempFilesPath);
+    }
 
 
     public String[] recieveTempFileTask(){

@@ -20,23 +20,27 @@ class Task implements Runnable
     // This Whole process is repeated 5 times
     public void run()
     {
-        try
-        {
-            this.pool.poolAccessSemaphore.acquire();
-            String[] myPaths = this.pool.recieveTempFileTask();
-            if (myPaths==null){
+        while(this.pool.areTasksLeft()){
+            try
+            {
+                this.pool.poolAccessSemaphore.acquire();
+                String[] myPaths = this.pool.recieveTempFileTask();
+                if (myPaths==null){
+                    this.pool.poolAccessSemaphore.release();
+                    return;
+                }
                 this.pool.poolAccessSemaphore.release();
-                return;
+                //here you should preform a task.
+                System.out.println(String.format("the tasker: %s got the paths: %s, %s", name, myPaths[0], myPaths[1]));
+                Thread.sleep(1000);
             }
-            System.out.println(String.format("the tasker: %s got the paths: %s, %s", name, myPaths[0], myPaths[1]));
-            this.pool.poolAccessSemaphore.release();
-            Thread.sleep(1000);
+
+            catch(InterruptedException e)
+            {
+                e.printStackTrace();
+            }
         }
 
-        catch(InterruptedException e)
-        {
-            e.printStackTrace();
-        }
     }
 }
 
