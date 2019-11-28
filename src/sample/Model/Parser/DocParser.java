@@ -33,13 +33,26 @@ public class DocParser implements IParser{
         TermHashMapDataStructure termHashMapDataStructure = new TermHashMapDataStructure();
         String[] docData = getDocData(fullDoc);
         String treatedFullDoc =""; // NOT IN USE YET
-        Document doc = new Document(docData[0], docData[1], docData[2]);
+        int textIterator=0;
+        int termLocationIterator = 0;
+
+        Document doc = new Document(docData[0], docData[1], docData[2], docData[3]);
+        //add doc date as term
+        termHashMapDataStructure.insert(docData[1], termLocationIterator, 1.8);
+        termLocationIterator+=1;
+        // adding doc title as a whole term
+        termHashMapDataStructure.insert(docData[2],termLocationIterator, 2);
+        termLocationIterator+=1;
+        // adding doc title's words as seperate terms
+        for (String word :
+                docData[2].split(" | \n | \\s ")) {
+            termHashMapDataStructure.insert(word, termLocationIterator, 1.8);
+            termLocationIterator+=1;
+        }
         //todo: remove unnecessary tags e.g. <F..>
         String[] docText = StringUtils.substring(fullDoc,fullDoc.indexOf("<TEXT>")+6, fullDoc.indexOf("</TEXT>")).split(" | \n | \t");
         docText = initialBadCharacterRemoval(docText);
 
-        int textIterator=0;
-        int termLocation = 0;
         while(textIterator<docText.length){
             // ignore here from any invalid entry
             if (docText[textIterator].equals("")){
@@ -58,28 +71,28 @@ public class DocParser implements IParser{
                 if (seperated.length>=3){
                     if(isANumber(seperated[0]) == -1 && isANumber(seperated[1]) == -1 && isANumber(seperated[2]) == -1){
                         //word-word-word pass as single term
-                        termHashMapDataStructure.insert(docText[textIterator], termLocation);
-                        termLocation+=1;
+                        termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.5);
+                        termLocationIterator+=1;
                     }
                     else{
                         //not eligible for a range, split and pass as differnet terms
                         for (int i = 0; i < seperated.length; i++) {
-                            termHashMapDataStructure.insert(seperated[i], termLocation);
-                            termLocation+=1;
+                            termHashMapDataStructure.insert(seperated[i], termLocationIterator, 1);
+                            termLocationIterator+=1;
                         }
                     }
                     textIterator+=1;
                 }else if(seperated.length==2){
                     // word-word number-word word-number number number
-                    termHashMapDataStructure.insert(docText[textIterator],termLocation);
-                    termLocation+=1;
+                    termHashMapDataStructure.insert(docText[textIterator],termLocationIterator, 1.5);
+                    termLocationIterator+=1;
                     if(isANumber(seperated[0]) != -1){
                         //number-number divide into two number and add them as terms
-                        termHashMapDataStructure.insert(seperated[0],termLocation);
-                        termLocation+=1;
+                        termHashMapDataStructure.insert(seperated[0],termLocationIterator, 1.4);
+                        termLocationIterator+=1;
                     }if (isANumber(seperated[1]) != -1){
-                        termHashMapDataStructure.insert(seperated[1],termLocation);
-                        termLocation+=1;
+                        termHashMapDataStructure.insert(seperated[1],termLocationIterator, 1.4);
+                        termLocationIterator+=1;
                     }
                     textIterator+=1;
                 }
@@ -93,15 +106,15 @@ public class DocParser implements IParser{
                 stringBuilder.append(firstNum);
                 stringBuilder.append("-");
                 stringBuilder.append(secondNum);
-                termHashMapDataStructure.insert(stringBuilder.toString(), termLocation);
-                termLocation+=1;
+                termHashMapDataStructure.insert(stringBuilder.toString(), termLocationIterator, 1.5);
+                termLocationIterator+=1;
                 textIterator+=4;
             }
             ////////////////// ENTITIES AND ACRONYMS /////
             else if(docText[textIterator].matches("(?:[a-zA-Z]\\.){2,}")){
                 //Acronyms, if the word is char.char.char. ...
-                termHashMapDataStructure.insert(docText[textIterator], termLocation);
-                termLocation+=1;
+                termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.7);
+                termLocationIterator+=1;
                 textIterator+=1;
             }
             else if(textIterator+2< docText.length &&
@@ -110,18 +123,18 @@ public class DocParser implements IParser{
                     Character.isUpperCase(docText[textIterator+2].charAt(0))){
                 // Emtities - Llll of Llll , capital letter at both words 1st and 3rd.
                 // adding each word as a seperate term
-                termHashMapDataStructure.insert(docText[textIterator], termLocation);
-                termLocation+=1;
-                termHashMapDataStructure.insert(docText[textIterator+2], termLocation);
-                termLocation+=1;
+                termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.7);
+                termLocationIterator+=1;
+                termHashMapDataStructure.insert(docText[textIterator+2], termLocationIterator, 1.7);
+                termLocationIterator+=1;
                 // adding the entire entity as a term
                 stringBuilder.append(docText[textIterator]);
                 stringBuilder.append(" ");
                 stringBuilder.append(docText[textIterator + 1]);
                 stringBuilder.append(" ");
                 stringBuilder.append(docText[textIterator + 2]);
-                termHashMapDataStructure.insert(stringBuilder.toString(), termLocation);
-                termLocation+=1;
+                termHashMapDataStructure.insert(stringBuilder.toString(), termLocationIterator, 1.7);
+                termLocationIterator+=1;
                 textIterator+=3;
             }
             else if(textIterator+1< docText.length &&
@@ -129,16 +142,16 @@ public class DocParser implements IParser{
                     Character.isUpperCase(docText[textIterator+1].charAt(0))){
                 // Emtities - Llll Llll , capital letter at both words 1st and 2rd.
                 // adding each word as a seperate term
-                termHashMapDataStructure.insert(docText[textIterator], termLocation);
-                termLocation+=1;
-                termHashMapDataStructure.insert(docText[textIterator+1], termLocation);
-                termLocation+=1;
+                termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.7);
+                termLocationIterator+=1;
+                termHashMapDataStructure.insert(docText[textIterator+1], termLocationIterator, 1.7);
+                termLocationIterator+=1;
                 // adding the entire entity as a term
                 stringBuilder.append(docText[textIterator]);
                 stringBuilder.append(" ");
                 stringBuilder.append(docText[textIterator + 1]);
-                termHashMapDataStructure.insert(stringBuilder.toString(), termLocation);
-                termLocation+=1;
+                termHashMapDataStructure.insert(stringBuilder.toString(), termLocationIterator, 1.7);
+                termLocationIterator+=1;
                 textIterator+=2;
             }
 
@@ -179,8 +192,8 @@ public class DocParser implements IParser{
                     stringBuilder.append(docText[textIterator]);
                     textIterator+=1;
                 }
-                termHashMapDataStructure.insert(stringBuilder.toString(), termLocation);
-                termLocation+=1;
+                termHashMapDataStructure.insert(stringBuilder.toString(), termLocationIterator, 1.5);
+                termLocationIterator+=1;
             }
 
             /////////////////numbers, percentages and prices/////////////////
@@ -252,14 +265,14 @@ public class DocParser implements IParser{
                     stringNumberBuilder.append(this.transformNumber(Double.parseDouble(docText[textIterator].replaceAll(",","")), false));
                     textIterator+=1;
                 }
-                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
-                termLocation+=1;
+                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.3);
+                termLocationIterator+=1;
             }else if(docText[textIterator].contains("%")){
                 //Number%
                 stringNumberBuilder.append(docText[textIterator]);
                 textIterator+=1;
-                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
-                termLocation+=1;
+                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.3);
+                termLocationIterator+=1;
             }else if((docText[textIterator].contains("bn") || docText[textIterator].contains("m"))&&startsWithNum(docText[textIterator])){
                 // Number[m/bn]
                 String replace_with="";
@@ -293,8 +306,8 @@ public class DocParser implements IParser{
 //                    System.out.println(e);
                     textIterator+=1;
                 }
-                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
-                termLocation+=1;
+                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.1);
+                termLocationIterator+=1;
 
             }else if(textIterator+1 < docText.length && (docText[textIterator+1].toLowerCase().equals("percent") || docText[textIterator+1].toLowerCase().equals("percentage") )){
                 // Number percent /percentage
@@ -314,8 +327,8 @@ public class DocParser implements IParser{
 //                    System.out.println(e);
                     textIterator+=1;
                 }
-                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
-                termLocation+=1;
+                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.3);
+                termLocationIterator+=1;
             }else if(textIterator+1 < docText.length &&
                     (docText[textIterator+1].contains("/") &&
                     startsWithNum(docText[textIterator+1])) &&
@@ -330,8 +343,8 @@ public class DocParser implements IParser{
                 }else{
                     textIterator+=2;
                 }
-                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
-                termLocation+=1;
+                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.1);
+                termLocationIterator+=1;
             }else if(textIterator+1 < docText.length && (docText[textIterator+1].toLowerCase().equals("thousand"))){
                 // Number Thousand
                 String replace_with="";
@@ -349,8 +362,8 @@ public class DocParser implements IParser{
 //                    System.out.println(e);
                     textIterator+=1;
                 }
-                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
-                termLocation+=1;
+                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.1);
+                termLocationIterator+=1;
             }else if(textIterator+1 < docText.length && (docText[textIterator+1].toLowerCase().equals("dollars"))){
                 // Number Dollars
                 String replace_with="";
@@ -368,8 +381,8 @@ public class DocParser implements IParser{
 //                    System.out.println(e);
                     textIterator+=1;
                 }
-                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
-                termLocation+=1;
+                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.3);
+                termLocationIterator+=1;
             }else if(textIterator+1 < docText.length && (docText[textIterator+1].toLowerCase().equals("m") || docText[textIterator+1].toLowerCase().equals("bn") )){
                 // Number m/bn
                 String replace_with="";
@@ -401,8 +414,8 @@ public class DocParser implements IParser{
 //                    System.out.println(e);
                     textIterator+=1;
                 }
-                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
-                termLocation+=1;
+                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.1);
+                termLocationIterator+=1;
             }else if(textIterator+1 < docText.length && (docText[textIterator+1].toLowerCase().equals("million") ||
                     docText[textIterator+1].toLowerCase().equals("billion") ||
                     docText[textIterator+1].toLowerCase().equals("trillion"))){
@@ -437,13 +450,12 @@ public class DocParser implements IParser{
 //                    System.out.println(e);
                     textIterator+=1;
                 }
-                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
-                termLocation+=1;
+                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.1);
+                termLocationIterator+=1;
             }else if(isANumber(docText[textIterator])!=-1){
                 //this is a number
-//                String num = this.transformNumber(Double.parseDouble(docText[textIterator]), true);
                 double num = isANumber(docText[textIterator]);
-//                stringNumberBuilder.append(this.transformNumber(Double.parseDouble(docText[textIterator]), true));
+                boolean isDate = false;
                 // checks if there is a month name after it, meaning it is a date.
                 if(textIterator+1 < docText.length &&
                         months.contains(docText[textIterator+1].replaceAll("\\.|,",""))){
@@ -453,11 +465,13 @@ public class DocParser implements IParser{
                         stringNumberBuilder.append(this.monthIntoNumber(docText[textIterator+1].replaceAll(", | . ", "")));
                         stringNumberBuilder.append("-");
                         stringNumberBuilder.append(this.daysInDatesFormatter(num));
+                        isDate = true;
                     }else if(num>=1000 && num<=9999){
                         // its YYYY
                         stringNumberBuilder.append(this.monthIntoNumber(docText[textIterator+1].replaceAll(", | . ", "")));
                         stringNumberBuilder.append("-");
                         stringNumberBuilder.append(num);
+                        isDate = true;
                     }
                     textIterator+=2;
                 }else{
@@ -466,8 +480,8 @@ public class DocParser implements IParser{
                     textIterator+=1;
                 }
 
-                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocation);
-                termLocation+=1;
+                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, isDate ? 1.3 : 1.1);
+                termLocationIterator+=1;
 
             }else {
                 //not a number/percent/price/range/date for sure
@@ -493,8 +507,8 @@ public class DocParser implements IParser{
                     textIterator += 1;
 
                 }else{
-                    termHashMapDataStructure.insert(word, termLocation);
-                    termLocation+=1;
+                    termHashMapDataStructure.insert(word, termLocationIterator, 1);
+                    termLocationIterator+=1;
                     textIterator += 1;
                 }
             }
@@ -555,8 +569,7 @@ public class DocParser implements IParser{
         docData[0] = docNo;
         docData[1] = docDate;
         docData[2] = docTI;
-        int fullDocLength = fullDoc.length();
-        //todo return the doc full lenght as well
+        docData[3] = String.valueOf(fullDoc.length());
         return docData;
     }
 
