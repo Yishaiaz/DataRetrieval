@@ -10,11 +10,11 @@ public class Document {
     public int length;
 
 
-    public Document(String docNo, String date, String headline) {
+    public Document(String docNo, String date, String headline, String length) {
         this.DocNo = docNo;
         this.date = date;
         this.headline = headline;
-        this.length=0;
+        this.length= Integer.parseInt(length);
     }
 
 
