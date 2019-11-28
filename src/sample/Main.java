@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import sample.Controller.Controller;
 import sample.Model.*;
+import sample.Model.Indexer.DocIndexer;
 import sample.View.MyView;
 
 public class Main extends Application {
@@ -27,26 +28,12 @@ public class Main extends Application {
 
 
     public static void main(String[] args) {
-      launch(args);
+  //   launch(args);
 
 
 
-//        String ZabaryFileAddress = "/Users/yishaiazabary/Desktop/University/שנה ד/DataRetrieval/corpus";
-//        String SababiFileAddress = "C:\\Users\\Sahar Ben Baruch\\Desktop\\corpus";
-//        CorpusHandler manger = new CorpusHandler(SababiFileAddress);
-//        manger.initListOfFilesPaths();
-//        try {
-//            manger.findTextInDocs();
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        }
-
-//
-
-
-  //    DocIndexer indexer=new DocIndexer();
-       // new File(Paths.get("").toAbsolutePath().toString()+"\\tempFiles").mkdir();
-      //  indexer.mergeTwoDocuments(Paths.get("").toAbsolutePath().toString()+"\\tempFiles\\FBIS3-1.txt","tempFiles\\FBIS3-2.txt");
+      DocIndexer indexer=new DocIndexer("C:\\Users\\Sahar Ben Baruch\\Desktop\\DataRetrieval\\temp");
+        indexer.mergeTwoDocuments("C:\\Users\\Sahar Ben Baruch\\Desktop\\1129222140.txt","C:\\Users\\Sahar Ben Baruch\\Desktop\\-1415959223.txt");
 
 
         System.exit(0);
