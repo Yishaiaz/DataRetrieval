@@ -7,16 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import sample.Controller.Controller;
 import sample.Model.*;
-import sample.Model.DataStructures.TermHashMapDataStructure;
-import sample.Model.DataStructures.TermHashMapEntry;
-import sample.Model.Indexer.DocIndexer;
-import sample.Model.Number;
-import sample.Model.Parser.DocParser;
 import sample.View.MyView;
-
-import java.io.*;
-import java.nio.file.Paths;
-import java.util.Observer;
 
 public class Main extends Application {
 
@@ -32,8 +23,6 @@ public class Main extends Application {
         Controller controller = new Controller(model, view);
         model.addObserver(controller);
         view.setController(controller);
-
-
     }
 
 
