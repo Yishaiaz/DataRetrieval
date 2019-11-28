@@ -58,6 +58,7 @@ public class tries {
         Runnable tasker4 = new Task("task4", t1);
         Runnable tasker5 = new Task("task5", t1);
 
+        t1.updateFilesList();
         ExecutorService pool = Executors.newFixedThreadPool(MAX_T);
         pool.execute(tasker1);
         pool.execute(tasker2);
