@@ -23,7 +23,7 @@ public class DocIndexer {
     public void indexOneDoc(Document doc) {
         try {
             //Whatever the file path is.
-            File statText = new File(postingFilePath +"\\"+ doc.DocNo + ".txt");
+            File statText = new File(postingFilePath +File.separator+ doc.DocNo + ".txt");
             FileOutputStream is = new FileOutputStream(statText);
             OutputStreamWriter osw = new OutputStreamWriter(is);
             Writer w = new BufferedWriter(osw);
@@ -86,7 +86,7 @@ public class DocIndexer {
             BufferedReader br2 = null;
             br1 = new BufferedReader(new InputStreamReader(new FileInputStream(path1), "UTF-8"));
             br2 = new BufferedReader(new InputStreamReader(new FileInputStream(path2), "UTF-8"));
-            File merged = new File(postingFilePath+"\\"+ "merged" + ".txt");
+            File merged = new File(postingFilePath+File.pathSeparator+ "merged" + ".txt");
             FileWriter fileWriter = new FileWriter(merged.getPath());
             PrintWriter out = new PrintWriter(fileWriter);
             Iterator it1 = br1.lines().iterator();
