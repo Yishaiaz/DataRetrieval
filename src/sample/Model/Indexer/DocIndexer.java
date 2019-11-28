@@ -23,7 +23,7 @@ public class DocIndexer {
     public void indexOneDoc(Document doc) {
         try {
             //Whatever the file path is.
-            File statText = new File(postingFilePath +File.pathSeparator+ doc.DocNo + ".txt");
+            File statText = new File(postingFilePath +File.separator+ doc.DocNo + ".txt");
             FileOutputStream is = new FileOutputStream(statText);
             OutputStreamWriter osw = new OutputStreamWriter(is);
             Writer w = new BufferedWriter(osw);

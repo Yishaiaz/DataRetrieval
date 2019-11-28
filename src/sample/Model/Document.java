@@ -10,7 +10,7 @@ public class Document {
     public int length;
 
 
-    public Document(String docNo, String date, String headline,int length) {
+    public Document(String docNo, String date, String headline) {
         this.DocNo = docNo;
         this.date = date;
         this.headline = headline;
