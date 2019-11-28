@@ -7,14 +7,14 @@ public class Document {
     public String date;
     public String headline;
     public TermHashMapDataStructure parsedTerms;
-    public double weight;
+    public int length;
 
 
-    public Document(String docNo, String date, String headline) {
+    public Document(String docNo, String date, String headline,int length) {
         this.DocNo = docNo;
         this.date = date;
         this.headline = headline;
-        this.weight=0;
+        this.length=0;
     }
 
 
