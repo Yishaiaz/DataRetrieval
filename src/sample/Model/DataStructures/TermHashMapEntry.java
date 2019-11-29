@@ -28,6 +28,10 @@ public class TermHashMapEntry {
         return TF;
     }
 
+    public double getWeight() {
+        return weight;
+    }
+
     public void setValue(String value) {
         this.value = value;
     }
