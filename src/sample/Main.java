@@ -28,15 +28,8 @@ public class Main extends Application {
 
 
     public static void main(String[] args) {
-  //   launch(args);
+     launch(args);
 
-
-
-      DocIndexer indexer=new DocIndexer("C:\\Users\\Sahar Ben Baruch\\Desktop\\DataRetrieval\\temp");
-        indexer.mergeTwoDocuments("C:\\Users\\Sahar Ben Baruch\\Desktop\\1129222140.txt","C:\\Users\\Sahar Ben Baruch\\Desktop\\-1415959223.txt");
-
-
-        System.exit(0);
 
     }
 }

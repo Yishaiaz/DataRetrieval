@@ -38,6 +38,7 @@ public class DocParser implements IParser{
 
         Document doc = new Document(docData[0], docData[1], docData[2], docData[3]);
         //add doc date as term
+        // todo: remove any special characters from the title terms as well
         termHashMapDataStructure.insert(docData[1], termLocationIterator, 1.8);
         termLocationIterator+=1;
         // adding doc title as a whole term
@@ -53,464 +54,464 @@ public class DocParser implements IParser{
         String[] docText = StringUtils.substring(fullDoc,fullDoc.indexOf("<TEXT>")+6, fullDoc.indexOf("</TEXT>")).split(" | \n | \t");
         docText = initialBadCharacterRemoval(docText);
 
-        while(textIterator<docText.length){
-            // ignore here from any invalid entry
-            if (docText[textIterator].equals("")){
-                textIterator+=1;
-                continue;
-            }
-
-
-            StrBuilder stringBuilder = new StrBuilder();
-            StrBuilder stringNumberBuilder = new StrBuilder();
-
-            ////////////////// RANGES ////////////////////
-            if(docText[textIterator].contains("-") && docText[textIterator].split("-").length > 1){
-                //term-term / word-word-word
-                String[] seperated = docText[textIterator].split("-");
-                if (seperated.length>=3){
-                    if(isANumber(seperated[0]) == -1 && isANumber(seperated[1]) == -1 && isANumber(seperated[2]) == -1){
-                        //word-word-word pass as single term
-                        termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.5);
-                        termLocationIterator+=1;
-                    }
-                    else{
-                        //not eligible for a range, split and pass as differnet terms
-                        for (int i = 0; i < seperated.length; i++) {
-                            termHashMapDataStructure.insert(seperated[i], termLocationIterator, 1);
-                            termLocationIterator+=1;
-                        }
-                    }
-                    textIterator+=1;
-                }else if(seperated.length==2){
-                    // word-word number-word word-number number number
-                    termHashMapDataStructure.insert(docText[textIterator],termLocationIterator, 1.5);
-                    termLocationIterator+=1;
-                    if(isANumber(seperated[0]) != -1){
-                        //number-number divide into two number and add them as terms
-                        termHashMapDataStructure.insert(seperated[0],termLocationIterator, 1.4);
-                        termLocationIterator+=1;
-                    }if (isANumber(seperated[1]) != -1){
-                        termHashMapDataStructure.insert(seperated[1],termLocationIterator, 1.4);
-                        termLocationIterator+=1;
-                    }
-                    textIterator+=1;
-                }
-            }else if(textIterator+3 < docText.length &&
-                    docText[textIterator].toLowerCase().equals("between") &&
-                    docText[textIterator+2].toLowerCase().equals("and") &&
-                    (isANumber(docText[textIterator+1]) != -1 && isANumber(docText[textIterator+3]) != -1)){
-                    // BETWEEN value and value
-                double firstNum = isANumber(docText[textIterator+1]);
-                double secondNum = isANumber(docText[textIterator+3]);
-                stringBuilder.append(firstNum);
-                stringBuilder.append("-");
-                stringBuilder.append(secondNum);
-                termHashMapDataStructure.insert(stringBuilder.toString(), termLocationIterator, 1.5);
-                termLocationIterator+=1;
-                textIterator+=4;
-            }
-            ////////////////// ENTITIES AND ACRONYMS /////
-            else if(docText[textIterator].matches("(?:[a-zA-Z]\\.){2,}")){
-                //Acronyms, if the word is char.char.char. ...
-                termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.7);
-                termLocationIterator+=1;
-                textIterator+=1;
-            }
-            else if(textIterator+2< docText.length &&
-                    Character.isUpperCase(docText[textIterator].charAt(0)) &&
-                    docText[textIterator+1].toLowerCase().equals("of") && (!docText[textIterator+2].equals("")) &&
-                    Character.isUpperCase(docText[textIterator+2].charAt(0))){
-                // Emtities - Llll of Llll , capital letter at both words 1st and 3rd.
-                // adding each word as a seperate term
-                termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.7);
-                termLocationIterator+=1;
-                termHashMapDataStructure.insert(docText[textIterator+2], termLocationIterator, 1.7);
-                termLocationIterator+=1;
-                // adding the entire entity as a term
-                stringBuilder.append(docText[textIterator]);
-                stringBuilder.append(" ");
-                stringBuilder.append(docText[textIterator + 1]);
-                stringBuilder.append(" ");
-                stringBuilder.append(docText[textIterator + 2]);
-                termHashMapDataStructure.insert(stringBuilder.toString(), termLocationIterator, 1.7);
-                termLocationIterator+=1;
-                textIterator+=3;
-            }
-            else if(textIterator+1< docText.length &&
-                    Character.isUpperCase(docText[textIterator].charAt(0)) && (!docText[textIterator+1].equals("")) &&
-                    Character.isUpperCase(docText[textIterator+1].charAt(0))){
-                // Emtities - Llll Llll , capital letter at both words 1st and 2rd.
-                // adding each word as a seperate term
-                termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.7);
-                termLocationIterator+=1;
-                termHashMapDataStructure.insert(docText[textIterator+1], termLocationIterator, 1.7);
-                termLocationIterator+=1;
-                // adding the entire entity as a term
-                stringBuilder.append(docText[textIterator]);
-                stringBuilder.append(" ");
-                stringBuilder.append(docText[textIterator + 1]);
-                termHashMapDataStructure.insert(stringBuilder.toString(), termLocationIterator, 1.7);
-                termLocationIterator+=1;
-                textIterator+=2;
-            }
-
-            ////////////////// DATES ///////////////////// this is for the MM DD / MM YYYY format, NOT the DD MM format
-            else if(this.months.contains(docText[textIterator].replaceAll("\\.|,",""))){
-                //look for the DD or YYYY
-                if(textIterator+1 < docText.length &&  isANumber(docText[textIterator+1]) != -1){
-                    // found a full date
-                    String monthRep = this.monthIntoNumber(docText[textIterator]);
-                    double isNextANumber = isANumber(docText[textIterator+1]);
-                    // check if its DD or YYYY
-                    //assume years will be larger than days.
-                    if(isNextANumber<=31){
-                        //DD format
-                        stringBuilder.append(monthRep);
-                        //check if the number is below 10 to add 0
-                        stringBuilder.append("-");
-                        if(isNextANumber<10){
-                            stringBuilder.append("0");
-                            stringBuilder.append((int)(isNextANumber));
-                        }else{
-                            stringBuilder.append((int)isNextANumber);
-                        }
-                        textIterator+=2;
-                    }else if(isNextANumber>=1000 && isNextANumber<=9999){
-                        // YYYY format
-                        stringBuilder.append((int)isNextANumber);
-                        stringBuilder.append("-");
-                        stringBuilder.append(monthRep);
-                        textIterator+=2;
-                    }else{
-                        //the number has nothing to do with the month name, pass as a regular word
-                        stringBuilder.append(docText[textIterator]);
-                        textIterator+=1;
-                    }
-                }else{
-                    //this is just the month, pass a regular word term
-                    stringBuilder.append(docText[textIterator]);
-                    textIterator+=1;
-                }
-                termHashMapDataStructure.insert(stringBuilder.toString(), termLocationIterator, 1.5);
-                termLocationIterator+=1;
-            }
-
-            /////////////////numbers, percentages and prices/////////////////
-            ////DOLLAR NUMBERS/////
-            else if(docText[textIterator].startsWith("$")){
-                //remove the '$' sign
-                String replace_with = docText[textIterator].replace("$","");
-                docText[textIterator] = replace_with;
-                //evaluate the number and transform if necessary
-                if((docText[textIterator].contains("bn") || docText[textIterator].contains("m") || docText[textIterator].contains("B") || docText[textIterator].contains("M") )
-                        && startsWithNum(docText[textIterator])) {
-                    if(docText[textIterator].endsWith("bn")|| docText[textIterator].endsWith("B")|| docText[textIterator].endsWith("b")){
-                        try {
-                            docText[textIterator] = docText[textIterator].replace("bn", "");
-                            docText[textIterator] = docText[textIterator].replace("B", "");
-                            docText[textIterator] = docText[textIterator].replace("b", "");
-                            double num = Double.parseDouble(docText[textIterator].replaceAll(",", "")) * Math.pow(10, 9);
-                            String toConcat = this.transformNumber(num, false);
-                            stringNumberBuilder.append(toConcat);
-                            textIterator+=1;
-                        }catch (Exception e){
-                            textIterator+=1;
-                        }
-                    }else if(docText[textIterator].endsWith("m")|| docText[textIterator].endsWith("M")){
-                        try {
-                            docText[textIterator] = docText[textIterator].replace("m", "");
-                            docText[textIterator] = docText[textIterator].replace("M", "");
-                            double num = Double.parseDouble(docText[textIterator].replaceAll(",", "")) * Math.pow(10, 6);
-                            String toConcat = this.transformNumber(num, false);
-                            stringNumberBuilder.append(toConcat);
-                            textIterator+=1;
-                        }catch (Exception e){
-                            textIterator+=1;
-                        }
-                    }
-                }else if(textIterator+1<docText.length){
-                    if(docText[textIterator+1].toLowerCase().equals("million")){
-                        try{
-//                            $price million
-                            double num = Double.parseDouble(docText[textIterator].replaceAll(",",""))*Math.pow(10,6);
-                            String toConcat = this.transformNumber(num, false);
-                            stringNumberBuilder.append(toConcat);
-                            textIterator+=2;
-                        }catch (Exception e){
-                            // wasn't a number
-//                            System.out.println(e);
-                            textIterator+=1;
-                        }
-
-                    }else if(docText[textIterator+1].toLowerCase().equals("billion")){
-                        try{
-//                            $price billion
-                            double num = Double.parseDouble(docText[textIterator].replaceAll(",",""))*Math.pow(10,9);
-                            String toConcat = this.transformNumber(num, false);
-                            stringNumberBuilder.append(toConcat);
-                            textIterator+=2;
-                        }catch (Exception e){
-                            // wasn't a number
-//                            System.out.println(e);
-                            textIterator+=1;
-                        }
-                    }else{
-                        // $price
-                        stringNumberBuilder.append(this.transformNumber(Double.parseDouble(docText[textIterator].replaceAll(",","")), false));
-                        textIterator+=1;
-                    }
-                }else{
-                    // $price [end of text]
-                    stringNumberBuilder.append(this.transformNumber(Double.parseDouble(docText[textIterator].replaceAll(",","")), false));
-                    textIterator+=1;
-                }
-                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.3);
-                termLocationIterator+=1;
-            }else if(docText[textIterator].contains("%")){
-                //Number%
-                stringNumberBuilder.append(docText[textIterator]);
-                textIterator+=1;
-                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.3);
-                termLocationIterator+=1;
-            }else if((docText[textIterator].contains("bn") || docText[textIterator].contains("m"))&&startsWithNum(docText[textIterator])){
-                // Number[m/bn]
-                String replace_with="";
-                double num=1;
-                String toConcat="";
-                //removing the units
-                if (docText[textIterator].contains("bn")){
-                    replace_with = docText[textIterator].replace("bn","");
-                    num = Math.pow(10,9);
-                }else{
-                    replace_with = docText[textIterator].replace("m","");
-                    num = Math.pow(10,6);
-                }
-                try{
-                    // it's a number for sure
-                    num = Double.parseDouble(replace_with)*num;
-                    if(textIterator+1< docText.length && docText[textIterator+1].toLowerCase().equals("dollars")){
-                        toConcat = this.transformNumber(num, false);
-                        // price[m/bn] dollars
-                        textIterator+=2;
-
-                    }else{
-                        // number[m/bn] dollars
-                        toConcat = this.transformNumber(num, true);
-                        textIterator+=1;
-                    }
-                    stringNumberBuilder.append(toConcat);
-                }
-                catch (NumberFormatException e){
-                    // NOT A NUMBER
-//                    System.out.println(e);
-                    textIterator+=1;
-                }
-                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.1);
-                termLocationIterator+=1;
-
-            }else if(textIterator+1 < docText.length && (docText[textIterator+1].toLowerCase().equals("percent") || docText[textIterator+1].toLowerCase().equals("percentage") )){
-                // Number percent /percentage
-                String replace_with="";
-                double num=1;
-                String toConcat="";
-                try{
-                    // it's a number for sure
-                    num = Double.parseDouble(docText[textIterator])*num;
-                    toConcat = this.transformNumber(num, true);
-                    // price m/bn dollars
-                    textIterator+=2;
-                    stringNumberBuilder.append(toConcat);
-                    stringNumberBuilder.append("%");
-                }catch (NumberFormatException e){
-                    // NOT A NUMBER
-//                    System.out.println(e);
-                    textIterator+=1;
-                }
-                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.3);
-                termLocationIterator+=1;
-            }else if(textIterator+1 < docText.length &&
-                    (docText[textIterator+1].contains("/") &&
-                    startsWithNum(docText[textIterator+1])) &&
-                    isANumber(docText[textIterator])!=-1){
-                // Number fraction dollars
-                stringNumberBuilder.append(isANumber(docText[textIterator]));
-                stringNumberBuilder.append(" ");
-                stringNumberBuilder.append(docText[textIterator+1]);
-                if(textIterator+2 < docText.length && docText[textIterator+2].toLowerCase().equals("dollars") ) {
-                    stringNumberBuilder.append(" Dollars");
-                    textIterator+=3;
-                }else{
-                    textIterator+=2;
-                }
-                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.1);
-                termLocationIterator+=1;
-            }else if(textIterator+1 < docText.length && (docText[textIterator+1].toLowerCase().equals("thousand"))){
-                // Number Thousand
-                String replace_with="";
-                double num=1000;
-                String toConcat="";
-                try{
-                    // it's a number for sure
-                    num = Double.parseDouble(docText[textIterator])*num;
-                    toConcat = this.transformNumber(num, true);
-                    // price m/bn dollars
-                    textIterator+=2;
-                    stringNumberBuilder.append(toConcat);
-                }catch (NumberFormatException e){
-                    // NOT A NUMBER
-//                    System.out.println(e);
-                    textIterator+=1;
-                }
-                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.1);
-                termLocationIterator+=1;
-            }else if(textIterator+1 < docText.length && (docText[textIterator+1].toLowerCase().equals("dollars"))){
-                // Number Dollars
-                String replace_with="";
-                double num=1;
-                String toConcat="";
-                try{
-                    // it's a number for sure
-                    num = Double.parseDouble(docText[textIterator])*num;
-                    toConcat = this.transformNumber(num, false);
-                    // price m/bn dollars
-                    textIterator+=2;
-                    stringNumberBuilder.append(toConcat);
-                }catch (NumberFormatException e){
-                    // NOT A NUMBER
-//                    System.out.println(e);
-                    textIterator+=1;
-                }
-                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.3);
-                termLocationIterator+=1;
-            }else if(textIterator+1 < docText.length && (docText[textIterator+1].toLowerCase().equals("m") || docText[textIterator+1].toLowerCase().equals("bn") )){
-                // Number m/bn
-                String replace_with="";
-                double num=1;
-                String toConcat="";
-                //removing the units
-                if (docText[textIterator+1].contains("bn")){
-                    num = Math.pow(10,9);
-                }else{
-                    num = Math.pow(10,6);
-                }
-                try{
-                    // it's a number for sure
-                    num = Double.parseDouble(docText[textIterator])*num;
-                    if(textIterator+2<docText.length && docText[textIterator+2].toLowerCase().equals("dollars")){
-                        toConcat = this.transformNumber(num, false);
-                        // price m/bn dollars
-                        textIterator+=3;
-
-                    }else{
-                        // number m/bn dollars
-                        toConcat = this.transformNumber(num, true);
-                        textIterator+=2;
-                    }
-                    stringNumberBuilder.append(toConcat);
-                }
-                catch (NumberFormatException e){
-                    // NOT A NUMBER
-//                    System.out.println(e);
-                    textIterator+=1;
-                }
-                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.1);
-                termLocationIterator+=1;
-            }else if(textIterator+1 < docText.length && (docText[textIterator+1].toLowerCase().equals("million") ||
-                    docText[textIterator+1].toLowerCase().equals("billion") ||
-                    docText[textIterator+1].toLowerCase().equals("trillion"))){
-                //number million/billion
-                String replace_with="";
-                double num=1;
-                String toConcat="";
-                if (docText[textIterator+1].contains("trillion")){
-                    num = Math.pow(10,12);
-                }else if(docText[textIterator+1].contains("billion")){
-                    num = Math.pow(10,9);
-                }else{
-                    num = Math.pow(10,6);
-                }
-                try{
-                    // it's a number for sure
-                    num = Double.parseDouble(docText[textIterator])*num;
-                    if(textIterator+3 < docText.length && docText[textIterator+2].toLowerCase().equals("u.s.") && docText[textIterator+3].toLowerCase().equals("dollars")){
-                        //price million/billion u.s. dollars
-                        toConcat = this.transformNumber(num, false);
-                        textIterator+=4;
-
-                    }else{
-                        // number million/billion
-                        toConcat = this.transformNumber(num, true);
-                        textIterator+=2;
-                    }
-                    stringNumberBuilder.append(toConcat);
-                }
-                catch (NumberFormatException e){
-                    // NOT A NUMBER
-//                    System.out.println(e);
-                    textIterator+=1;
-                }
-                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.1);
-                termLocationIterator+=1;
-            }else if(isANumber(docText[textIterator])!=-1){
-                //this is a number
-                double num = isANumber(docText[textIterator]);
-                boolean isDate = false;
-                // checks if there is a month name after it, meaning it is a date.
-                if(textIterator+1 < docText.length &&
-                        months.contains(docText[textIterator+1].replaceAll("\\.|,",""))){
-                    //checks if it is a YYYY or a DD
-                    if(num<=31){
-                        // its DD
-                        stringNumberBuilder.append(this.monthIntoNumber(docText[textIterator+1].replaceAll(", | . ", "")));
-                        stringNumberBuilder.append("-");
-                        stringNumberBuilder.append(this.daysInDatesFormatter(num));
-                        isDate = true;
-                    }else if(num>=1000 && num<=9999){
-                        // its YYYY
-                        stringNumberBuilder.append(this.monthIntoNumber(docText[textIterator+1].replaceAll(", | . ", "")));
-                        stringNumberBuilder.append("-");
-                        stringNumberBuilder.append(num);
-                        isDate = true;
-                    }
-                    textIterator+=2;
-                }else{
-                    //here should be all the rest of the cases of just a number
-                    stringNumberBuilder.append(num);
-                    textIterator+=1;
-                }
-
-                termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, isDate ? 1.3 : 1.1);
-                termLocationIterator+=1;
-
-            }else {
-                //not a number/percent/price/range/date for sure
-                String word = docText[textIterator];
-                if(this.stopWords.contains(word.toLowerCase())) {
-                    //a stop word, ignore it.
+        while(textIterator<docText.length) {
+            try {
+                // ignore here from any invalid entry
+                if (docText[textIterator].equals("")) {
                     textIterator += 1;
                     continue;
                 }
-                if(this.wordStemming){
-                    char[] wordInChars = word.toCharArray();
-                    this.stemmer.add(wordInChars, wordInChars.length);
-                    this.stemmer.stem();
-                    word = this.stemmer.toString();
-                    this.stemmer.resetStemer();
 
-                }else{
-                    Pattern regex = Pattern.compile("[^A-Za-z0-9]");
-                    word = docText[textIterator].replaceAll(regex.toString(), "");
-                }
-                if(this.stopWords.contains(word.toLowerCase())){
-                    //a stop word, ignore it.
-                    textIterator += 1;
 
-                }else{
-                    termHashMapDataStructure.insert(word, termLocationIterator, 1);
-                    termLocationIterator+=1;
-                    textIterator += 1;
+                StrBuilder stringBuilder = new StrBuilder();
+                StrBuilder stringNumberBuilder = new StrBuilder();
+
+                ////////////////// RANGES ////////////////////
+                if (docText[textIterator].contains("-") && docText[textIterator].split("-").length > 1) {
+                    //term-term / word-word-word
+                    String[] seperated = docText[textIterator].split("-");
+                    if (seperated.length >= 3) {
+                        if (isANumber(seperated[0]) == -1 && isANumber(seperated[1]) == -1 && isANumber(seperated[2]) == -1) {
+                            //word-word-word pass as single term
+                            termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.5);
+                            termLocationIterator += 1;
+                        } else {
+                            //not eligible for a range, split and pass as differnet terms
+                            for (int i = 0; i < seperated.length; i++) {
+                                termHashMapDataStructure.insert(seperated[i], termLocationIterator, 1);
+                                termLocationIterator += 1;
+                            }
+                        }
+                        textIterator += 1;
+                    } else if (seperated.length == 2) {
+                        // word-word number-word word-number number number
+                        termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.5);
+                        termLocationIterator += 1;
+                        if (isANumber(seperated[0]) != -1) {
+                            //number-number divide into two number and add them as terms
+                            termHashMapDataStructure.insert(seperated[0], termLocationIterator, 1.4);
+                            termLocationIterator += 1;
+                        }
+                        if (isANumber(seperated[1]) != -1) {
+                            termHashMapDataStructure.insert(seperated[1], termLocationIterator, 1.4);
+                            termLocationIterator += 1;
+                        }
+                        textIterator += 1;
+                    }
+                } else if (textIterator + 3 < docText.length &&
+                        docText[textIterator].toLowerCase().equals("between") &&
+                        docText[textIterator + 2].toLowerCase().equals("and") &&
+                        (isANumber(docText[textIterator + 1]) != -1 && isANumber(docText[textIterator + 3]) != -1)) {
+                    // BETWEEN value and value
+                    double firstNum = isANumber(docText[textIterator + 1]);
+                    double secondNum = isANumber(docText[textIterator + 3]);
+                    stringBuilder.append(firstNum);
+                    stringBuilder.append("-");
+                    stringBuilder.append(secondNum);
+                    termHashMapDataStructure.insert(stringBuilder.toString(), termLocationIterator, 1.5);
+                    termLocationIterator += 1;
+                    textIterator += 4;
                 }
+                ////////////////// ENTITIES AND ACRONYMS /////
+                else if (docText[textIterator].matches("(?:[a-zA-Z]\\.){2,}")) {
+                    //Acronyms, if the word is char.char.char. ...
+                    termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.7);
+                    termLocationIterator += 1;
+                    textIterator += 1;
+                } else if (textIterator + 2 < docText.length &&
+                        Character.isUpperCase(docText[textIterator].charAt(0)) &&
+                        docText[textIterator + 1].toLowerCase().equals("of") && (!docText[textIterator + 2].equals("")) &&
+                        Character.isUpperCase(docText[textIterator + 2].charAt(0))) {
+                    // Emtities - Llll of Llll , capital letter at both words 1st and 3rd.
+                    // adding each word as a seperate term
+                    termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.7);
+                    termLocationIterator += 1;
+                    termHashMapDataStructure.insert(docText[textIterator + 2], termLocationIterator, 1.7);
+                    termLocationIterator += 1;
+                    // adding the entire entity as a term
+                    stringBuilder.append(docText[textIterator]);
+                    stringBuilder.append(" ");
+                    stringBuilder.append(docText[textIterator + 1]);
+                    stringBuilder.append(" ");
+                    stringBuilder.append(docText[textIterator + 2]);
+                    termHashMapDataStructure.insert(stringBuilder.toString(), termLocationIterator, 1.7);
+                    termLocationIterator += 1;
+                    textIterator += 3;
+                } else if (textIterator + 1 < docText.length &&
+                        Character.isUpperCase(docText[textIterator].charAt(0)) && (!docText[textIterator + 1].equals("")) &&
+                        Character.isUpperCase(docText[textIterator + 1].charAt(0))) {
+                    // Emtities - Llll Llll , capital letter at both words 1st and 2rd.
+                    // adding each word as a seperate term
+                    termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.7);
+                    termLocationIterator += 1;
+                    termHashMapDataStructure.insert(docText[textIterator + 1], termLocationIterator, 1.7);
+                    termLocationIterator += 1;
+                    // adding the entire entity as a term
+                    stringBuilder.append(docText[textIterator]);
+                    stringBuilder.append(" ");
+                    stringBuilder.append(docText[textIterator + 1]);
+                    termHashMapDataStructure.insert(stringBuilder.toString(), termLocationIterator, 1.7);
+                    termLocationIterator += 1;
+                    textIterator += 2;
+                }
+
+                ////////////////// DATES ///////////////////// this is for the MM DD / MM YYYY format, NOT the DD MM format
+                else if (this.months.contains(docText[textIterator].replaceAll("\\.|,", ""))) {
+                    //look for the DD or YYYY
+                    if (textIterator + 1 < docText.length && isANumber(docText[textIterator + 1]) != -1) {
+                        // found a full date
+                        String monthRep = this.monthIntoNumber(docText[textIterator]);
+                        double isNextANumber = isANumber(docText[textIterator + 1]);
+                        // check if its DD or YYYY
+                        //assume years will be larger than days.
+                        if (isNextANumber <= 31) {
+                            //DD format
+                            stringBuilder.append(monthRep);
+                            //check if the number is below 10 to add 0
+                            stringBuilder.append("-");
+                            if (isNextANumber < 10) {
+                                stringBuilder.append("0");
+                                stringBuilder.append((int) (isNextANumber));
+                            } else {
+                                stringBuilder.append((int) isNextANumber);
+                            }
+                            textIterator += 2;
+                        } else if (isNextANumber >= 1000 && isNextANumber <= 9999) {
+                            // YYYY format
+                            stringBuilder.append((int) isNextANumber);
+                            stringBuilder.append("-");
+                            stringBuilder.append(monthRep);
+                            textIterator += 2;
+                        } else {
+                            //the number has nothing to do with the month name, pass as a regular word
+                            stringBuilder.append(docText[textIterator]);
+                            textIterator += 1;
+                        }
+                    } else {
+                        //this is just the month, pass a regular word term
+                        stringBuilder.append(docText[textIterator]);
+                        textIterator += 1;
+                    }
+                    termHashMapDataStructure.insert(stringBuilder.toString(), termLocationIterator, 1.5);
+                    termLocationIterator += 1;
+                }
+
+                /////////////////numbers, percentages and prices/////////////////
+                ////DOLLAR NUMBERS/////
+                else if (docText[textIterator].startsWith("$")) {
+                    //remove the '$' sign
+                    String replace_with = docText[textIterator].replace("$", "");
+                    docText[textIterator] = replace_with;
+                    //evaluate the number and transform if necessary
+                    if ((docText[textIterator].contains("bn") || docText[textIterator].contains("m") || docText[textIterator].contains("B") || docText[textIterator].contains("M"))
+                            && startsWithNum(docText[textIterator])) {
+                        if (docText[textIterator].endsWith("bn") || docText[textIterator].endsWith("B") || docText[textIterator].endsWith("b")) {
+                            try {
+                                docText[textIterator] = docText[textIterator].replace("bn", "");
+                                docText[textIterator] = docText[textIterator].replace("B", "");
+                                docText[textIterator] = docText[textIterator].replace("b", "");
+                                double num = Double.parseDouble(docText[textIterator].replaceAll(",", "")) * Math.pow(10, 9);
+                                String toConcat = this.transformNumber(num, false);
+                                stringNumberBuilder.append(toConcat);
+                                textIterator += 1;
+                            } catch (Exception e) {
+                                textIterator += 1;
+                            }
+                        } else if (docText[textIterator].endsWith("m") || docText[textIterator].endsWith("M")) {
+                            try {
+                                docText[textIterator] = docText[textIterator].replace("m", "");
+                                docText[textIterator] = docText[textIterator].replace("M", "");
+                                double num = Double.parseDouble(docText[textIterator].replaceAll(",", "")) * Math.pow(10, 6);
+                                String toConcat = this.transformNumber(num, false);
+                                stringNumberBuilder.append(toConcat);
+                                textIterator += 1;
+                            } catch (Exception e) {
+                                textIterator += 1;
+                            }
+                        }
+                    } else if (textIterator + 1 < docText.length) {
+                        if (docText[textIterator + 1].toLowerCase().equals("million")) {
+                            try {
+    //                            $price million
+                                double num = Double.parseDouble(docText[textIterator].replaceAll(",", "")) * Math.pow(10, 6);
+                                String toConcat = this.transformNumber(num, false);
+                                stringNumberBuilder.append(toConcat);
+                                textIterator += 2;
+                            } catch (Exception e) {
+                                // wasn't a number
+    //                            System.out.println(e);
+                                textIterator += 1;
+                            }
+
+                        } else if (docText[textIterator + 1].toLowerCase().equals("billion")) {
+                            try {
+    //                            $price billion
+                                double num = Double.parseDouble(docText[textIterator].replaceAll(",", "")) * Math.pow(10, 9);
+                                String toConcat = this.transformNumber(num, false);
+                                stringNumberBuilder.append(toConcat);
+                                textIterator += 2;
+                            } catch (Exception e) {
+                                // wasn't a number
+    //                            System.out.println(e);
+                                textIterator += 1;
+                            }
+                        } else {
+                            // $price
+                            stringNumberBuilder.append(this.transformNumber(Double.parseDouble(docText[textIterator].replaceAll(",", "")), false));
+                            textIterator += 1;
+                        }
+                    } else {
+                        // $price [end of text]
+                        docText[textIterator].replaceAll("[^\\d.]", "");
+                        stringNumberBuilder.append(this.transformNumber(Double.parseDouble(docText[textIterator].replaceAll(",", "")), false));
+                        textIterator += 1;
+                    }
+                    termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.3);
+                    termLocationIterator += 1;
+                } else if (docText[textIterator].contains("%")) {
+                    //Number%
+                    stringNumberBuilder.append(docText[textIterator]);
+                    textIterator += 1;
+                    termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.3);
+                    termLocationIterator += 1;
+                } else if ((docText[textIterator].contains("bn") || docText[textIterator].contains("m")) && startsWithNum(docText[textIterator])) {
+                    // Number[m/bn]
+                    String replace_with = "";
+                    double num = 1;
+                    String toConcat = "";
+                    //removing the units
+                    if (docText[textIterator].contains("bn")) {
+                        replace_with = docText[textIterator].replace("bn", "");
+                        num = Math.pow(10, 9);
+                    } else {
+                        replace_with = docText[textIterator].replace("m", "");
+                        num = Math.pow(10, 6);
+                    }
+                    try {
+                        // it's a number for sure
+                        num = Double.parseDouble(replace_with) * num;
+                        if (textIterator + 1 < docText.length && docText[textIterator + 1].toLowerCase().equals("dollars")) {
+                            toConcat = this.transformNumber(num, false);
+                            // price[m/bn] dollars
+                            textIterator += 2;
+
+                        } else {
+                            // number[m/bn] dollars
+                            toConcat = this.transformNumber(num, true);
+                            textIterator += 1;
+                        }
+                        stringNumberBuilder.append(toConcat);
+                    } catch (NumberFormatException e) {
+                        // NOT A NUMBER
+    //                    System.out.println(e);
+                        textIterator += 1;
+                    }
+                    termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.1);
+                    termLocationIterator += 1;
+
+                } else if (textIterator + 1 < docText.length && (docText[textIterator + 1].toLowerCase().equals("percent") || docText[textIterator + 1].toLowerCase().equals("percentage"))) {
+                    // Number percent /percentage
+                    String replace_with = "";
+                    double num = 1;
+                    String toConcat = "";
+                    try {
+                        // it's a number for sure
+                        num = Double.parseDouble(docText[textIterator]) * num;
+                        toConcat = this.transformNumber(num, true);
+                        // price m/bn dollars
+                        textIterator += 2;
+                        stringNumberBuilder.append(toConcat);
+                        stringNumberBuilder.append("%");
+                    } catch (NumberFormatException e) {
+                        // NOT A NUMBER
+    //                    System.out.println(e);
+                        textIterator += 1;
+                    }
+                    termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.3);
+                    termLocationIterator += 1;
+                } else if (textIterator + 1 < docText.length &&
+                        (docText[textIterator + 1].contains("/") &&
+                                startsWithNum(docText[textIterator + 1])) &&
+                        isANumber(docText[textIterator]) != -1) {
+                    // Number fraction dollars
+                    stringNumberBuilder.append(isANumber(docText[textIterator]));
+                    stringNumberBuilder.append(" ");
+                    stringNumberBuilder.append(docText[textIterator + 1]);
+                    if (textIterator + 2 < docText.length && docText[textIterator + 2].toLowerCase().equals("dollars")) {
+                        stringNumberBuilder.append(" Dollars");
+                        textIterator += 3;
+                    } else {
+                        textIterator += 2;
+                    }
+                    termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.1);
+                    termLocationIterator += 1;
+                } else if (textIterator + 1 < docText.length && (docText[textIterator + 1].toLowerCase().equals("thousand"))) {
+                    // Number Thousand
+                    String replace_with = "";
+                    double num = 1000;
+                    String toConcat = "";
+                    try {
+                        // it's a number for sure
+                        num = Double.parseDouble(docText[textIterator]) * num;
+                        toConcat = this.transformNumber(num, true);
+                        // price m/bn dollars
+                        textIterator += 2;
+                        stringNumberBuilder.append(toConcat);
+                    } catch (NumberFormatException e) {
+                        // NOT A NUMBER
+    //                    System.out.println(e);
+                        textIterator += 1;
+                    }
+                    termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.1);
+                    termLocationIterator += 1;
+                } else if (textIterator + 1 < docText.length && (docText[textIterator + 1].toLowerCase().equals("dollars"))) {
+                    // Number Dollars
+                    String replace_with = "";
+                    double num = 1;
+                    String toConcat = "";
+                    try {
+                        // it's a number for sure
+                        num = Double.parseDouble(docText[textIterator]) * num;
+                        toConcat = this.transformNumber(num, false);
+                        // price m/bn dollars
+                        textIterator += 2;
+                        stringNumberBuilder.append(toConcat);
+                    } catch (NumberFormatException e) {
+                        // NOT A NUMBER
+    //                    System.out.println(e);
+                        textIterator += 1;
+                    }
+                    termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.3);
+                    termLocationIterator += 1;
+                } else if (textIterator + 1 < docText.length && (docText[textIterator + 1].toLowerCase().equals("m") || docText[textIterator + 1].toLowerCase().equals("bn"))) {
+                    // Number m/bn
+                    String replace_with = "";
+                    double num = 1;
+                    String toConcat = "";
+                    //removing the units
+                    if (docText[textIterator + 1].contains("bn")) {
+                        num = Math.pow(10, 9);
+                    } else {
+                        num = Math.pow(10, 6);
+                    }
+                    try {
+                        // it's a number for sure
+                        num = Double.parseDouble(docText[textIterator]) * num;
+                        if (textIterator + 2 < docText.length && docText[textIterator + 2].toLowerCase().equals("dollars")) {
+                            toConcat = this.transformNumber(num, false);
+                            // price m/bn dollars
+                            textIterator += 3;
+
+                        } else {
+                            // number m/bn dollars
+                            toConcat = this.transformNumber(num, true);
+                            textIterator += 2;
+                        }
+                        stringNumberBuilder.append(toConcat);
+                    } catch (NumberFormatException e) {
+                        // NOT A NUMBER
+    //                    System.out.println(e);
+                        textIterator += 1;
+                    }
+                    termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.1);
+                    termLocationIterator += 1;
+                } else if (textIterator + 1 < docText.length && (docText[textIterator + 1].toLowerCase().equals("million") ||
+                        docText[textIterator + 1].toLowerCase().equals("billion") ||
+                        docText[textIterator + 1].toLowerCase().equals("trillion"))) {
+                    //number million/billion
+                    String replace_with = "";
+                    double num = 1;
+                    String toConcat = "";
+                    if (docText[textIterator + 1].contains("trillion")) {
+                        num = Math.pow(10, 12);
+                    } else if (docText[textIterator + 1].contains("billion")) {
+                        num = Math.pow(10, 9);
+                    } else {
+                        num = Math.pow(10, 6);
+                    }
+                    try {
+                        // it's a number for sure
+                        num = Double.parseDouble(docText[textIterator]) * num;
+                        if (textIterator + 3 < docText.length && docText[textIterator + 2].toLowerCase().equals("u.s.") && docText[textIterator + 3].toLowerCase().equals("dollars")) {
+                            //price million/billion u.s. dollars
+                            toConcat = this.transformNumber(num, false);
+                            textIterator += 4;
+
+                        } else {
+                            // number million/billion
+                            toConcat = this.transformNumber(num, true);
+                            textIterator += 2;
+                        }
+                        stringNumberBuilder.append(toConcat);
+                    } catch (NumberFormatException e) {
+                        // NOT A NUMBER
+    //                    System.out.println(e);
+                        textIterator += 1;
+                    }
+                    termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.1);
+                    termLocationIterator += 1;
+                } else if (isANumber(docText[textIterator]) != -1) {
+                    //this is a number
+                    double num = isANumber(docText[textIterator]);
+                    boolean isDate = false;
+                    // checks if there is a month name after it, meaning it is a date.
+                    if (textIterator + 1 < docText.length &&
+                            months.contains(docText[textIterator + 1].replaceAll("\\.|,", ""))) {
+                        //checks if it is a YYYY or a DD
+                        if (num <= 31) {
+                            // its DD
+                            stringNumberBuilder.append(this.monthIntoNumber(docText[textIterator + 1].replaceAll(", | . ", "")));
+                            stringNumberBuilder.append("-");
+                            stringNumberBuilder.append(this.daysInDatesFormatter(num));
+                            isDate = true;
+                        } else if (num >= 1000 && num <= 9999) {
+                            // its YYYY
+                            stringNumberBuilder.append(this.monthIntoNumber(docText[textIterator + 1].replaceAll(", | . ", "")));
+                            stringNumberBuilder.append("-");
+                            stringNumberBuilder.append(num);
+                            isDate = true;
+                        }
+                        textIterator += 2;
+                    } else {
+                        //here should be all the rest of the cases of just a number
+                        stringNumberBuilder.append(num);
+                        textIterator += 1;
+                    }
+
+                    termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, isDate ? 1.3 : 1.1);
+                    termLocationIterator += 1;
+
+                } else {
+                    //not a number/percent/price/range/date for sure
+                    String word = docText[textIterator];
+                    if (this.stopWords.contains(word.toLowerCase())) {
+                        //a stop word, ignore it.
+                        textIterator += 1;
+                        continue;
+                    }
+                    if (this.wordStemming) {
+                        char[] wordInChars = word.toCharArray();
+                        this.stemmer.add(wordInChars, wordInChars.length);
+                        this.stemmer.stem();
+                        word = this.stemmer.toString();
+                        this.stemmer.resetStemer();
+
+                    } else {
+                        Pattern regex = Pattern.compile("[^A-Za-z0-9]");
+                        word = docText[textIterator].replaceAll(regex.toString(), "");
+                    }
+                    if (this.stopWords.contains(word.toLowerCase())) {
+                        //a stop word, ignore it.
+                        textIterator += 1;
+
+                    } else {
+                        termHashMapDataStructure.insert(word, termLocationIterator, 1);
+                        termLocationIterator += 1;
+                        textIterator += 1;
+                    }
+                }
+            }catch(Exception e){
+                    textIterator+=1;
             }
         }
         //adding it into the Document object.
