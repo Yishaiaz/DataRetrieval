@@ -56,7 +56,7 @@ public class ReadFile {
                         long start_time = System.currentTimeMillis();
                         Document doc = this.parser.Parse(fullDocStringBuilder.toString());
                        // docsContainer not full yet
-                        if (docsContainer.size()<5)
+                        if (docsContainer.size()<30)
                             docsContainer.add(doc);
                         // docs container full and ready for index
                         else {
@@ -67,7 +67,7 @@ public class ReadFile {
 //                        Document doc = this.parser.Parse(fullDoc);
 //                        this.indexer.index(doc);
 
-                        System.out.println(String.format("Time to parse doc- %s, took: %d Ms", doc.getDocNo(), (System.currentTimeMillis() - start_time)));
+//                        System.out.println(String.format("Time to parse doc- %s, took: %d Ms", doc.getDocNo(), (System.currentTimeMillis() - start_time)));
                         line = br.readLine();
                     }
                     else{
