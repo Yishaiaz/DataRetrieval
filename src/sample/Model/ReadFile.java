@@ -85,7 +85,7 @@ public class ReadFile {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println(String.format("Total parsing took: %d Ms", (System.currentTimeMillis() - total_start_time)));
+        System.out.println(String.format("Total parsing for single FILE took: %d Ms", (System.currentTimeMillis() - total_start_time)));
     }
 
 }
