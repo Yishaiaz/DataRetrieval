@@ -397,7 +397,7 @@ public class DocParser implements IParser{
                 try{
                     // it's a number for sure
                     num = Double.parseDouble(docText[textIterator])*num;
-                    if(docText[textIterator+2].toLowerCase().equals("dollars")){
+                    if(textIterator+2<docText.length && docText[textIterator+2].toLowerCase().equals("dollars")){
                         toConcat = this.transformNumber(num, false);
                         // price m/bn dollars
                         textIterator+=3;

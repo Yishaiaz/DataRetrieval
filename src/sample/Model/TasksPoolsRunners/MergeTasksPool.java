@@ -33,6 +33,7 @@ public class MergeTasksPool {
                 List<String> tempFiles = walk.filter(Files::isRegularFile)
                         .map(x -> x.toString()).collect(Collectors.toList());
                 toMergePaths.addAll(tempFiles);
+                toMergePaths.remove(this.tempFilesPath+"/.DS_Store");
                 //    System.out.println(filesPaths.size());
             } catch (IOException e) {
                 e.printStackTrace();
