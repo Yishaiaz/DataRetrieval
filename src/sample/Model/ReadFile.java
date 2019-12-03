@@ -5,6 +5,7 @@ import sample.Model.Parser.DocParser;
 import sample.Model.Parser.IParser;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 
@@ -31,6 +32,7 @@ public class ReadFile {
     //  prepare file for parsing by extract fields and create object of doc.
     public void prepareDocToParse(String corpusPath) {
         long total_start_time = System.currentTimeMillis();
+        ArrayList <Document> docsContainer= new ArrayList<>();
         BufferedReader br = null;
         StringBuilder fullDocStringBuilder = new StringBuilder();
 //        String fullDoc = "";
@@ -53,7 +55,15 @@ public class ReadFile {
                         //with timer
                         long start_time = System.currentTimeMillis();
                         Document doc = this.parser.Parse(fullDocStringBuilder.toString());
-                         this.indexer.indexOneDoc(doc);
+                       // docsContainer not full yet
+                        if (docsContainer.size()<5)
+                            docsContainer.add(doc);
+                        // docs container full and ready for index
+                        else {
+                            docsContainer.add(doc);
+                            this.indexer.indexChuckDocs(docsContainer);
+                            docsContainer.clear();
+                        }
 //                        Document doc = this.parser.Parse(fullDoc);
 //                        this.indexer.index(doc);
 
@@ -67,6 +77,11 @@ public class ReadFile {
                     }
                 }
             }
+
+            //if There are some docs left in docsContainer.
+       if (docsContainer.size()>0)
+           indexer.indexChuckDocs(docsContainer);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
