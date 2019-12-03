@@ -38,7 +38,7 @@ public class CorpusHandler {
 
         //check if path exist
         if (corpusFolder != null) {
-            try (Stream<Path> walk = Files.walk(Paths.get(corpusPath))) {
+            try (Stream<Path> walk = Files.walk(Paths.get(corpusPath+"/corpus"))) {
 
                 List<String> folders = walk.filter(Files::isDirectory)
                         .map(x -> x.toString()).collect(Collectors.toList());
