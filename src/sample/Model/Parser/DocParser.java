@@ -88,7 +88,7 @@ public class DocParser implements IParser{
                         } else {
                             //not eligible for a range, split and pass as differnet terms
                             for (int i = 0; i < seperated.length; i++) {
-                                if (StringUtils.equals(seperated[i], "")){
+                                if (!StringUtils.equals(seperated[i], "")){
                                     termHashMapDataStructure.insert(seperated[i], termLocationIterator, 1);
                                     termLocationIterator += 1;
                                 }
@@ -346,8 +346,10 @@ public class DocParser implements IParser{
                         //                    System.out.println(e);
                         textIterator += 1;
                     }
-                    termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.1);
-                    termLocationIterator += 1;
+                    if (!StringUtils.equals(stringNumberBuilder.toString(), "")){
+                        termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.1);
+                        termLocationIterator += 1;
+                    }
 
                 }else if (StringUtils.isNumeric(docText[textIterator])&&
                         textIterator + 1 < docText.length &&
@@ -785,8 +787,12 @@ public class DocParser implements IParser{
             docText[textIterator] = StringUtils.removeEnd(docText[textIterator], "?");
             docText[textIterator] = StringUtils.removeEnd(docText[textIterator], ",");
             docText[textIterator] = StringUtils.remove(docText[textIterator], "[");
+            docText[textIterator] = StringUtils.remove(docText[textIterator], " ");
             docText[textIterator] = StringUtils.remove(docText[textIterator], "]");
             docText[textIterator] = StringUtils.remove(docText[textIterator], "]");
+            docText[textIterator] = StringUtils.remove(docText[textIterator], "(");
+            docText[textIterator] = StringUtils.remove(docText[textIterator], ")");
+            docText[textIterator] = StringUtils.remove(docText[textIterator], "*");
             docText[textIterator] = StringUtils.remove(docText[textIterator], ":");
             docText[textIterator] = StringUtils.remove(docText[textIterator], ";");
             docText[textIterator] = StringUtils.remove(docText[textIterator], "<");
