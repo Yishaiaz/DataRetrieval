@@ -99,12 +99,12 @@ public class DocParser implements IParser{
                         // word-word number-word word-number number number
                         termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.5);
                         termLocationIterator += 1;
-                        if (StringUtils.isNumeric(seperated[0])) {
+                        if (StringUtils.isNumeric(seperated[0]) && !StringUtils.equals(seperated[0], "")) {
                             //number-number divide into two number and add them as terms
                             termHashMapDataStructure.insert(seperated[0], termLocationIterator, 1.4);
                             termLocationIterator += 1;
                         }
-                        if (StringUtils.isNumeric(seperated[1])) {
+                        if (StringUtils.isNumeric(seperated[1]) && !StringUtils.equals(seperated[1], "")) {
                             termHashMapDataStructure.insert(seperated[1], termLocationIterator, 1.4);
                             termLocationIterator += 1;
                         }
