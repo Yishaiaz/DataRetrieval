@@ -8,7 +8,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Struct;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -57,6 +56,8 @@ public class DocIndexer {
                 w.write(term+"|"+ df+"|"+valuesOfChunck.get(term));
             }
             w.close();
+            osw.close();
+            is.close();
         } catch (IOException e) {
             System.err.println("Problem writing to the files "+ docsContainer.get(0).getDocNo() +" to "+ docsContainer.get(docsContainer.size()-1).getDocNo() );
         }

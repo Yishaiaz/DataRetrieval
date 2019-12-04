@@ -30,7 +30,7 @@ public class ReadFile {
 
 
     //  prepare file for parsing by extract fields and create object of doc.
-    public void prepareDocToParse(String corpusPath) {
+    public void prepareDocToParse(String corpusPath,int containerSize) {
         long total_start_time = System.currentTimeMillis();
         ArrayList <Document> docsContainer= new ArrayList<>();
         BufferedReader br = null;
@@ -56,7 +56,7 @@ public class ReadFile {
                         long start_time = System.currentTimeMillis();
                         Document doc = this.parser.Parse(fullDocStringBuilder.toString());
                        // docsContainer not full yet
-                        if (docsContainer.size()<30)
+                        if (docsContainer.size()<containerSize)
                             docsContainer.add(doc);
                         // docs container full and ready for index
                         else {

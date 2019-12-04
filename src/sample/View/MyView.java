@@ -63,6 +63,8 @@ public class MyView {
     }
 
     public void activate(){
+        //clean posting file path before starting.
+        cleanPostingFilePath();
         if (!txtField_postingFilesInput.getText().equals("") || !txtField_corpusPath.getText().equals("")) {
 
             if (stemming_cp.isSelected()) {
@@ -78,7 +80,13 @@ public class MyView {
     }
 
     public void reset(){
+        cleanPostingFilePath();
+        txtField_postingFilesInput.clear();
+        txtField_corpusPath.clear();
+        stemming_cp.setSelected(false);
+    }
 
+    public void cleanPostingFilePath(){
         //get all paths of Posting Files into 'pathsToPostFiles'.
         File folder = new File(txtField_postingFilesInput.getText());
         ArrayList<String> pathsToPostFiles= new ArrayList<>();
@@ -110,16 +118,14 @@ public class MyView {
             }
         } else
             System.out.println("Path doesn't exist.");
-
         //delete all files from Disk.
         for (String path: pathsToPostFiles){
-            File file= new File(path);
-            file.delete();
+            if (path.endsWith(".txt")) {
+                File file = new File(path);
+                file.delete();
+            }
         }
 
-        txtField_postingFilesInput.clear();
-        txtField_corpusPath.clear();
-        stemming_cp.setSelected(false);
     }
 
 
