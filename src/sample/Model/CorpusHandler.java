@@ -1,5 +1,8 @@
 package sample.Model;
 
+import sample.Model.TaskPool.WriteToFilePool;
+import sample.Model.TasksPoolsRunners.WriteToFileTask;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -8,6 +11,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -17,6 +23,8 @@ public class CorpusHandler {
     private ArrayList<String> filesPaths; //list contains all paths in Corpus dir.
     public HashSet<String> stopWords = new HashSet<>();
     public HashSet<String> months = new HashSet<>();
+    ExecutorService pool = Executors.newFixedThreadPool(3);
+    WriteToFilePool writeToFilePool;
 
     public CorpusHandler(String corpusPath) {
         this.corpusPath = corpusPath;
@@ -67,17 +75,34 @@ public class CorpusHandler {
     }
 
     public void findTextInDocs(boolean withStemming) throws FileNotFoundException {
+        writeToFilePool= new WriteToFilePool();
+        WriteToFileTask tasker1= new WriteToFileTask("task1",writeToFilePool,postingFilesPath);
+        WriteToFileTask tasker2= new WriteToFileTask("task2",writeToFilePool,postingFilesPath);
+        WriteToFileTask tasker3= new WriteToFileTask("task3",writeToFilePool,postingFilesPath);
 
-        ReadFile readFile = new ReadFile(this.corpusPath, this.stopWords, this.months,withStemming,postingFilesPath);
+
+        pool.execute(tasker1);
+        pool.execute(tasker2);
+        pool.execute(tasker3);
+
+
+        ReadFile readFile = new ReadFile(this.corpusPath, this.stopWords, this.months,withStemming,postingFilesPath,writeToFilePool);
         //send every file to ReadFile for preparation for parsing.
         for (String path : filesPaths) {
             if(path.endsWith(".DS_Store")){
                 System.out.println("you and your mac");
             }
             else{
-                readFile.prepareDocToParse(path,30);
+                readFile.prepareDocToParse(path,20);
+
             }
         }
+
+        while(writeToFilePool.areTasksLeft()){}
+        pool.shutdown();
+        while(pool.isTerminated()){}
+        System.out.println("end");
+
 
     }
     private HashSet<String> readStopWordsFile(){
@@ -99,7 +124,4 @@ public class CorpusHandler {
         return stopWords;
     }
 
-
 }
-
-

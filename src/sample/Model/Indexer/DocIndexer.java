@@ -1,8 +1,10 @@
 package sample.Model.Indexer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.StrBuilder;
 import sample.Model.DataStructures.TermHashMapDataStructure;
 import sample.Model.Document;
+import sample.Model.TaskPool.WriteToFilePool;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -15,16 +17,16 @@ import java.util.stream.Stream;
 public class DocIndexer {
 
     String postingFilePath="";
-    public DocIndexer(String postingFilePath) {
+    WriteToFilePool writeToFilePool;
+    public DocIndexer(String postingFilePath,WriteToFilePool writeToFilePool) {
         this.postingFilePath=postingFilePath;
-
+        this.writeToFilePool=writeToFilePool;
     }
 
     //this function receives document and put into file all terms inside it.
     public void indexChuckDocs(ArrayList<Document> docsContainer) {
-        try {
-            //Whatever the file path is.
-            File statText = new File(postingFilePath +File.separator+ docsContainer.hashCode() + ".txt");
+   //     try {
+
             //<Term, postingString>
             HashMap<String, String> valuesOfChunck=new HashMap<>();
 
@@ -47,20 +49,25 @@ public class DocIndexer {
 
             }
 
+            StrBuilder contentOfFile=new StrBuilder();
             //write everything to file.
-            FileOutputStream is = new FileOutputStream(statText);
-            OutputStreamWriter osw = new OutputStreamWriter(is);
-            Writer w = new BufferedWriter(osw);
+//            File statText = new File(postingFilePath +File.separator+ docsContainer.hashCode() + ".txt");
+//            FileOutputStream is = new FileOutputStream(statText);
+//            OutputStreamWriter osw = new OutputStreamWriter(is);
+//            Writer w = new BufferedWriter(osw);
             for (String term : valuesOfChunck.keySet()){
                 int df= countMatches(valuesOfChunck.get(term),'<');
-                w.write(term+"|"+ df+"|"+valuesOfChunck.get(term));
+               // w.write(term+"|"+ df+"|"+valuesOfChunck.get(term));
+                contentOfFile.append(term+"|"+ df+"|"+valuesOfChunck.get(term));
             }
-            w.close();
-            osw.close();
-            is.close();
-        } catch (IOException e) {
-            System.err.println("Problem writing to the files "+ docsContainer.get(0).getDocNo() +" to "+ docsContainer.get(docsContainer.size()-1).getDocNo() );
-        }
+            writeToFilePool.addContentToStack(contentOfFile.toString());
+
+//            w.close();
+//            osw.close();
+//            is.close();
+//        } catch (IOException e) {
+//            System.err.println("Problem writing to the files "+ docsContainer.get(0).getDocNo() +" to "+ docsContainer.get(docsContainer.size()-1).getDocNo() );
+//        }
     }
 
     //this function help to add segment to line in posting file .
