@@ -282,8 +282,10 @@ public class DocParser implements IParser{
                         stringNumberBuilder.append(this.transformNumber(Double.parseDouble(docText[textIterator].replaceAll(",", "")), false));
                         textIterator += 1;
                     }
-                    termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.3);
-                    termLocationIterator += 1;
+                    if (!StringUtils.equals(stringNumberBuilder.toString(), "")) {
+                        termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.3);
+                        termLocationIterator += 1;
+                    }
                 } else if (docText[textIterator].contains("%")) {
                     //Number%
                     stringNumberBuilder.append(docText[textIterator]);
