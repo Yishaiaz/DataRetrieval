@@ -45,6 +45,7 @@ public class DocParser implements IParser{
         termHashMapDataStructure.insert(docData[2],termLocationIterator, 2);
         termLocationIterator+=1;
         // adding doc title's words as seperate terms
+        docData = initialBadCharacterRemoval(docData);
         for (String word :
                 docData[2].split("\t | \n | ")) {
             word = word.replaceAll("[^\\d.]", "");
@@ -547,7 +548,7 @@ public class DocParser implements IParser{
                         textIterator += 1;
 
                     } else {
-                        if(StringUtils.equals(word, "")){
+                        if(StringUtils.equals(word, "") || StringUtils.equals(word, ".")  || StringUtils.equals(word, "-") || StringUtils.equals(word, ",") || StringUtils.equals(word, "+")){
                             textIterator+=1;
                         }else{
                             termHashMapDataStructure.insert(word, termLocationIterator, 1);
@@ -800,6 +801,7 @@ public class DocParser implements IParser{
             docText[textIterator] = StringUtils.remove(docText[textIterator], "<");
             docText[textIterator] = StringUtils.remove(docText[textIterator], ">");
             docText[textIterator] = StringUtils.remove(docText[textIterator], "=");
+            docText[textIterator] = StringUtils.remove(docText[textIterator], "'");
             docText[textIterator] = StringUtils.remove(docText[textIterator], "\"");
             docText[textIterator] = StringUtils.remove(docText[textIterator], "/");
             // if the word/number is comprised of ',' remove them.  THIS IS FOR NUMBERS ONLY
