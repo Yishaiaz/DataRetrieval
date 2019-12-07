@@ -1,8 +1,10 @@
 package sample.Model.Indexer;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.StrBuilder;
 import sample.Model.DataStructures.TermHashMapDataStructure;
 import sample.Model.Document;
+import sample.Model.TaskPool.WriteToFilePool;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -12,19 +14,21 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
+
 public class DocIndexer {
 
     String postingFilePath="";
-    public DocIndexer(String postingFilePath) {
+    WriteToFilePool writeToFilePool;
+    public DocIndexer(String postingFilePath,WriteToFilePool writeToFilePool) {
         this.postingFilePath=postingFilePath;
-
+        this.writeToFilePool=writeToFilePool;
     }
 
     //this function receives document and put into file all terms inside it.
     public void indexChuckDocs(ArrayList<Document> docsContainer) {
-        try {
-            //Whatever the file path is.
-            File statText = new File(postingFilePath +File.separator+ docsContainer.hashCode() + ".txt");
+   //     try {
+
             //<Term, postingString>
             HashMap<String, String> valuesOfChunck=new HashMap<>();
 
@@ -47,20 +51,25 @@ public class DocIndexer {
 
             }
 
+            StrBuilder contentOfFile=new StrBuilder();
             //write everything to file.
-            FileOutputStream is = new FileOutputStream(statText);
-            OutputStreamWriter osw = new OutputStreamWriter(is);
-            Writer w = new BufferedWriter(osw);
+//            File statText = new File(postingFilePath +File.separator+ docsContainer.hashCode() + ".txt");
+//            FileOutputStream is = new FileOutputStream(statText);
+//            OutputStreamWriter osw = new OutputStreamWriter(is);
+//            Writer w = new BufferedWriter(osw);
             for (String term : valuesOfChunck.keySet()){
                 int df= countMatches(valuesOfChunck.get(term),'<');
-                w.write(term+"|"+ df+"|"+valuesOfChunck.get(term));
+               // w.write(term+"|"+ df+"|"+valuesOfChunck.get(term));
+                contentOfFile.append(term+"|"+ df+"|"+valuesOfChunck.get(term));
             }
-            w.close();
-            osw.close();
-            is.close();
-        } catch (IOException e) {
-            System.err.println("Problem writing to the files "+ docsContainer.get(0).getDocNo() +" to "+ docsContainer.get(docsContainer.size()-1).getDocNo() );
-        }
+            writeToFilePool.addContentToStack(contentOfFile.toString());
+
+//            w.close();
+//            osw.close();
+//            is.close();
+//        } catch (IOException e) {
+//            System.err.println("Problem writing to the files "+ docsContainer.get(0).getDocNo() +" to "+ docsContainer.get(docsContainer.size()-1).getDocNo() );
+//        }
     }
 
     //this function help to add segment to line in posting file .
@@ -144,7 +153,9 @@ public class DocIndexer {
                      String temp= line1.replaceAll("\n","")+line2;
                      //count total df
                      int df= countMatches(temp,'<');
-                    out.write(term1+"|"+df+"|"+line1+line2+"\n");
+                    //out.write(term1+"|"+df+"|"+line1+line2+"\n");
+                    out.write(term1+"|"+df+"|"+temp+"\n");
+                    System.out.println(term1+"|"+df+"|"+temp+"\n");
 
                     //int indexOfMetaData = line2.indexOf("<");
                     //out.write(line2.substring(indexOfMetaData) + "\n");
@@ -154,18 +165,37 @@ public class DocIndexer {
                     term2 = findTerm((line2));
 
 
-                } else if (!it1.hasNext() || term1.compareTo(term2) > 0) {
+                } else if (!it1.hasNext() ||  CASE_INSENSITIVE_ORDER.compare(term1, term2)> 0) {
                     out.write(line2 + "\n");
                     line2 = (String) it2.next();
                     term2 = findTerm(line2);
-                } else if (!it2.hasNext() || term1.compareTo(term2) < 0) {
+                } else if (!it2.hasNext() || CASE_INSENSITIVE_ORDER.compare(term2, term1)> 0) {
                     out.write(line1 + "\n");
                     line1 = (String) it1.next();
                     term1 = findTerm(line1);
                 }
-                out.flush();
+
             }
 
+            // in case doc2 end and doc1 not
+            if (!it2.hasNext() && it1.hasNext()){
+                while(it1.hasNext()) {
+                    out.write(line1 + "\n");
+                    line1 = (String) it1.next();
+                    term1 = findTerm(line1);
+                }
+            }
+
+            // in case doc1 end and doc2 not
+            if (!it1.hasNext() && it2.hasNext()){
+                while(it2.hasNext()) {
+                    out.write(line2 + "\n");
+                    line2 = (String) it2.next();
+                    term2 = findTerm(line2);
+                }
+            }
+
+            out.flush();
             //delete original files
             File file1=new File (path1);
             file1.delete();
@@ -194,7 +224,7 @@ public class DocIndexer {
         }
         BufferedReader bufferedReader = new BufferedReader(fileReader);
         String inputLine = "";
-        List<String> lineList = new ArrayList<String>();
+        ArrayList<String> lineList = new ArrayList<>();
         while (true) {
             try {
                 if (!((inputLine = bufferedReader.readLine()) != null)) break;
@@ -205,14 +235,9 @@ public class DocIndexer {
         }
         fileReader.close();
 
-        Collections.sort(lineList, String.CASE_INSENSITIVE_ORDER);
+        Collections.sort(lineList,new RatingCompare());
         FileWriter fileWriter = new FileWriter(path);
         PrintWriter out = new PrintWriter(fileWriter);
-        for (String outputLine : lineList) {
-            out.println(outputLine);
-        }
-
-
         for (String outputLine : lineList) {
             out.println(outputLine);
         }
@@ -222,8 +247,16 @@ public class DocIndexer {
 
     }
 
+
+    class RatingCompare implements Comparator<String> {
+
+        @Override
+        public int compare(String o1, String o2) {
+            o1=o1.substring(0,o1.indexOf('|'));
+            o2=o2.substring(0,o2.indexOf('|'));
+            return  (CASE_INSENSITIVE_ORDER.compare(o1, o2));
+
+        }
+    }
+
 }
-
-
-
-

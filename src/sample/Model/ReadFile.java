@@ -3,6 +3,7 @@ package sample.Model;
 import sample.Model.Indexer.DocIndexer;
 import sample.Model.Parser.DocParser;
 import sample.Model.Parser.IParser;
+import sample.Model.TaskPool.WriteToFilePool;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -15,10 +16,10 @@ public class ReadFile {
     private final HashSet<String> STOP_WORD_BAG;
     public DocIndexer indexer;
 
-    public ReadFile(String corpusPath, HashSet<String> stopWords, HashSet<String> months, boolean withStemming,String postingFilesPath) {
+    public ReadFile(String corpusPath, HashSet<String> stopWords, HashSet<String> months, boolean withStemming, String postingFilesPath, WriteToFilePool writeToFilePool) {
         this.corpusPath = corpusPath;
         this.parser = new DocParser(withStemming, stopWords, months);
-        indexer=new DocIndexer(postingFilesPath);
+        indexer=new DocIndexer(postingFilesPath,writeToFilePool);
         this.STOP_WORD_BAG = stopWords;
 //        readStopWordsFile();
     }
@@ -56,7 +57,7 @@ public class ReadFile {
                         long start_time = System.currentTimeMillis();
                         Document doc = this.parser.Parse(fullDocStringBuilder.toString());
                        // docsContainer not full yet
-                        if (docsContainer.size()<containerSize)
+                        if (docsContainer.size()<containerSize-1)
                             docsContainer.add(doc);
                         // docs container full and ready for index
                         else {
@@ -81,6 +82,8 @@ public class ReadFile {
             //if There are some docs left in docsContainer.
        if (docsContainer.size()>0)
            indexer.indexChuckDocs(docsContainer);
+
+
 
         } catch (Exception e) {
             e.printStackTrace();
