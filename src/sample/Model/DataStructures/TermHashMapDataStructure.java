@@ -31,6 +31,11 @@ public class TermHashMapDataStructure {
             termsEntries.get(key).addLocation(iDFLocation);
         } else {
             // in case its new Term in Structure.
+
+            //in case word start with uppercase.
+            if (Character.isUpperCase(s.charAt(0)))
+                s=s.toUpperCase();
+
             TermHashMapEntry newEntry = new TermHashMapEntry(s, weight);
             newEntry.addLocation(iDFLocation);
             termsEntries.put(key, newEntry);

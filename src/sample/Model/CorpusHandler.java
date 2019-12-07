@@ -100,7 +100,6 @@ public class CorpusHandler {
 
         while(writeToFilePool.areTasksLeft()){}
         pool.shutdown();
-        while(pool.isTerminated()){}
         System.out.println("end");
 
 

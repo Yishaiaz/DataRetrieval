@@ -14,6 +14,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
+
 public class DocIndexer {
 
     String postingFilePath="";
@@ -151,7 +153,9 @@ public class DocIndexer {
                      String temp= line1.replaceAll("\n","")+line2;
                      //count total df
                      int df= countMatches(temp,'<');
-                    out.write(term1+"|"+df+"|"+line1+line2+"\n");
+                    //out.write(term1+"|"+df+"|"+line1+line2+"\n");
+                    out.write(term1+"|"+df+"|"+temp+"\n");
+                    System.out.println(term1+"|"+df+"|"+temp+"\n");
 
                     //int indexOfMetaData = line2.indexOf("<");
                     //out.write(line2.substring(indexOfMetaData) + "\n");
@@ -161,18 +165,37 @@ public class DocIndexer {
                     term2 = findTerm((line2));
 
 
-                } else if (!it1.hasNext() || term1.compareTo(term2) > 0) {
+                } else if (!it1.hasNext() ||  CASE_INSENSITIVE_ORDER.compare(term1, term2)> 0) {
                     out.write(line2 + "\n");
                     line2 = (String) it2.next();
                     term2 = findTerm(line2);
-                } else if (!it2.hasNext() || term1.compareTo(term2) < 0) {
+                } else if (!it2.hasNext() || CASE_INSENSITIVE_ORDER.compare(term2, term1)> 0) {
                     out.write(line1 + "\n");
                     line1 = (String) it1.next();
                     term1 = findTerm(line1);
                 }
-                out.flush();
+
             }
 
+            // in case doc2 end and doc1 not
+            if (!it2.hasNext() && it1.hasNext()){
+                while(it1.hasNext()) {
+                    out.write(line1 + "\n");
+                    line1 = (String) it1.next();
+                    term1 = findTerm(line1);
+                }
+            }
+
+            // in case doc1 end and doc2 not
+            if (!it1.hasNext() && it2.hasNext()){
+                while(it2.hasNext()) {
+                    out.write(line2 + "\n");
+                    line2 = (String) it2.next();
+                    term2 = findTerm(line2);
+                }
+            }
+
+            out.flush();
             //delete original files
             File file1=new File (path1);
             file1.delete();
@@ -201,7 +224,7 @@ public class DocIndexer {
         }
         BufferedReader bufferedReader = new BufferedReader(fileReader);
         String inputLine = "";
-        List<String> lineList = new ArrayList<String>();
+        ArrayList<String> lineList = new ArrayList<>();
         while (true) {
             try {
                 if (!((inputLine = bufferedReader.readLine()) != null)) break;
@@ -212,14 +235,9 @@ public class DocIndexer {
         }
         fileReader.close();
 
-        Collections.sort(lineList, String.CASE_INSENSITIVE_ORDER);
+        Collections.sort(lineList,new RatingCompare());
         FileWriter fileWriter = new FileWriter(path);
         PrintWriter out = new PrintWriter(fileWriter);
-        for (String outputLine : lineList) {
-            out.println(outputLine);
-        }
-
-
         for (String outputLine : lineList) {
             out.println(outputLine);
         }
@@ -229,8 +247,16 @@ public class DocIndexer {
 
     }
 
+
+    class RatingCompare implements Comparator<String> {
+
+        @Override
+        public int compare(String o1, String o2) {
+            o1=o1.substring(0,o1.indexOf('|'));
+            o2=o2.substring(0,o2.indexOf('|'));
+            return  (CASE_INSENSITIVE_ORDER.compare(o1, o2));
+
+        }
+    }
+
 }
-
-
-
-
