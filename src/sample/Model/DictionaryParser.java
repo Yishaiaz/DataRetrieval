@@ -2,9 +2,7 @@ package sample.Model;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.Buffer;
 
 public class DictionaryParser implements Runnable{
@@ -12,12 +10,14 @@ public class DictionaryParser implements Runnable{
     private String alphabetRangeEnd;
     private String pathToIndex;
     private String pathToDictionaryDirectory;
+    private boolean isNumericParser;
 
-    public DictionaryParser(String alphabetRangeStart, String alphabetRangeEnd, String pathToIndex, String pathToDictionaryDirectory) {
+    public DictionaryParser(String alphabetRangeStart, String alphabetRangeEnd, String pathToIndex, String pathToDictionaryDirectory, Boolean numericParser) {
         this.alphabetRangeStart = StringUtils.lowerCase(alphabetRangeStart);
         this.alphabetRangeEnd = StringUtils.lowerCase(alphabetRangeEnd);
         this.pathToIndex = pathToIndex;
         this.pathToDictionaryDirectory = pathToDictionaryDirectory;
+        this.isNumericParser = numericParser;
     }
 
     @Override
@@ -35,17 +35,26 @@ public class DictionaryParser implements Runnable{
         int singleTermTotalNumberOfApperance;
         try{
             BufferedReader bufferedReader = new BufferedReader(new FileReader(this.pathToIndex));
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(this.pathToDictionaryDirectory+"/DictionaryTest.txt"));
             String line = bufferedReader.readLine();
-            // get to first line of the alphabet range given to this DictionaryParser
-            while(!(StringUtils.lowerCase(line).charAt(0) >= this.alphabetRangeStart.charAt(0) && StringUtils.lowerCase(line).charAt(0) < this.alphabetRangeEnd.charAt(0)) ){
-                line = bufferedReader.readLine();
-                postingLineNumber+=1;
-            }
+            bufferedWriter.write("Term Name, Docs Appearances, Total Corpus Appearances, line in posting file\n");
+//            if(this.isNumericParser){
+//                while(!(StringUtils.isNumeric(String.valueOf(line.charAt(0))))){
+//                    line = bufferedReader.readLine();
+//                    postingLineNumber+=1;
+//                }
+//            }else{
+//                while(!(StringUtils.lowerCase(line).charAt(0) >= this.alphabetRangeStart.charAt(0) && StringUtils.lowerCase(line).charAt(0) <= this.alphabetRangeEnd.charAt(0)) ){
+//                    line = bufferedReader.readLine();
+//                    postingLineNumber+=1;
+//                }
+//            }
+//            // get to first line of the alphabet range given to this DictionaryParser
 
             // read until you found the range end char or something 'above' it.
-            while(!StringUtils.startsWith(StringUtils.lowerCase(line), this.alphabetRangeEnd) &&
-                    StringUtils.lowerCase(line).charAt(0) < this.alphabetRangeEnd.charAt(0)){
-
+//            while((!this.isNumericParser && ( StringUtils.lowerCase(line).charAt(0) >= this.alphabetRangeStart.charAt(0) &&
+//                    StringUtils.lowerCase(line).charAt(0) <= this.alphabetRangeEnd.charAt(0))) || (this.isNumericParser &&(StringUtils.isNumeric(String.valueOf(line.charAt(0)))))){
+            while(line!=null){
                 int termEndIndex =  StringUtils.indexOf(line,"|");
 
                 singleTerm = StringUtils.substring(line,0, termEndIndex );
@@ -64,7 +73,8 @@ public class DictionaryParser implements Runnable{
                     }
                     singleTermTotalNumberOfApperance = sum;
                     // todo: here we have everything about the single term to write to the dictionary.
-                    System.out.println(String.format("Term Name: %s - in Number Of Docs %d with total appearances %d line number in posting file %d", singleTerm, singleTermNumberOfDocsAppearance, singleTermTotalNumberOfApperance, postingLineNumber));
+                    bufferedWriter.write(String.format("%s,%d,%d,%d\n", singleTerm, singleTermNumberOfDocsAppearance, singleTermTotalNumberOfApperance, postingLineNumber));
+//                    System.out.println(String.format("Term Name: %s - in Number Of Docs %d with total appearances %d line number in posting file %d", singleTerm, singleTermNumberOfDocsAppearance, singleTermTotalNumberOfApperance, postingLineNumber));
                 }catch (Exception e){
                     System.out.println(e.getMessage());
                 }
@@ -74,7 +84,7 @@ public class DictionaryParser implements Runnable{
 
                         
         }catch (IOException e){
-
+            System.out.println(e.getMessage());
         }
     }
 
