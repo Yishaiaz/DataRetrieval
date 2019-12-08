@@ -40,13 +40,34 @@ public class DocIndexer {
                     int tf = termStructure.termsEntries.get(key).getTF();
                     double weight = termStructure.termsEntries.get(key).getWeight();
                     // term appeared first time in this chunk.
-                    if (!valuesOfChunck.containsKey(value))
-                        valuesOfChunck.put(value,writeSegmentToPostingFileInFormat("",doc.getDocNo(),tf,weight));
+
 
                     //term already in valuesOfChunck. need to append <> segment of this doc .
-                    else{
+                     if (valuesOfChunck.containsKey(value)){
                         valuesOfChunck.replace(value,valuesOfChunck.get(value),writeSegmentToPostingFileInFormat(valuesOfChunck.get(value),doc.getDocNo(),tf,weight));
                     }
+
+                    //in case value start with upper case and this term already exist in lower case
+                    //need to save in lower case
+                     else if (Character.isUpperCase(value.charAt(0)) && valuesOfChunck.containsKey( value.toLowerCase())){
+
+                         String info=valuesOfChunck.get(key.toLowerCase());
+                         valuesOfChunck.replace(value.toLowerCase(),valuesOfChunck.get(value.toLowerCase()),writeSegmentToPostingFileInFormat(info,doc.getDocNo(),tf,weight));
+
+                    }
+                     //in case value start with lower case and this term already exist in upper case
+                     //need to save in lower case
+                    else if (Character.isLowerCase(value.charAt(0)) && valuesOfChunck.containsKey( value.toUpperCase())){
+
+                        String info= valuesOfChunck.get(value.toUpperCase());
+                        valuesOfChunck.remove(value.toUpperCase());
+                         valuesOfChunck.put(value.toLowerCase(),writeSegmentToPostingFileInFormat(info,doc.getDocNo(),tf,weight));
+
+                    }
+                    // in case value not exist at all , first time
+                    else if (!valuesOfChunck.containsKey(value))
+                        valuesOfChunck.put(value, writeSegmentToPostingFileInFormat("", doc.getDocNo(), tf, weight));
+
                 }
 
             }
@@ -146,7 +167,15 @@ public class DocIndexer {
             String term2 = findTerm(line2);
             while (it1.hasNext() && it2.hasNext()) {
                 //in case its same term
-                if (term1.compareTo(term2) == 0) {
+                if (CASE_INSENSITIVE_ORDER.compare(term1,term2) == 0) {
+
+//                    if (Character.isUpperCase(term1.charAt(0)) &&(Character.isLowerCase(term2.charAt(0))))
+//                            term1=term1.toLowerCase();
+//
+////                    if((Character.isUpperCase(term2.charAt(0)) &&(Character.isLowerCase(term1.charAt(0))) ))
+////                        term2=term2.toLowerCase();
+
+
                     // extract from line1 and line2 only <....> parts
                      line1= line1.substring(line1.indexOf("<"),line1.lastIndexOf(">")+1);
                      line2=line2.substring(line2.indexOf("<"),line2.lastIndexOf(">")+1);
@@ -167,10 +196,12 @@ public class DocIndexer {
 
                 } else if (!it1.hasNext() ||  CASE_INSENSITIVE_ORDER.compare(term1, term2)> 0) {
                     out.write(line2 + "\n");
+                    System.out.println(line2 + "\n");
                     line2 = (String) it2.next();
                     term2 = findTerm(line2);
                 } else if (!it2.hasNext() || CASE_INSENSITIVE_ORDER.compare(term2, term1)> 0) {
                     out.write(line1 + "\n");
+                    System.out.println(line1 + "\n");
                     line1 = (String) it1.next();
                     term1 = findTerm(line1);
                 }
