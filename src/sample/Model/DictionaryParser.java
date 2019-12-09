@@ -6,6 +6,10 @@ import java.io.*;
 import java.nio.Buffer;
 
 public class DictionaryParser implements Runnable{
+    /**
+     *  a class to convert an existing posting file into a dictionary.txt file
+     *  implements runnable in case we would like to run it as a thread.
+     */
     private String alphabetRangeStart;
     private String alphabetRangeEnd;
     private String pathToIndex;
@@ -20,6 +24,9 @@ public class DictionaryParser implements Runnable{
         this.isNumericParser = numericParser;
     }
 
+    /**
+     *
+     */
     @Override
     public void run() {
         parseInvertedIndex();
