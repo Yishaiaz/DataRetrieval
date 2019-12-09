@@ -3,18 +3,24 @@ package sample.Model.Indexer;
 import org.apache.commons.lang3.StringUtils;
 import sample.Model.DataStructures.TermHashMapDataStructure;
 import sample.Model.Document;
+import sample.Model.FilesMerger;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
-//todo: whatever can be private should be private
+
+
 public class DocIndexer {
+    int MAX_T = 10;
     public static int indexForTempFiles = 0;
     public static int indexForMergeFiles = 0;
     String postingFilePath = "";
@@ -303,10 +309,32 @@ public class DocIndexer {
 
     public void mergeFiles() {
         ArrayList<String> paths=getListOfFilesPaths(postingFilePath);
-        while (getListOfFilesPaths(postingFilePath).size()>1){
-            String path1=paths.get(0);
-            String path2=paths.get(1);
-            mergeTwoDocuments(path1,path2);
+        ArrayList<FilesMerger> mergers = new ArrayList<>();
+        while (paths.size()>1){
+            ExecutorService executorService = Executors.newFixedThreadPool(MAX_T);
+
+            int numberOfTaskers = 0;
+            int numberOfFiles = 0;
+            while(numberOfTaskers<MAX_T){
+                if ((paths.size()- numberOfTaskers*2)>1){
+                    String path1=paths.get(numberOfFiles);
+                    String path2=paths.get(numberOfFiles + 1);
+                    mergers.add(new FilesMerger(path1, path2, postingFilePath));
+                }
+                numberOfTaskers+=1;
+                numberOfFiles+=2;
+            }
+            for (FilesMerger takser :
+                    mergers) {
+                executorService.execute(takser);
+            }
+            executorService.shutdown();
+            try {
+                executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+            } catch (InterruptedException e) {
+                System.out.println(e.getCause());
+            }
+
             paths=getListOfFilesPaths(postingFilePath);
             Collections.sort(paths, new FileSizeCompare());
         }
