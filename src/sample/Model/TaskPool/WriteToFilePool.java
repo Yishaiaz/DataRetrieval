@@ -6,7 +6,7 @@ import java.util.Stack;
 import java.util.concurrent.Semaphore;
 
 public class WriteToFilePool {
-    public static Semaphore poolAccessSemaphore=new Semaphore(1);
+    public static Semaphore poolAccessSemaphore=new Semaphore(3);
     private Stack<String> contentFilesStack;
 
     public WriteToFilePool() {

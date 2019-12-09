@@ -97,6 +97,7 @@ public class CorpusHandler {
 
             }
         }
+        readFile.indexer.mergeFiles();
 
 //        while(writeToFilePool.areTasksLeft()){}
 //        pool.shutdown();
