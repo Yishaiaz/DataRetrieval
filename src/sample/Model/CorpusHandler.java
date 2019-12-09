@@ -93,7 +93,7 @@ public class CorpusHandler {
                 System.out.println("you and your mac");
             }
             else{
-                readFile.prepareDocToParse(path,20);
+                readFile.prepareDocToParse(path,250);
 
             }
         }
