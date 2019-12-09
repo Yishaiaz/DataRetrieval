@@ -809,6 +809,7 @@ public class DocParser implements IParser{
             docText[textIterator] = StringUtils.remove(docText[textIterator], "'");
             docText[textIterator] = StringUtils.remove(docText[textIterator], "\"");
             docText[textIterator] = StringUtils.remove(docText[textIterator], "/");
+            docText[textIterator] = StringUtils.remove(docText[textIterator], "|");
             // if the word/number is comprised of ',' remove them.  THIS IS FOR NUMBERS ONLY
             if(StringUtils.isNumeric(docText[textIterator])&& StringUtils.isNumeric(docText[textIterator].replaceAll(",",""))){
                 docText[textIterator] = docText[textIterator].replaceAll(",", "");
