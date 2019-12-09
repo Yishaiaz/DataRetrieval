@@ -90,7 +90,7 @@ public class DictionaryParser implements Runnable{
 
 
     public String getPathToIndex() {
-        return pathToIndex;
+//        return pathToIndex;
     }
 
     public String getPathToDictionaryDirectory() {
