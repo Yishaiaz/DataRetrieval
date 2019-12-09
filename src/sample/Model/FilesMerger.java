@@ -38,14 +38,10 @@ public class FilesMerger implements Runnable{
             indexForMergeFiles++;
             FileWriter fileWriter = new FileWriter(merged.getPath());
             BufferedWriter out = new BufferedWriter(fileWriter);
-//            Iterator it1 = br1.lines().iterator();
-//            Iterator it2 = br2.lines().iterator();
-            //line1 - current line in doc1. term1 is the term value
-//            String line1 = (String) it1.next();
+
             String line1 = br1.readLine();
             String term1 = StringUtils.substring(line1, 0, StringUtils.indexOf(line1,'|'));
-            //line2 - current line in doc2 . term2 is the term value
-//            String line2 = (String) it2.next();
+
             String line2 = br2.readLine();
             String term2 =StringUtils.substring(line2, 0, StringUtils.indexOf(line2,'|'));
             while (line1!=null && line2 != null) {
@@ -70,17 +66,6 @@ public class FilesMerger implements Runnable{
 
                     }
                 }
-//                else if (!it1.hasNext() ||  CASE_INSENSITIVE_ORDER.compare(term1, term2)> 0) {
-//                    out.write(line2 + "\n");
-//
-//                    line2 = (String) it2.next();
-//                    term2 = StringUtils.substring(line2, 0, StringUtils.indexOf(line2,'|'));
-//                } else if (!it2.hasNext() || CASE_INSENSITIVE_ORDER.compare(term2, term1)> 0) {
-//                    out.write(line1 + "\n");
-//
-//                    line1 = (String) it1.next();
-//                    term1 =  StringUtils.substring(line1, 0, StringUtils.indexOf(line1,'|'));
-//                }
                 else if (!(line1!=null) ||  CASE_INSENSITIVE_ORDER.compare(term1, term2)> 0) {
                     out.write(line2 + "\n");
 
@@ -94,24 +79,6 @@ public class FilesMerger implements Runnable{
                 }
 
             }
-
-//            // in case doc2 end and doc1 not
-//            if (!it2.hasNext() && it1.hasNext()){
-//                while(it1.hasNext()) {
-//                    out.write(line1 + "\n");
-//                    line1 = (String) it1.next();
-//                    term1 =  StringUtils.substring(line1, 0, StringUtils.indexOf(line1,'|'));
-//                }
-//            }
-//
-//            // in case doc1 end and doc2 not
-//            if (!it1.hasNext() && it2.hasNext()){
-//                while(it2.hasNext()) {
-//                    out.write(line2 + "\n");
-//                    line2 = (String) it2.next();
-//                    term2 =  StringUtils.substring(line2, 0, StringUtils.indexOf(line2,'|'));
-//                }
-//            }
             // in case doc2 end and doc1 not
             if (!(line2!=null) && (line1!=null)){
                 while((line1!=null)) {
@@ -181,7 +148,7 @@ public class FilesMerger implements Runnable{
             out.flush();
             out.close();
         }catch (StringIndexOutOfBoundsException e){
-//            System.out.println("it went wrong here\n"+lineList);
+            System.out.println("it went wrong here\n"+lineList);
         }
 
 
