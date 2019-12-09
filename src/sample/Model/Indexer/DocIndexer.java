@@ -172,7 +172,8 @@ public class DocIndexer {
 //                    if (Character.isUpperCase(term1.charAt(0)) &&(Character.isLowerCase(term2.charAt(0))))
 //                            term1=term1.toLowerCase();
 //
-////                    if((Character.isUpperCase(term2.charAt(0)) &&(Character.isLowerCase(term1.charAt(0))) ))
+////                    if((Character.isUpperCase(term2.charAt(0)) &&(Character.isLowerCase(term1.charAt(0
+// ))) ))
 ////                        term2=term2.toLowerCase();
 
 
@@ -184,7 +185,7 @@ public class DocIndexer {
                      int df= countMatches(temp,'<');
                     //out.write(term1+"|"+df+"|"+line1+line2+"\n");
                     out.write(term1+"|"+df+"|"+temp+"\n");
-                    System.out.println(term1+"|"+df+"|"+temp+"\n");
+//                    System.out.println(term1+"|"+df+"|"+temp+"\n");
 
                     //int indexOfMetaData = line2.indexOf("<");
                     //out.write(line2.substring(indexOfMetaData) + "\n");
@@ -196,12 +197,12 @@ public class DocIndexer {
 
                 } else if (!it1.hasNext() ||  CASE_INSENSITIVE_ORDER.compare(term1, term2)> 0) {
                     out.write(line2 + "\n");
-                    System.out.println(line2 + "\n");
+//                    System.out.println(line2 + "\n");
                     line2 = (String) it2.next();
                     term2 = findTerm(line2);
                 } else if (!it2.hasNext() || CASE_INSENSITIVE_ORDER.compare(term2, term1)> 0) {
                     out.write(line1 + "\n");
-                    System.out.println(line1 + "\n");
+//                    System.out.println(line1 + "\n");
                     line1 = (String) it1.next();
                     term1 = findTerm(line1);
                 }
