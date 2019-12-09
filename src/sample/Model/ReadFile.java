@@ -16,10 +16,10 @@ public class ReadFile {
     private final HashSet<String> STOP_WORD_BAG;
     public DocIndexer indexer;
 
-    public ReadFile(String corpusPath, HashSet<String> stopWords, HashSet<String> months, boolean withStemming, String postingFilesPath, WriteToFilePool writeToFilePool) {
+    public ReadFile(String corpusPath, HashSet<String> stopWords, HashSet<String> months, boolean withStemming, String postingFilesPath/*, WriteToFilePool writeToFilePool*/) {
         this.corpusPath = corpusPath;
         this.parser = new DocParser(withStemming, stopWords, months);
-        indexer=new DocIndexer(postingFilesPath,writeToFilePool);
+        indexer=new DocIndexer(postingFilesPath /*,writeToFilePool*/);
         this.STOP_WORD_BAG = stopWords;
 //        readStopWordsFile();
     }

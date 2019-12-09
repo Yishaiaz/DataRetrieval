@@ -23,8 +23,8 @@ public class CorpusHandler {
     private ArrayList<String> filesPaths; //list contains all paths in Corpus dir.
     public HashSet<String> stopWords = new HashSet<>();
     public HashSet<String> months = new HashSet<>();
-    ExecutorService pool = Executors.newFixedThreadPool(3);
-    WriteToFilePool writeToFilePool;
+   // ExecutorService pool = Executors.newFixedThreadPool(3);
+    //WriteToFilePool writeToFilePool;
 
     public CorpusHandler(String corpusPath) {
         this.corpusPath = corpusPath;
@@ -75,18 +75,18 @@ public class CorpusHandler {
     }
 
     public void findTextInDocs(boolean withStemming) throws FileNotFoundException {
-        writeToFilePool= new WriteToFilePool();
-        WriteToFileTask tasker1= new WriteToFileTask("task1",writeToFilePool,postingFilesPath);
-        WriteToFileTask tasker2= new WriteToFileTask("task2",writeToFilePool,postingFilesPath);
-        WriteToFileTask tasker3= new WriteToFileTask("task3",writeToFilePool,postingFilesPath);
+//        writeToFilePool= new WriteToFilePool();
+//        WriteToFileTask tasker1= new WriteToFileTask("task1",writeToFilePool,postingFilesPath);
+//        WriteToFileTask tasker2= new WriteToFileTask("task2",writeToFilePool,postingFilesPath);
+//        WriteToFileTask tasker3= new WriteToFileTask("task3",writeToFilePool,postingFilesPath);
+//
+//
+//        pool.execute(tasker1);
+//        pool.execute(tasker2);
+//        pool.execute(tasker3);
 
 
-        pool.execute(tasker1);
-        pool.execute(tasker2);
-        pool.execute(tasker3);
-
-
-        ReadFile readFile = new ReadFile(this.corpusPath, this.stopWords, this.months,withStemming,postingFilesPath,writeToFilePool);
+        ReadFile readFile = new ReadFile(this.corpusPath, this.stopWords, this.months,withStemming,postingFilesPath/*,writeToFilePool*/);
         //send every file to ReadFile for preparation for parsing.
         for (String path : filesPaths) {
             if(path.endsWith(".DS_Store")){
@@ -98,9 +98,9 @@ public class CorpusHandler {
             }
         }
 
-        while(writeToFilePool.areTasksLeft()){}
-        pool.shutdown();
-        System.out.println("end");
+//        while(writeToFilePool.areTasksLeft()){}
+//        pool.shutdown();
+//        System.out.println("end");
 
 
     }

@@ -17,12 +17,13 @@ import java.util.stream.Stream;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 
 public class DocIndexer {
-
+    public static int index=0;
     String postingFilePath="";
-    WriteToFilePool writeToFilePool;
-    public DocIndexer(String postingFilePath,WriteToFilePool writeToFilePool) {
+   // WriteToFilePool writeToFilePool;
+    public DocIndexer(String postingFilePath/*,WriteToFilePool writeToFilePool*/) {
         this.postingFilePath=postingFilePath;
-        this.writeToFilePool=writeToFilePool;
+        //this.writeToFilePool=writeToFilePool;
+
     }
 
     //this function receives document and put into file all terms inside it.
@@ -72,22 +73,38 @@ public class DocIndexer {
 
             }
 
-            StrBuilder contentOfFile=new StrBuilder();
+          //  StrBuilder contentOfFile=new StrBuilder();
             //write everything to file.
-//            File statText = new File(postingFilePath +File.separator+ docsContainer.hashCode() + ".txt");
-//            FileOutputStream is = new FileOutputStream(statText);
-//            OutputStreamWriter osw = new OutputStreamWriter(is);
-//            Writer w = new BufferedWriter(osw);
+            File statText = new File(postingFilePath +File.separator+ index + ".txt");
+            index++;
+        FileOutputStream is = null;
+        try {
+            is = new FileOutputStream(statText);
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+        }
+        OutputStreamWriter osw = new OutputStreamWriter(is);
+            Writer w = new BufferedWriter(osw);
             for (String term : valuesOfChunck.keySet()){
                 int df= countMatches(valuesOfChunck.get(term),'<');
-               // w.write(term+"|"+ df+"|"+valuesOfChunck.get(term));
-                contentOfFile.append(term+"|"+ df+"|"+valuesOfChunck.get(term));
+                try {
+                    w.write(term+"|"+ df+"|"+valuesOfChunck.get(term));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                //contentOfFile.append(term+"|"+ df+"|"+valuesOfChunck.get(term));
             }
-            writeToFilePool.addContentToStack(contentOfFile.toString());
+          //  writeToFilePool.addContentToStack(contentOfFile.toString());
 
-//            w.close();
-//            osw.close();
-//            is.close();
+
+        try {
+            w.close();
+            osw.close();
+            is.close();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
 //        } catch (IOException e) {
 //            System.err.println("Problem writing to the files "+ docsContainer.get(0).getDocNo() +" to "+ docsContainer.get(docsContainer.size()-1).getDocNo() );
 //        }
