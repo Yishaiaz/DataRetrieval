@@ -49,42 +49,31 @@ public class FilesMerger implements Runnable{
             while (it1.hasNext() && it2.hasNext()) {
                 //in case its same term
                 if (CASE_INSENSITIVE_ORDER.compare(term1,term2) == 0) {
+                    try{
+                        line1= line1.substring(line1.indexOf("<"),line1.lastIndexOf(">")+1);
+                        line2=line2.substring(line2.indexOf("<"),line2.lastIndexOf(">")+1);
+                        String temp= line1.replaceAll("\n","")+line2;
+                        //count total df
+                        int df= countMatches(temp,'<');
+                        //out.write(term1+"|"+df+"|"+line1+line2+"\n");
+                        out.write(term1+"|"+df+"|"+temp+"\n");
 
-//                    if (Character.isUpperCase(term1.charAt(0)) &&(Character.isLowerCase(term2.charAt(0))))
-//                            term1=term1.toLowerCase();
-//
-////                    if((Character.isUpperCase(term2.charAt(0)) &&(Character.isLowerCase(term1.charAt(0
-// ))) ))
-////                        term2=term2.toLowerCase();
+                        line1 = (String) it1.next();
+                        // term1 = findTerm((line1));
+                        term1 = StringUtils.substring(line1, 0, StringUtils.indexOf(line1,'|'));
+                        line2 = (String) it2.next();
+                        term2 =StringUtils.substring(line2, 0, StringUtils.indexOf(line2,'|'));
+                    }catch (Exception e){
 
-
-                    // extract from line1 and line2 only <....> parts
-                    line1= line1.substring(line1.indexOf("<"),line1.lastIndexOf(">")+1);
-                    line2=line2.substring(line2.indexOf("<"),line2.lastIndexOf(">")+1);
-                    String temp= line1.replaceAll("\n","")+line2;
-                    //count total df
-                    int df= countMatches(temp,'<');
-                    //out.write(term1+"|"+df+"|"+line1+line2+"\n");
-                    out.write(term1+"|"+df+"|"+temp+"\n");
-//                    System.out.println(term1+"|"+df+"|"+temp+"\n");
-
-                    //int indexOfMetaData = line2.indexOf("<");
-                    //out.write(line2.substring(indexOfMetaData) + "\n");
-                    line1 = (String) it1.next();
-                    // term1 = findTerm((line1));
-                    term1 = StringUtils.substring(line1, 0, StringUtils.indexOf(line1,'|'));
-                    line2 = (String) it2.next();
-                    term2 =StringUtils.substring(line2, 0, StringUtils.indexOf(line2,'|'));
-
-
+                    }
                 } else if (!it1.hasNext() ||  CASE_INSENSITIVE_ORDER.compare(term1, term2)> 0) {
                     out.write(line2 + "\n");
-//                    System.out.println(line2 + "\n");
+
                     line2 = (String) it2.next();
                     term2 = StringUtils.substring(line2, 0, StringUtils.indexOf(line2,'|'));
                 } else if (!it2.hasNext() || CASE_INSENSITIVE_ORDER.compare(term2, term1)> 0) {
                     out.write(line1 + "\n");
-//                    System.out.println(line1 + "\n");
+
                     line1 = (String) it1.next();
                     term1 =  StringUtils.substring(line1, 0, StringUtils.indexOf(line1,'|'));
                 }
@@ -114,13 +103,16 @@ public class FilesMerger implements Runnable{
             br1.close();
             br2.close();
             //delete original files
-            File file1=new File (path1);
-            file1.delete();
-            if (file1.exists())
-                System.out.println("not good, "+ path1);
-
-            File file2=new File (path2);
-            file2.delete();
+            try{
+                File file1=new File (path1);
+                file1.delete();
+            }catch(Exception e){
+            }
+            try{
+                File file2=new File (path2);
+                file2.delete();
+            }catch(Exception e){
+            }
 
         } catch (IOException e) {
 //            e.printStackTrace();
@@ -131,7 +123,6 @@ public class FilesMerger implements Runnable{
         FileReader fileReader = null;
         BufferedReader bufferedReader = null;
         try {
-//            System.out.println(path);
             fileReader = new FileReader(path);
             bufferedReader =  new BufferedReader(fileReader);
         } catch (FileNotFoundException e) {
@@ -161,8 +152,7 @@ public class FilesMerger implements Runnable{
             out.close();
             fileWriter.close();
         }catch (StringIndexOutOfBoundsException e){
-            System.out.println("it went wrong here\n"+lineList);
-//            System.out.printf("");
+//            System.out.println("it went wrong here\n"+lineList);
         }
 
 
