@@ -11,6 +11,10 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.regex.Pattern;
 
 public class DocParser implements IParser{
+    /**
+     * parser is responsible for receiving a representation of a document as a single string.
+     * stems if requested and (using the porter stemmer algorithm) and eliminates stop words/
+     */
     private Boolean wordStemming;
     private HashSet<String> stopWords;
     private HashSet<String> months;
@@ -26,13 +30,22 @@ public class DocParser implements IParser{
         }
     }
 
-
+    /**
+     * receives the entire document from <Doc> to </Doc> and parses it according to the rules assigned to us.
+     * trims any unwanted characters and extracts the document meta data (DocID, Doc title, Doc Date)
+     * all the terms besides those who are from the meta data, are parsed from the <Text> </Text> section of the document.
+     * @param fullDoc
+     * @return
+     * @throws Exception
+     */
     @Override
     public Document Parse(String fullDoc) throws Exception {
 //        StringUtils stringUtils = new StringUtils();
         TermHashMapDataStructure termHashMapDataStructure = new TermHashMapDataStructure();
         String[] docData = getDocData(fullDoc);
-//        fullDoc = StringUtils.remove(fullDoc, "");
+        //creating a regex to recognize american phone numbers
+        String regexForAmericanPhoneNumbers = "^\\(?([0-9]{3})\\)?[-.\\s]?([0-9]{3})[-.\\s]?([0-9]{4})$";
+        Pattern patternForAmericanPhoneNumbers  = Pattern.compile(regexForAmericanPhoneNumbers);
 
         int textIterator=0;
         int termLocationIterator = 0;
@@ -61,7 +74,7 @@ public class DocParser implements IParser{
                 termLocationIterator+=1;
             }
         }
-        //todo: remove unnecessary tags e.g. <F..>
+
 
         fullDoc = StringUtils.substring(fullDoc,StringUtils.indexOf(fullDoc, "<TEXT>")+6, StringUtils.indexOf(fullDoc, "</TEXT>"));
         String[] docText =fullDoc.split(" | \n | \t");
@@ -80,9 +93,14 @@ public class DocParser implements IParser{
 
                 StrBuilder stringBuilder = new StrBuilder();
                 StrBuilder stringNumberBuilder = new StrBuilder();
-
+                // american phone numbers
+                if(patternForAmericanPhoneNumbers.matcher(docText[textIterator]).matches()){
+                    termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.8);
+                    termLocationIterator += 1;
+                    textIterator += 1;
+                }
                 ////////////////// RANGES ////////////////////
-                if (docText[textIterator].contains("-") && docText[textIterator].split("-").length > 1) {
+                else if (docText[textIterator].contains("-") && docText[textIterator].split("-").length > 1) {
                     //term-term / word-word-word
                     String[] seperated = docText[textIterator].split("-");
                     if (seperated.length >= 3) {

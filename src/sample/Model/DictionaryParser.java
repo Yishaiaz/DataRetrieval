@@ -25,7 +25,7 @@ public class DictionaryParser implements Runnable{
     }
 
     /**
-     *
+     * activates the parseInvertedIndex method.
      */
     @Override
     public void run() {
@@ -33,7 +33,8 @@ public class DictionaryParser implements Runnable{
     }
 
     /**
-     * runs from the first alphabet char until the final one NOT INCLUDING the last one.
+     * reads entire file and extracts all term requested data (term name, docs appearances, total corpus appearances, line in posting file)
+     * all in a '.csv' format, to allow after quick reading.
      */
     public void parseInvertedIndex(){
         int postingLineNumber = 0;
@@ -45,22 +46,6 @@ public class DictionaryParser implements Runnable{
             BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(this.pathToDictionaryDirectory+"/DictionaryTest.txt"));
             String line = bufferedReader.readLine();
             bufferedWriter.write("Term Name, Docs Appearances, Total Corpus Appearances, line in posting file\n");
-//            if(this.isNumericParser){
-//                while(!(StringUtils.isNumeric(String.valueOf(line.charAt(0))))){
-//                    line = bufferedReader.readLine();
-//                    postingLineNumber+=1;
-//                }
-//            }else{
-//                while(!(StringUtils.lowerCase(line).charAt(0) >= this.alphabetRangeStart.charAt(0) && StringUtils.lowerCase(line).charAt(0) <= this.alphabetRangeEnd.charAt(0)) ){
-//                    line = bufferedReader.readLine();
-//                    postingLineNumber+=1;
-//                }
-//            }
-//            // get to first line of the alphabet range given to this DictionaryParser
-
-            // read until you found the range end char or something 'above' it.
-//            while((!this.isNumericParser && ( StringUtils.lowerCase(line).charAt(0) >= this.alphabetRangeStart.charAt(0) &&
-//                    StringUtils.lowerCase(line).charAt(0) <= this.alphabetRangeEnd.charAt(0))) || (this.isNumericParser &&(StringUtils.isNumeric(String.valueOf(line.charAt(0)))))){
             while(line!=null){
                 int termEndIndex =  StringUtils.indexOf(line,"|");
 
@@ -95,19 +80,34 @@ public class DictionaryParser implements Runnable{
         }
     }
 
-
+    /**
+     * getter
+     * @return
+     */
     public String getPathToIndex() {
         return this.pathToIndex;
     }
 
+    /**
+     * getter
+     * @return
+     */
     public String getPathToDictionaryDirectory() {
         return pathToDictionaryDirectory;
     }
 
+    /**
+     * setter, path to index posting file.
+     * @param pathToIndex
+     */
     public void setPathToIndex(String pathToIndex) {
         this.pathToIndex = pathToIndex;
     }
 
+    /**
+     * setter the path to write the dictionary to.
+     * @param pathToDictionaryDirectory
+     */
     public void setPathToDictionaryDirectory(String pathToDictionaryDirectory) {
         this.pathToDictionaryDirectory = pathToDictionaryDirectory;
     }

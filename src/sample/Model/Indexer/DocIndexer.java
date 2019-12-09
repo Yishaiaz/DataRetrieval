@@ -20,7 +20,7 @@ import static java.lang.String.CASE_INSENSITIVE_ORDER;
 
 
 public class DocIndexer {
-    int MAX_T = 10;
+    int MAX_T = 20;
     public static int indexForTempFiles = 0;
     public static int indexForMergeFiles = 0;
     String postingFilePath = "";
@@ -309,6 +309,7 @@ public class DocIndexer {
 
     public void mergeFiles() {
         ArrayList<String> paths=getListOfFilesPaths(postingFilePath);
+        paths.sort(new FileSizeCompare());
         ArrayList<FilesMerger> mergers = new ArrayList<>();
         while (paths.size()>1){
             ExecutorService executorService = Executors.newFixedThreadPool(MAX_T);
@@ -330,7 +331,7 @@ public class DocIndexer {
             }
             executorService.shutdown();
             try {
-                executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+                executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS);
             } catch (InterruptedException e) {
                 System.out.println(e.getCause());
             }
@@ -357,11 +358,7 @@ public class DocIndexer {
         public int compare(String o1, String o2) {
             File file1 = new File(o1);
             File file2 = new File(o2);
-            return file1.length() > file2.length() ? 1 : -1 ;
-//            o1=o1.substring(0,o1.indexOf('|'));
-//            o2=o2.substring(0,o2.indexOf('|'));
-//            return  (CASE_INSENSITIVE_ORDER.compare(o1, o2));
-
+            return file1.length() > file2.length() ? 1 : file1.length()< file2.length() ? -1 : 0  ;
         }
     }
 
