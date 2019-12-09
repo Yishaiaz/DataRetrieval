@@ -74,7 +74,7 @@ public class DocParser implements IParser{
                 termLocationIterator+=1;
             }
         }
-        //todo: remove unnecessary tags e.g. <F..>
+
 
         fullDoc = StringUtils.substring(fullDoc,StringUtils.indexOf(fullDoc, "<TEXT>")+6, StringUtils.indexOf(fullDoc, "</TEXT>"));
         String[] docText =fullDoc.split(" | \n | \t");
@@ -95,7 +95,7 @@ public class DocParser implements IParser{
                 StrBuilder stringNumberBuilder = new StrBuilder();
                 // american phone numbers
                 if(patternForAmericanPhoneNumbers.matcher(docText[textIterator]).matches()){
-                    termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 2);
+                    termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.8);
                     termLocationIterator += 1;
                     textIterator += 1;
                 }
