@@ -23,7 +23,7 @@ public class CorpusHandler {
     private ArrayList<String> filesPaths; //list contains all paths in Corpus dir.
     public HashSet<String> stopWords = new HashSet<>();
     public HashSet<String> months = new HashSet<>();
-   // ExecutorService pool = Executors.newFixedThreadPool(3);
+    // ExecutorService pool = Executors.newFixedThreadPool(3);
     //WriteToFilePool writeToFilePool;
 
     public CorpusHandler(String corpusPath) {
@@ -86,7 +86,6 @@ public class CorpusHandler {
 //        pool.execute(tasker3);
 
         long start_time = System.currentTimeMillis();
-
         ReadFile readFile = new ReadFile(this.corpusPath, this.stopWords, this.months,withStemming,postingFilesPath/*,writeToFilePool*/);
         //send every file to ReadFile for preparation for parsing.
         for (String path : filesPaths) {
@@ -94,11 +93,15 @@ public class CorpusHandler {
                 System.out.println("you and your mac");
             }
             else{
-                readFile.prepareDocToParse(path,50);
+                readFile.prepareDocToParse(path,20);
 
             }
         }
-        System.out.println(String.format("total time to parse ALL files %d min", (System.currentTimeMillis()-start_time)/60000));
+        System.out.println(String.format("Total time without merging : %d minutes", (System.currentTimeMillis() - start_time)/60000));
+        start_time = System.currentTimeMillis();
+        readFile.indexer.mergeFiles();
+        System.out.println(String.format("Total time to merge : %d seconds", (System.currentTimeMillis() - start_time)/1000));
+
 
 //        while(writeToFilePool.areTasksLeft()){}
 //        pool.shutdown();

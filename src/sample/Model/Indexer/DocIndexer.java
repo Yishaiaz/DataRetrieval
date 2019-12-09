@@ -1,10 +1,7 @@
 package sample.Model.Indexer;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.StrBuilder;
 import sample.Model.DataStructures.TermHashMapDataStructure;
 import sample.Model.Document;
-import sample.Model.TaskPool.WriteToFilePool;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -17,93 +14,89 @@ import java.util.stream.Stream;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 
 public class DocIndexer {
-    public static int index=0;
-    String postingFilePath="";
-   // WriteToFilePool writeToFilePool;
+    public static int indexForTempFiles = 0;
+    public static int indexForMergeFiles = 0;
+    String postingFilePath = "";
+
+    // WriteToFilePool writeToFilePool;
     public DocIndexer(String postingFilePath/*,WriteToFilePool writeToFilePool*/) {
-        this.postingFilePath=postingFilePath;
+        this.postingFilePath = postingFilePath;
         //this.writeToFilePool=writeToFilePool;
 
     }
 
     //this function receives document and put into file all terms inside it.
     public void indexChuckDocs(ArrayList<Document> docsContainer) {
-   //     try {
+        //     try {
 
-            //<Term, postingString>
-            HashMap<String, String> valuesOfChunck=new HashMap<>();
+        //<Term, postingString>
+        HashMap<String, String> valuesOfChunck = new HashMap<>();
 
-            for (Document doc: docsContainer) {
+        for (Document doc : docsContainer) {
 
-                TermHashMapDataStructure termStructure = doc.parsedTerms;
-                for (String key : termStructure.termsEntries.keySet()) {
-                    String value=termStructure.termsEntries.get(key).getValue();
-                    int tf = termStructure.termsEntries.get(key).getTF();
-                    double weight = termStructure.termsEntries.get(key).getWeight();
-                    // term appeared first time in this chunk.
+            TermHashMapDataStructure termStructure = doc.parsedTerms;
+            for (String key : termStructure.termsEntries.keySet()) {
+                String value = termStructure.termsEntries.get(key).getValue();
+                int tf = termStructure.termsEntries.get(key).getTF();
+                double weight = termStructure.termsEntries.get(key).getWeight();
+                // term appeared first time in this chunk.
 
 
-                    //term already in valuesOfChunck. need to append <> segment of this doc .
-                     if (valuesOfChunck.containsKey(value)){
-                        valuesOfChunck.replace(value,valuesOfChunck.get(value),writeSegmentToPostingFileInFormat(valuesOfChunck.get(value),doc.getDocNo(),tf,weight));
-                    }
+                //term already in valuesOfChunck. need to append <> segment of this doc .
+                if (valuesOfChunck.containsKey(value)) {
+                    valuesOfChunck.replace(value, valuesOfChunck.get(value), writeSegmentToPostingFileInFormat(valuesOfChunck.get(value), doc.getDocNo(), tf, weight));
+                }
 
-                    //in case value start with upper case and this term already exist in lower case
-                    //need to save in lower case
-                     else if (Character.isUpperCase(value.charAt(0)) && valuesOfChunck.containsKey( value.toLowerCase())){
+                //in case value start with upper case and this term already exist in lower case
+                //need to save in lower case
+                else if (Character.isUpperCase(value.charAt(0)) && valuesOfChunck.containsKey(value.toLowerCase())) {
 
-                         String info=valuesOfChunck.get(key.toLowerCase());
-                         valuesOfChunck.replace(value.toLowerCase(),valuesOfChunck.get(value.toLowerCase()),writeSegmentToPostingFileInFormat(info,doc.getDocNo(),tf,weight));
-
-                    }
-                     //in case value start with lower case and this term already exist in upper case
-                     //need to save in lower case
-                    else if (Character.isLowerCase(value.charAt(0)) && valuesOfChunck.containsKey( value.toUpperCase())){
-
-                        String info= valuesOfChunck.get(value.toUpperCase());
-                        valuesOfChunck.remove(value.toUpperCase());
-                         valuesOfChunck.put(value.toLowerCase(),writeSegmentToPostingFileInFormat(info,doc.getDocNo(),tf,weight));
-
-                    }
-                    // in case value not exist at all , first time
-                    else if (!valuesOfChunck.containsKey(value))
-                        valuesOfChunck.put(value, writeSegmentToPostingFileInFormat("", doc.getDocNo(), tf, weight));
+                    String info = valuesOfChunck.get(key.toLowerCase());
+                    valuesOfChunck.replace(value.toLowerCase(), valuesOfChunck.get(value.toLowerCase()), writeSegmentToPostingFileInFormat(info, doc.getDocNo(), tf, weight));
 
                 }
+                //in case value start with lower case and this term already exist in upper case
+                //need to save in lower case
+                else if (Character.isLowerCase(value.charAt(0)) && valuesOfChunck.containsKey(value.toUpperCase())) {
+
+                    String info = valuesOfChunck.get(value.toUpperCase());
+                    valuesOfChunck.remove(value.toUpperCase());
+                    valuesOfChunck.put(value.toLowerCase(), writeSegmentToPostingFileInFormat(info, doc.getDocNo(), tf, weight));
+
+                }
+                // in case value not exist at all , first time
+                else if (!valuesOfChunck.containsKey(value))
+                    valuesOfChunck.put(value, writeSegmentToPostingFileInFormat("", doc.getDocNo(), tf, weight));
 
             }
 
-          //  StrBuilder contentOfFile=new StrBuilder();
-            //write everything to file.
-            File statText = new File(postingFilePath +File.separator+ index + ".txt");
-            index++;
+        }
+
+        //  StrBuilder contentOfFile=new StrBuilder();
+        //write everything to file.
+        File statText = new File(postingFilePath + File.separator + indexForTempFiles + ".txt");
+        indexForTempFiles++;
         FileOutputStream is = null;
         try {
             is = new FileOutputStream(statText);
-        } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-        }
-        OutputStreamWriter osw = new OutputStreamWriter(is);
+
+            OutputStreamWriter osw = new OutputStreamWriter(is);
             Writer w = new BufferedWriter(osw);
-            for (String term : valuesOfChunck.keySet()){
-                int df= countMatches(valuesOfChunck.get(term),'<');
-                try {
-                    w.write(term+"|"+ df+"|"+valuesOfChunck.get(term)+System.lineSeparator());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                //contentOfFile.append(term+"|"+ df+"|"+valuesOfChunck.get(term));
+            for (String term : valuesOfChunck.keySet()) {
+                int df = countMatches(valuesOfChunck.get(term), '<');
+
+                w.write(term + "|" + df + "|" + valuesOfChunck.get(term));
             }
-          //  writeToFilePool.addContentToStack(contentOfFile.toString());
-
-
-        try {
             w.close();
             osw.close();
             is.close();
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        //contentOfFile.append(term+"|"+ df+"|"+valuesOfChunck.get(term));
+
+        //  writeToFilePool.addContentToStack(contentOfFile.toString());
+
 
 //        } catch (IOException e) {
 //            System.err.println("Problem writing to the files "+ docsContainer.get(0).getDocNo() +" to "+ docsContainer.get(docsContainer.size()-1).getDocNo() );
@@ -171,7 +164,8 @@ public class DocIndexer {
             BufferedReader br2 = null;
             br1 = new BufferedReader(new InputStreamReader(new FileInputStream(path1), "UTF-8"));
             br2 = new BufferedReader(new InputStreamReader(new FileInputStream(path2), "UTF-8"));
-            File merged = new File(postingFilePath+File.separator+ "merged"+hashCode() +".txt");
+            File merged = new File(postingFilePath+File.separator+ "merged"+indexForMergeFiles +".txt");
+            indexForMergeFiles++;
             FileWriter fileWriter = new FileWriter(merged.getPath());
             PrintWriter out = new PrintWriter(fileWriter);
             Iterator it1 = br1.lines().iterator();
@@ -195,11 +189,11 @@ public class DocIndexer {
 
 
                     // extract from line1 and line2 only <....> parts
-                     line1= line1.substring(line1.indexOf("<"),line1.lastIndexOf(">")+1);
-                     line2=line2.substring(line2.indexOf("<"),line2.lastIndexOf(">")+1);
-                     String temp= line1.replaceAll("\n","")+line2;
-                     //count total df
-                     int df= countMatches(temp,'<');
+                    line1= line1.substring(line1.indexOf("<"),line1.lastIndexOf(">")+1);
+                    line2=line2.substring(line2.indexOf("<"),line2.lastIndexOf(">")+1);
+                    String temp= line1.replaceAll("\n","")+line2;
+                    //count total df
+                    int df= countMatches(temp,'<');
                     //out.write(term1+"|"+df+"|"+line1+line2+"\n");
                     out.write(term1+"|"+df+"|"+temp+"\n");
 //                    System.out.println(term1+"|"+df+"|"+temp+"\n");
@@ -245,9 +239,15 @@ public class DocIndexer {
             }
 
             out.flush();
+            out.close();
+            br1.close();
+            br2.close();
             //delete original files
             File file1=new File (path1);
             file1.delete();
+            if (file1.exists())
+                System.out.println("not good, "+ path1);
+
             File file2=new File (path2);
             file2.delete();
 
@@ -257,7 +257,7 @@ public class DocIndexer {
     }
 
 
-// this function extract the term from line in file (term came before '|')
+    // this function extract the term from line in file (term came before '|')
     private String findTerm(String line) {
         int indexOfEnd = line.indexOf('|');
         return line.substring(0, indexOfEnd);
@@ -294,6 +294,16 @@ public class DocIndexer {
         out.close();
         fileWriter.close();
 
+    }
+
+    public void mergeFiles() {
+        ArrayList<String> paths=getListOfFilesPaths(postingFilePath);
+        while (getListOfFilesPaths(postingFilePath).size()>1){
+            String path1=paths.get(0);
+            String path2=paths.get(1);
+            mergeTwoDocuments(path1,path2);
+            paths=getListOfFilesPaths(postingFilePath);
+        }
     }
 
 
