@@ -1,5 +1,6 @@
 package sample.Model.Indexer;
 
+import org.apache.commons.lang3.StringUtils;
 import sample.Model.DataStructures.TermHashMapDataStructure;
 import sample.Model.Document;
 
@@ -12,7 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
-
+//todo: whatever can be private should be private
 public class DocIndexer {
     public static int indexForTempFiles = 0;
     public static int indexForMergeFiles = 0;
@@ -85,7 +86,7 @@ public class DocIndexer {
             for (String term : valuesOfChunck.keySet()) {
                 int df = countMatches(valuesOfChunck.get(term), '<');
 
-                w.write(term + "|" + df + "|" + valuesOfChunck.get(term)+System.lineSeparator());
+                w.write(term + "|" + df + "|" + valuesOfChunck.get(term));
             }
             w.close();
             osw.close();
@@ -106,6 +107,7 @@ public class DocIndexer {
     //this function help to add segment to line in posting file .
     //segment = <docID, tf, weight>
     public String writeSegmentToPostingFileInFormat(String mainLine ,String docId,int tf,double weight){
+        //todo: אולי צריך פה lineseperator
         String ans=mainLine.replaceAll("\n","")+"<" + docId + " ," + tf + "," + Double.toString(weight) + ">" + '\n';
         return ans;
     }
@@ -172,10 +174,10 @@ public class DocIndexer {
             Iterator it2 = br2.lines().iterator();
             //line1 - current line in doc1. term1 is the term value
             String line1 = (String) it1.next();
-            String term1 = findTerm(line1);
+            String term1 = StringUtils.substring(line1, 0, StringUtils.indexOf(line1,'|'));
             //line2 - current line in doc2 . term2 is the term value
             String line2 = (String) it2.next();
-            String term2 = findTerm(line2);
+            String term2 =StringUtils.substring(line2, 0, StringUtils.indexOf(line2,'|'));
             while (it1.hasNext() && it2.hasNext()) {
                 //in case its same term
                 if (CASE_INSENSITIVE_ORDER.compare(term1,term2) == 0) {
@@ -201,21 +203,22 @@ public class DocIndexer {
                     //int indexOfMetaData = line2.indexOf("<");
                     //out.write(line2.substring(indexOfMetaData) + "\n");
                     line1 = (String) it1.next();
-                    term1 = findTerm((line1));
+                   // term1 = findTerm((line1));
+                    term1 = StringUtils.substring(line1, 0, StringUtils.indexOf(line1,'|'));
                     line2 = (String) it2.next();
-                    term2 = findTerm((line2));
+                    term2 =StringUtils.substring(line2, 0, StringUtils.indexOf(line2,'|'));
 
 
                 } else if (!it1.hasNext() ||  CASE_INSENSITIVE_ORDER.compare(term1, term2)> 0) {
                     out.write(line2 + "\n");
 //                    System.out.println(line2 + "\n");
                     line2 = (String) it2.next();
-                    term2 = findTerm(line2);
+                    term2 = StringUtils.substring(line2, 0, StringUtils.indexOf(line2,'|'));
                 } else if (!it2.hasNext() || CASE_INSENSITIVE_ORDER.compare(term2, term1)> 0) {
                     out.write(line1 + "\n");
 //                    System.out.println(line1 + "\n");
                     line1 = (String) it1.next();
-                    term1 = findTerm(line1);
+                    term1 =  StringUtils.substring(line1, 0, StringUtils.indexOf(line1,'|'));
                 }
 
             }
@@ -225,7 +228,7 @@ public class DocIndexer {
                 while(it1.hasNext()) {
                     out.write(line1 + "\n");
                     line1 = (String) it1.next();
-                    term1 = findTerm(line1);
+                    term1 =  StringUtils.substring(line1, 0, StringUtils.indexOf(line1,'|'));
                 }
             }
 
@@ -234,7 +237,7 @@ public class DocIndexer {
                 while(it2.hasNext()) {
                     out.write(line2 + "\n");
                     line2 = (String) it2.next();
-                    term2 = findTerm(line2);
+                    term2 =  StringUtils.substring(line2, 0, StringUtils.indexOf(line2,'|'));
                 }
             }
 
@@ -257,11 +260,13 @@ public class DocIndexer {
     }
 
 
-    // this function extract the term from line in file (term came before '|')
-    private String findTerm(String line) {
-        int indexOfEnd = line.indexOf('|');
-        return line.substring(0, indexOfEnd);
-    }
+//    // this function extract the term from line in file (term came before '|')
+//    //todo: אין למה לקרוא לפונציה הזאת כ"כ הרבה פעמים, עדיף להכניס את לקוד עצמו (פריימים מיותרים)
+//    private String findTerm(String line) {
+//        String check = StringUtils.substring(line, 0, StringUtils.indexOf(line,'|'));
+//        int indexOfEnd = line.indexOf('|');
+//        return line.substring(0, indexOfEnd);
+//    }
 
     public void sortDocument(String path) throws IOException {
 
