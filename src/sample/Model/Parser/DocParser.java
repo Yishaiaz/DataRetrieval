@@ -58,6 +58,14 @@ public class DocParser implements IParser{
         }
         // adding doc title as a whole term
         if(!StringUtils.isEmpty(docData[2])){
+            StrBuilder temp = new StrBuilder();
+            String[] clean = initialBadCharacterRemoval(docData[2].split(" "));
+            for (String word :
+                    clean) {
+                temp.append(word);
+                temp.append(" ");
+            }
+            docData[2] = temp.toString();
             termHashMapDataStructure.insert(docData[2],termLocationIterator, 2);
             termLocationIterator+=1;
         }

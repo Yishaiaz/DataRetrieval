@@ -20,7 +20,7 @@ import static java.lang.String.CASE_INSENSITIVE_ORDER;
 
 
 public class DocIndexer {
-    int MAX_T = 20;
+    private int MAX_T = 20;
     public static int indexForTempFiles = 0;
     public static int indexForMergeFiles = 0;
     String postingFilePath = "";
