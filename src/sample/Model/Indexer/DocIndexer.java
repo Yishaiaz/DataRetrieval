@@ -308,6 +308,7 @@ public class DocIndexer {
             String path2=paths.get(1);
             mergeTwoDocuments(path1,path2);
             paths=getListOfFilesPaths(postingFilePath);
+            Collections.sort(paths, new FileSizeCompare());
         }
     }
 
@@ -319,6 +320,19 @@ public class DocIndexer {
             o1=o1.substring(0,o1.indexOf('|'));
             o2=o2.substring(0,o2.indexOf('|'));
             return  (CASE_INSENSITIVE_ORDER.compare(o1, o2));
+
+        }
+    }
+    class FileSizeCompare implements Comparator<String> {
+
+        @Override
+        public int compare(String o1, String o2) {
+            File file1 = new File(o1);
+            File file2 = new File(o2);
+            return file1.length() > file2.length() ? 1 : -1 ;
+//            o1=o1.substring(0,o1.indexOf('|'));
+//            o2=o2.substring(0,o2.indexOf('|'));
+//            return  (CASE_INSENSITIVE_ORDER.compare(o1, o2));
 
         }
     }
