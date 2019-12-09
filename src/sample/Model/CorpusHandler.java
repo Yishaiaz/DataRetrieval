@@ -85,6 +85,7 @@ public class CorpusHandler {
 //        pool.execute(tasker2);
 //        pool.execute(tasker3);
 
+        long start_time = System.currentTimeMillis();
 
         ReadFile readFile = new ReadFile(this.corpusPath, this.stopWords, this.months,withStemming,postingFilesPath/*,writeToFilePool*/);
         //send every file to ReadFile for preparation for parsing.
@@ -93,10 +94,11 @@ public class CorpusHandler {
                 System.out.println("you and your mac");
             }
             else{
-                readFile.prepareDocToParse(path,20);
+                readFile.prepareDocToParse(path,50);
 
             }
         }
+        System.out.println(String.format("total time to parse ALL files %d min", (System.currentTimeMillis()-start_time)/60000));
 
 //        while(writeToFilePool.areTasksLeft()){}
 //        pool.shutdown();

@@ -73,7 +73,7 @@ public class DictionaryParser implements Runnable{
                     }
                     singleTermTotalNumberOfApperance = sum;
                     // todo: here we have everything about the single term to write to the dictionary.
-                    bufferedWriter.write(String.format("%s,%d,%d,%d\n", singleTerm, singleTermNumberOfDocsAppearance, singleTermTotalNumberOfApperance, postingLineNumber));
+                    bufferedWriter.write(String.format("%s,%d,%d,%d"+System.lineSeparator(), singleTerm, singleTermNumberOfDocsAppearance, singleTermTotalNumberOfApperance, postingLineNumber));
 //                    System.out.println(String.format("Term Name: %s - in Number Of Docs %d with total appearances %d line number in posting file %d", singleTerm, singleTermNumberOfDocsAppearance, singleTermTotalNumberOfApperance, postingLineNumber));
                 }catch (Exception e){
                     System.out.println(e.getMessage());

@@ -88,7 +88,7 @@ public class DocIndexer {
             for (String term : valuesOfChunck.keySet()){
                 int df= countMatches(valuesOfChunck.get(term),'<');
                 try {
-                    w.write(term+"|"+ df+"|"+valuesOfChunck.get(term));
+                    w.write(term+"|"+ df+"|"+valuesOfChunck.get(term)+System.lineSeparator());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
