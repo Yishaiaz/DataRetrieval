@@ -39,13 +39,12 @@ public class DocParser implements IParser{
 
         Document doc = new Document(docData[0], docData[1], docData[2], docData[3]);
         //add doc date as term
-        if(StringUtils.isEmpty(docData[1])){
+        if(!StringUtils.isEmpty(docData[1])){
             termHashMapDataStructure.insert(docData[1], termLocationIterator, 1.8);
             termLocationIterator+=1;
         }
         // adding doc title as a whole term
-        //todo: if empty don't feed to term structure
-        if(StringUtils.isEmpty(docData[2])){
+        if(!StringUtils.isEmpty(docData[2])){
             termHashMapDataStructure.insert(docData[2],termLocationIterator, 2);
             termLocationIterator+=1;
         }
