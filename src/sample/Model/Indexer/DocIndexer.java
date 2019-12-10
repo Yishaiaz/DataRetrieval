@@ -180,7 +180,7 @@ public class DocIndexer {
             }
             executorService.shutdown();
             try {
-                executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.HOURS);
+                executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 System.out.println(e.getCause());
             }
