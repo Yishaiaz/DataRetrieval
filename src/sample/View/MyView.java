@@ -1,13 +1,23 @@
 package sample.View;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.TextArea;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.text.StrBuilder;
 import sample.Controller.Controller;
 
-import java.io.File;
-import java.io.IOException;
+import javax.swing.*;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -19,7 +29,7 @@ import java.util.stream.Stream;
 
 public class MyView {
     private Controller controller;
-
+    private String dictionaryContent;
 
     @FXML
     public javafx.scene.control.Button btn_browse;
@@ -27,6 +37,7 @@ public class MyView {
     public javafx.scene.control.CheckBox stemming_cp;
     public javafx.scene.control.TextField txtField_postingFilesInput;
     public javafx.scene.control.TextField txtField_corpusPath;
+    public javafx.scene.control.ListView listView_dictionary;
 
     public void chooseCorpusPath(){
         DirectoryChooser chooser=new DirectoryChooser();
@@ -131,5 +142,43 @@ public class MyView {
 
     public void setController(Controller controller) {
         this.controller=controller;
+    }
+
+    public void loadDictionary(){
+        String dictionaryPath= txtField_corpusPath.getText();
+        File dictionary = new File (dictionaryPath+File.separator+"DictionaryTest.txt");
+        StrBuilder dictionaryContent= new StrBuilder();
+        String str="";
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(dictionary));
+            while ((str=br.readLine())!= null){
+                dictionaryContent.append(str);
+            }
+
+            br.close();
+            this.dictionaryContent=dictionaryContent.toString();
+            System.out.println("finish loading");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void presentDictionary(){
+        Stage stage=new Stage();
+        FXMLLoader fxmlLoader=new FXMLLoader();
+        try {
+            Parent root=fxmlLoader.load(getClass().getResource("Dictionary.fxml"));
+            Scene scene=new Scene(root,600,380);
+            stage.setScene(scene);
+            stage.initModality(Modality.APPLICATION_MODAL); //Lock the window until it closes
+            stage.setResizable(false);
+            stage.show();
+
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

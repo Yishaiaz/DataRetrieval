@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
 
-<GridPane alignment="center" hgap="10" vgap="10" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.View.MyView">
+<GridPane alignment="center" hgap="10" vgap="10" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.View.MyView">
    <children>
       <BorderPane prefHeight="600.0" prefWidth="900.0">
          <right>
@@ -22,7 +33,7 @@
                         <Font name="Aharoni Bold" size="12.0" />
                      </font>
                   </Label>
-                  <Button id="btn_parse" fx:id="btn_parse" layoutX="676.0" layoutY="337.0" mnemonicParsing="false" onAction="#activate" text="parse">
+                  <Button id="btn_parse" fx:id="btn_parse" layoutX="473.0" layoutY="337.0" mnemonicParsing="false" onAction="#activate" prefHeight="22.0" prefWidth="83.0" text="parse">
                      <font>
                         <Font name="Aharoni Bold" size="12.0" />
                      </font>
@@ -38,7 +49,6 @@
                         <Font name="Aharoni Bold" size="12.0" />
                      </font>
                   </Button>
-                  <TextArea id="txtArea_resultScreen" layoutX="147.0" layoutY="300.0" prefHeight="277.0" prefWidth="506.0" />
                   <ImageView fitHeight="116.0" fitWidth="443.0" layoutX="179.0" layoutY="42.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../resources/logo.JPG" />
@@ -68,13 +78,13 @@
                         <Font name="System Bold" size="14.0" />
                      </font>
                   </CheckBox>
-                  <Button fx:id="reset_btn" layoutX="676.0" layoutY="300.0" mnemonicParsing="false" text="Reset" onAction="#reset">
+                  <Button fx:id="reset_btn" layoutX="474.0" layoutY="300.0" mnemonicParsing="false" onAction="#reset" prefHeight="26.0" prefWidth="79.0" text="Reset">
                      <font>
                         <Font name="System Bold" size="12.0" />
                      </font>
                   </Button>
-                  <Button layoutX="20.0" layoutY="287.0" mnemonicParsing="false" text="Show Dictionary" />
-                  <Button layoutX="21.0" layoutY="323.0" mnemonicParsing="false" text="Load Dictionary" />
+                  <Button fx:id="showDictionary_btn" layoutX="141.0" layoutY="300.0" mnemonicParsing="false" onAction="#presentDictionary" text="Show Dictionary" />
+                  <Button fx:id="loadDictionary_btn" layoutX="142.0" layoutY="346.0" mnemonicParsing="false" onAction="#loadDictionary" text="Load Dictionary" />
                </children>
             </AnchorPane>
          </right>

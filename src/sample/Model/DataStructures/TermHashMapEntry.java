@@ -1,7 +1,12 @@
 package sample.Model.DataStructures;
 
 import java.util.ArrayList;
-
+/**
+ * This class is represent entry of term .
+ * value- which is the term
+ * tf - how many times term appears in doc
+ * weight
+ */
 public class TermHashMapEntry {
     private String value;
     private int TF = 0;
@@ -15,6 +20,10 @@ public class TermHashMapEntry {
         this.weight = weight;
     }
 
+    /**
+     * increase location of term because its appears again in doc.
+     * @param location
+     */
     public void addLocation(int location) {
         TF++;
         termLocations.add(location);
