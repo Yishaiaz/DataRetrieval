@@ -92,7 +92,7 @@ public class DocIndexer {
             for (String term : valuesOfChunck.keySet()) {
                 int df = countMatches(valuesOfChunck.get(term), '<');
 
-                w.write(term + "|" + df + "|" + valuesOfChunck.get(term));
+                w.write(term + "|" + df + "|" + valuesOfChunck.get(term)+System.lineSeparator());
             }
             w.close();
             osw.close();
@@ -100,21 +100,12 @@ public class DocIndexer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //contentOfFile.append(term+"|"+ df+"|"+valuesOfChunck.get(term));
-
-        //  writeToFilePool.addContentToStack(contentOfFile.toString());
-
-
-//        } catch (IOException e) {
-//            System.err.println("Problem writing to the files "+ docsContainer.get(0).getDocNo() +" to "+ docsContainer.get(docsContainer.size()-1).getDocNo() );
-//        }
     }
 
     //this function help to add segment to line in posting file .
     //segment = <docID, tf, weight>
     public String writeSegmentToPostingFileInFormat(String mainLine ,String docId,int tf,double weight){
-        //todo: אולי צריך פה lineseperator
-        String ans=mainLine.replaceAll("\n","")+"<" + docId + " ," + tf + "," + Double.toString(weight) + ">" + '\n';
+        String ans=StringUtils.removeEnd(mainLine,"\n") + "<" + docId + " ," + tf + "," + Double.toString(weight) + ">";
         return ans;
     }
 
@@ -164,148 +155,6 @@ public class DocIndexer {
         return filesPaths;
     }
 
-    public void mergeTwoDocuments(String path1, String path2) {
-        try {
-            sortDocument(path1);
-            sortDocument(path2);
-            BufferedReader br1 = null;
-            BufferedReader br2 = null;
-            br1 = new BufferedReader(new InputStreamReader(new FileInputStream(path1), "UTF-8"));
-            br2 = new BufferedReader(new InputStreamReader(new FileInputStream(path2), "UTF-8"));
-            File merged = new File(postingFilePath+File.separator+ "merged"+indexForMergeFiles +".txt");
-            indexForMergeFiles++;
-            FileWriter fileWriter = new FileWriter(merged.getPath());
-            PrintWriter out = new PrintWriter(fileWriter);
-            Iterator it1 = br1.lines().iterator();
-            Iterator it2 = br2.lines().iterator();
-            //line1 - current line in doc1. term1 is the term value
-            String line1 = (String) it1.next();
-            String term1 = StringUtils.substring(line1, 0, StringUtils.indexOf(line1,'|'));
-            //line2 - current line in doc2 . term2 is the term value
-            String line2 = (String) it2.next();
-            String term2 =StringUtils.substring(line2, 0, StringUtils.indexOf(line2,'|'));
-            while (it1.hasNext() && it2.hasNext()) {
-                //in case its same term
-                if (CASE_INSENSITIVE_ORDER.compare(term1,term2) == 0) {
-
-//                    if (Character.isUpperCase(term1.charAt(0)) &&(Character.isLowerCase(term2.charAt(0))))
-//                            term1=term1.toLowerCase();
-//
-////                    if((Character.isUpperCase(term2.charAt(0)) &&(Character.isLowerCase(term1.charAt(0
-// ))) ))
-////                        term2=term2.toLowerCase();
-
-
-                    // extract from line1 and line2 only <....> parts
-                    line1= line1.substring(line1.indexOf("<"),line1.lastIndexOf(">")+1);
-                    line2=line2.substring(line2.indexOf("<"),line2.lastIndexOf(">")+1);
-                    String temp= line1.replaceAll("\n","")+line2;
-                    //count total df
-                    int df= countMatches(temp,'<');
-                    //out.write(term1+"|"+df+"|"+line1+line2+"\n");
-                    out.write(term1+"|"+df+"|"+temp+"\n");
-//                    System.out.println(term1+"|"+df+"|"+temp+"\n");
-
-                    //int indexOfMetaData = line2.indexOf("<");
-                    //out.write(line2.substring(indexOfMetaData) + "\n");
-                    line1 = (String) it1.next();
-                   // term1 = findTerm((line1));
-                    term1 = StringUtils.substring(line1, 0, StringUtils.indexOf(line1,'|'));
-                    line2 = (String) it2.next();
-                    term2 =StringUtils.substring(line2, 0, StringUtils.indexOf(line2,'|'));
-
-
-                } else if (!it1.hasNext() ||  CASE_INSENSITIVE_ORDER.compare(term1, term2)> 0) {
-                    out.write(line2 + "\n");
-//                    System.out.println(line2 + "\n");
-                    line2 = (String) it2.next();
-                    term2 = StringUtils.substring(line2, 0, StringUtils.indexOf(line2,'|'));
-                } else if (!it2.hasNext() || CASE_INSENSITIVE_ORDER.compare(term2, term1)> 0) {
-                    out.write(line1 + "\n");
-//                    System.out.println(line1 + "\n");
-                    line1 = (String) it1.next();
-                    term1 =  StringUtils.substring(line1, 0, StringUtils.indexOf(line1,'|'));
-                }
-
-            }
-
-            // in case doc2 end and doc1 not
-            if (!it2.hasNext() && it1.hasNext()){
-                while(it1.hasNext()) {
-                    out.write(line1 + "\n");
-                    line1 = (String) it1.next();
-                    term1 =  StringUtils.substring(line1, 0, StringUtils.indexOf(line1,'|'));
-                }
-            }
-
-            // in case doc1 end and doc2 not
-            if (!it1.hasNext() && it2.hasNext()){
-                while(it2.hasNext()) {
-                    out.write(line2 + "\n");
-                    line2 = (String) it2.next();
-                    term2 =  StringUtils.substring(line2, 0, StringUtils.indexOf(line2,'|'));
-                }
-            }
-
-            out.flush();
-            out.close();
-            br1.close();
-            br2.close();
-            //delete original files
-            File file1=new File (path1);
-            file1.delete();
-            if (file1.exists())
-                System.out.println("not good, "+ path1);
-
-            File file2=new File (path2);
-            file2.delete();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-//    // this function extract the term from line in file (term came before '|')
-//    //todo: אין למה לקרוא לפונציה הזאת כ"כ הרבה פעמים, עדיף להכניס את לקוד עצמו (פריימים מיותרים)
-//    private String findTerm(String line) {
-//        String check = StringUtils.substring(line, 0, StringUtils.indexOf(line,'|'));
-//        int indexOfEnd = line.indexOf('|');
-//        return line.substring(0, indexOfEnd);
-//    }
-
-    public void sortDocument(String path) throws IOException {
-
-        FileReader fileReader = null;
-        try {
-            fileReader = new FileReader(path);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        BufferedReader bufferedReader = new BufferedReader(fileReader);
-        String inputLine = "";
-        ArrayList<String> lineList = new ArrayList<>();
-        while (true) {
-            try {
-                if (!((inputLine = bufferedReader.readLine()) != null)) break;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            lineList.add(inputLine);
-        }
-        fileReader.close();
-
-        Collections.sort(lineList,new RatingCompare());
-        FileWriter fileWriter = new FileWriter(path);
-        PrintWriter out = new PrintWriter(fileWriter);
-        for (String outputLine : lineList) {
-            out.println(outputLine);
-        }
-        out.flush();
-        out.close();
-        fileWriter.close();
-
-    }
 
     public void mergeFiles() {
         ArrayList<String> paths=getListOfFilesPaths(postingFilePath);
@@ -341,18 +190,13 @@ public class DocIndexer {
         }
     }
 
-
-    class RatingCompare implements Comparator<String> {
-
-        @Override
-        public int compare(String o1, String o2) {
-            o1=o1.substring(0,o1.indexOf('|'));
-            o2=o2.substring(0,o2.indexOf('|'));
-            return  (CASE_INSENSITIVE_ORDER.compare(o1, o2));
-
-        }
-    }
     class FileSizeCompare implements Comparator<String> {
+        /**
+         *
+         * @param o1
+         * @param o2
+         * @return
+         */
 
         @Override
         public int compare(String o1, String o2) {

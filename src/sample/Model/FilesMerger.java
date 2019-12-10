@@ -12,19 +12,37 @@ import java.util.Iterator;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 
 public class FilesMerger implements Runnable{
+    /**
+     * a runnable implementation of the file merging process.
+     * receives two paths for the posting files to merge.
+     * uses two "pointers" one on each document in order to keep everything sorted without the need to resort.
+     */
     public static int indexForMergeFiles=0;
     private String firstPath;
     private String secondPath;
     private String postingFilePath;
 
+    /**
+     * constructor
+     * @param firstPath - String, the full path to the first file to merge
+     * @param secondPath - String, the full path to the second file to merge
+     * @param postingFilePath - String, the full path to the DIRECTORY where the new merged file should be written to.
+     */
     public FilesMerger(String firstPath, String secondPath, String postingFilePath){
         this.firstPath = firstPath;
         this.secondPath = secondPath;
         this.postingFilePath = postingFilePath;
     }
 
+    /**
+     * all functionality is wrapped in a try/catch block in order to avoid any issues.
+     * run() sorts both documents separately, then using a BufferedReader object reads both documents line by line.
+     * keeps the merged document sorted.
+     * writes the merged document using BufferedWriter object.
+     */
     @Override
     public void run() {
+
         String path1 = this.firstPath;
         String path2 = this.secondPath;
         try {
@@ -50,16 +68,16 @@ public class FilesMerger implements Runnable{
                     try{
                         line1= line1.substring(line1.indexOf("<"),line1.lastIndexOf(">")+1);
                         line2=line2.substring(line2.indexOf("<"),line2.lastIndexOf(">")+1);
-                        String temp= line1.replaceAll("\n","")+line2;
+                        String temp= StringUtils.remove(line1, "\n")+StringUtils.remove(line2,"\n");
                         //count total df
-                        int df= countMatches(temp,'<');
+                        int df= StringUtils.countMatches(temp,"<");
                         //out.write(term1+"|"+df+"|"+line1+line2+"\n");
-                        out.write(term1+"|"+df+"|"+temp+"\n");
+                        out.write(term1+"|"+df+"|"+temp+System.lineSeparator());
 
-//                        line1 = (String) it1.next();
+
                         line1 = br1.readLine();
                         term1 = StringUtils.substring(line1, 0, StringUtils.indexOf(line1,'|'));
-//                        line2 = (String) it2.next();
+
                         line2 = br2.readLine();
                         term2 =StringUtils.substring(line2, 0, StringUtils.indexOf(line2,'|'));
                     }catch (Exception e){
@@ -67,12 +85,12 @@ public class FilesMerger implements Runnable{
                     }
                 }
                 else if (!(line1!=null) ||  CASE_INSENSITIVE_ORDER.compare(term1, term2)> 0) {
-                    out.write(line2 + "\n");
+                    out.write(line2 + System.lineSeparator());
 
                     line2 = br1.readLine();
                     term2 = StringUtils.substring(line2, 0, StringUtils.indexOf(line2,'|'));
                 } else if (!(line2!=null) || CASE_INSENSITIVE_ORDER.compare(term2, term1)> 0) {
-                    out.write(line1 + "\n");
+                    out.write(line1 + System.lineSeparator());
 
                     line1 = br2.readLine();
                     term1 =  StringUtils.substring(line1, 0, StringUtils.indexOf(line1,'|'));
@@ -82,7 +100,7 @@ public class FilesMerger implements Runnable{
             // in case doc2 end and doc1 not
             if (!(line2!=null) && (line1!=null)){
                 while((line1!=null)) {
-                    out.write(line1 + "\n");
+                    out.write(line1 + System.lineSeparator());
                     line1 = br1.readLine();
                     term1 =  StringUtils.substring(line1, 0, StringUtils.indexOf(line1,'|'));
                 }
@@ -91,7 +109,7 @@ public class FilesMerger implements Runnable{
             // in case doc1 end and doc2 not
             if (!(line1!=null) && (line1!=null)){
                 while((line2!=null)) {
-                    out.write(line2 + "\n");
+                    out.write(line2 + System.lineSeparator());
                     line2 = br2.readLine();
                     term2 =  StringUtils.substring(line2, 0, StringUtils.indexOf(line2,'|'));
                 }
@@ -115,6 +133,13 @@ public class FilesMerger implements Runnable{
 //            e.printStackTrace();
         }
     }
+
+    /**
+     * private method, receives a full path to a txt document, reads it, and sorts it
+     * using a custom comparator object. @see RatingComparator inner class.
+     * catches all exeptions internally
+     * @param path - String, full path to a .txt file
+     */
     private void sortDocument(String path) throws IOException {
 
         FileReader fileReader = null;
@@ -143,26 +168,16 @@ public class FilesMerger implements Runnable{
             FileWriter fileWriter = new FileWriter(path);
             BufferedWriter out = new BufferedWriter(fileWriter);
             for (String outputLine : lineList) {
-                out.write(outputLine);
+                out.write(outputLine + System.lineSeparator());
             }
-            out.flush();
             out.close();
         }catch (StringIndexOutOfBoundsException e){
-            System.out.println("it went wrong here\n"+lineList);
+            System.out.println(e.getMessage());
         }
 
 
     }
-    private int countMatches(String str, char c) {
-        int count = 0;
 
-        for (char ch : str.toCharArray()) {
-            if (ch == c) {
-                count++;
-            }
-        }
-        return count;
-    }
     class RatingCompare implements Comparator<String> {
 
         @Override
