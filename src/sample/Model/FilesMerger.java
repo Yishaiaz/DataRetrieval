@@ -128,7 +128,8 @@ public class FilesMerger implements Runnable{
                 file2.delete();
             }catch(Exception e){
             }
-
+            br1.close();
+            br2.close();
         } catch (IOException e) {
 //            e.printStackTrace();
         }
@@ -149,6 +150,7 @@ public class FilesMerger implements Runnable{
             bufferedReader =  new BufferedReader(fileReader);
         } catch (FileNotFoundException e) {
 //            e.printStackTrace();
+            bufferedReader.close();
             return;
         }
 
@@ -158,20 +160,23 @@ public class FilesMerger implements Runnable{
             try {
                 if (!((inputLine = bufferedReader.readLine()) != null)) break;
             } catch (IOException e) {
+                bufferedReader.close();
                 e.printStackTrace();
             }
             lineList.add(inputLine);
         }
-        fileReader.close();
+        bufferedReader.close();
+        FileWriter fileWriter = new FileWriter(path);
+        BufferedWriter out = null;
         try{
+            out = new BufferedWriter(fileWriter);
             Collections.sort(lineList,new RatingCompare());
-            FileWriter fileWriter = new FileWriter(path);
-            BufferedWriter out = new BufferedWriter(fileWriter);
             for (String outputLine : lineList) {
                 out.write(outputLine + System.lineSeparator());
             }
             out.close();
         }catch (StringIndexOutOfBoundsException e){
+            out.close();
             System.out.println(e.getMessage());
         }
 
