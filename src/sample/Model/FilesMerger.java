@@ -87,12 +87,12 @@ public class FilesMerger implements Runnable{
                 else if (!(line1!=null) ||  CASE_INSENSITIVE_ORDER.compare(term1, term2)> 0) {
                     out.write(line2 + System.lineSeparator());
 
-                    line2 = br1.readLine();
+                    line2 = br2.readLine();
                     term2 = StringUtils.substring(line2, 0, StringUtils.indexOf(line2,'|'));
                 } else if (!(line2!=null) || CASE_INSENSITIVE_ORDER.compare(term2, term1)> 0) {
                     out.write(line1 + System.lineSeparator());
 
-                    line1 = br2.readLine();
+                    line1 = br1.readLine();
                     term1 =  StringUtils.substring(line1, 0, StringUtils.indexOf(line1,'|'));
                 }
 
