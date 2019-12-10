@@ -178,8 +178,16 @@ public class FilesMerger implements Runnable{
 
     }
 
+    /**
+     * a custom comparator class, implements Comparator<String>
+     */
     class RatingCompare implements Comparator<String> {
-
+        /**
+         *  compares between two strings according to CASE_INSENSITIVE_ORDER, default by Java.
+         * @param o1 - String
+         * @param o2 - String
+         * @return int [>1,0,<-1]
+         */
         @Override
         public int compare(String o1, String o2) {
             o1=o1.substring(0,o1.indexOf('|'));
