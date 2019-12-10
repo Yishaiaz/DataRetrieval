@@ -23,8 +23,8 @@ public class CorpusHandler {
     private ArrayList<String> filesPaths; //list contains all paths in Corpus dir.
     public HashSet<String> stopWords = new HashSet<>();
     public HashSet<String> months = new HashSet<>();
-    ExecutorService pool = Executors.newFixedThreadPool(3);
-    WriteToFilePool writeToFilePool;
+    // ExecutorService pool = Executors.newFixedThreadPool(3);
+    //WriteToFilePool writeToFilePool;
 
     public CorpusHandler(String corpusPath) {
         this.corpusPath = corpusPath;
@@ -75,32 +75,37 @@ public class CorpusHandler {
     }
 
     public void findTextInDocs(boolean withStemming) throws FileNotFoundException {
-        writeToFilePool= new WriteToFilePool();
-        WriteToFileTask tasker1= new WriteToFileTask("task1",writeToFilePool,postingFilesPath);
-        WriteToFileTask tasker2= new WriteToFileTask("task2",writeToFilePool,postingFilesPath);
-        WriteToFileTask tasker3= new WriteToFileTask("task3",writeToFilePool,postingFilesPath);
+//        writeToFilePool= new WriteToFilePool();
+//        WriteToFileTask tasker1= new WriteToFileTask("task1",writeToFilePool,postingFilesPath);
+//        WriteToFileTask tasker2= new WriteToFileTask("task2",writeToFilePool,postingFilesPath);
+//        WriteToFileTask tasker3= new WriteToFileTask("task3",writeToFilePool,postingFilesPath);
+//
+//
+//        pool.execute(tasker1);
+//        pool.execute(tasker2);
+//        pool.execute(tasker3);
 
-
-        pool.execute(tasker1);
-        pool.execute(tasker2);
-        pool.execute(tasker3);
-
-
-        ReadFile readFile = new ReadFile(this.corpusPath, this.stopWords, this.months,withStemming,postingFilesPath,writeToFilePool);
+        long start_time = System.currentTimeMillis();
+        ReadFile readFile = new ReadFile(this.corpusPath, this.stopWords, this.months,withStemming,postingFilesPath/*,writeToFilePool*/);
         //send every file to ReadFile for preparation for parsing.
         for (String path : filesPaths) {
             if(path.endsWith(".DS_Store")){
                 System.out.println("you and your mac");
             }
             else{
-                readFile.prepareDocToParse(path,20);
+                readFile.prepareDocToParse(path,250);
 
             }
         }
+        System.out.println(String.format("Total time without merging : %d minutes", (System.currentTimeMillis() - start_time)/60000));
+        start_time = System.currentTimeMillis();
+        readFile.indexer.mergeFiles();
+        System.out.println(String.format("Total time to merge : %d seconds", (System.currentTimeMillis() - start_time)/1000));
 
-        while(writeToFilePool.areTasksLeft()){}
-        pool.shutdown();
-        System.out.println("end");
+
+//        while(writeToFilePool.areTasksLeft()){}
+//        pool.shutdown();
+//        System.out.println("end");
 
 
     }

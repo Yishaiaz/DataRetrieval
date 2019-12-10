@@ -1,102 +1,111 @@
 package sample.Model.Indexer;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.text.StrBuilder;
 import sample.Model.DataStructures.TermHashMapDataStructure;
 import sample.Model.Document;
-import sample.Model.TaskPool.WriteToFilePool;
+import sample.Model.FilesMerger;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 
-public class DocIndexer {
 
-    String postingFilePath="";
-    WriteToFilePool writeToFilePool;
-    public DocIndexer(String postingFilePath,WriteToFilePool writeToFilePool) {
-        this.postingFilePath=postingFilePath;
-        this.writeToFilePool=writeToFilePool;
+public class DocIndexer {
+    private int MAX_T = 20;
+    public static int indexForTempFiles = 0;
+    public static int indexForMergeFiles = 0;
+    String postingFilePath = "";
+
+    // WriteToFilePool writeToFilePool;
+    public DocIndexer(String postingFilePath/*,WriteToFilePool writeToFilePool*/) {
+        this.postingFilePath = postingFilePath;
+        //this.writeToFilePool=writeToFilePool;
+
     }
 
     //this function receives document and put into file all terms inside it.
     public void indexChuckDocs(ArrayList<Document> docsContainer) {
-   //     try {
+        //     try {
 
-            //<Term, postingString>
-            HashMap<String, String> valuesOfChunck=new HashMap<>();
+        //<Term, postingString>
+        HashMap<String, String> valuesOfChunck = new HashMap<>();
 
-            for (Document doc: docsContainer) {
+        for (Document doc : docsContainer) {
 
-                TermHashMapDataStructure termStructure = doc.parsedTerms;
-                for (String key : termStructure.termsEntries.keySet()) {
-                    String value=termStructure.termsEntries.get(key).getValue();
-                    int tf = termStructure.termsEntries.get(key).getTF();
-                    double weight = termStructure.termsEntries.get(key).getWeight();
-                    // term appeared first time in this chunk.
+            TermHashMapDataStructure termStructure = doc.parsedTerms;
+            for (String key : termStructure.termsEntries.keySet()) {
+                String value = termStructure.termsEntries.get(key).getValue();
+                int tf = termStructure.termsEntries.get(key).getTF();
+                double weight = termStructure.termsEntries.get(key).getWeight();
+                // term appeared first time in this chunk.
 
 
-                    //term already in valuesOfChunck. need to append <> segment of this doc .
-                     if (valuesOfChunck.containsKey(value)){
-                        valuesOfChunck.replace(value,valuesOfChunck.get(value),writeSegmentToPostingFileInFormat(valuesOfChunck.get(value),doc.getDocNo(),tf,weight));
-                    }
-
-                    //in case value start with upper case and this term already exist in lower case
-                    //need to save in lower case
-                     else if (Character.isUpperCase(value.charAt(0)) && valuesOfChunck.containsKey( value.toLowerCase())){
-
-                         String info=valuesOfChunck.get(key.toLowerCase());
-                         valuesOfChunck.replace(value.toLowerCase(),valuesOfChunck.get(value.toLowerCase()),writeSegmentToPostingFileInFormat(info,doc.getDocNo(),tf,weight));
-
-                    }
-                     //in case value start with lower case and this term already exist in upper case
-                     //need to save in lower case
-                    else if (Character.isLowerCase(value.charAt(0)) && valuesOfChunck.containsKey( value.toUpperCase())){
-
-                        String info= valuesOfChunck.get(value.toUpperCase());
-                        valuesOfChunck.remove(value.toUpperCase());
-                         valuesOfChunck.put(value.toLowerCase(),writeSegmentToPostingFileInFormat(info,doc.getDocNo(),tf,weight));
-
-                    }
-                    // in case value not exist at all , first time
-                    else if (!valuesOfChunck.containsKey(value))
-                        valuesOfChunck.put(value, writeSegmentToPostingFileInFormat("", doc.getDocNo(), tf, weight));
-
+                //term already in valuesOfChunck. need to append <> segment of this doc .
+                if (valuesOfChunck.containsKey(value)) {
+                    valuesOfChunck.replace(value, valuesOfChunck.get(value), writeSegmentToPostingFileInFormat(valuesOfChunck.get(value), doc.getDocNo(), tf, weight));
                 }
 
+                //in case value start with upper case and this term already exist in lower case
+                //need to save in lower case
+                else if (Character.isUpperCase(value.charAt(0)) && valuesOfChunck.containsKey(value.toLowerCase())) {
+
+                    String info = valuesOfChunck.get(key.toLowerCase());
+                    valuesOfChunck.replace(value.toLowerCase(), valuesOfChunck.get(value.toLowerCase()), writeSegmentToPostingFileInFormat(info, doc.getDocNo(), tf, weight));
+
+                }
+                //in case value start with lower case and this term already exist in upper case
+                //need to save in lower case
+                else if (Character.isLowerCase(value.charAt(0)) && valuesOfChunck.containsKey(value.toUpperCase())) {
+
+                    String info = valuesOfChunck.get(value.toUpperCase());
+                    valuesOfChunck.remove(value.toUpperCase());
+                    valuesOfChunck.put(value.toLowerCase(), writeSegmentToPostingFileInFormat(info, doc.getDocNo(), tf, weight));
+
+                }
+                // in case value not exist at all , first time
+                else if (!valuesOfChunck.containsKey(value))
+                    valuesOfChunck.put(value, writeSegmentToPostingFileInFormat("", doc.getDocNo(), tf, weight));
+
             }
 
-            StrBuilder contentOfFile=new StrBuilder();
-            //write everything to file.
-//            File statText = new File(postingFilePath +File.separator+ docsContainer.hashCode() + ".txt");
-//            FileOutputStream is = new FileOutputStream(statText);
-//            OutputStreamWriter osw = new OutputStreamWriter(is);
-//            Writer w = new BufferedWriter(osw);
-            for (String term : valuesOfChunck.keySet()){
-                int df= countMatches(valuesOfChunck.get(term),'<');
-               // w.write(term+"|"+ df+"|"+valuesOfChunck.get(term));
-                contentOfFile.append(term+"|"+ df+"|"+valuesOfChunck.get(term));
-            }
-            writeToFilePool.addContentToStack(contentOfFile.toString());
+        }
 
-//            w.close();
-//            osw.close();
-//            is.close();
-//        } catch (IOException e) {
-//            System.err.println("Problem writing to the files "+ docsContainer.get(0).getDocNo() +" to "+ docsContainer.get(docsContainer.size()-1).getDocNo() );
-//        }
+        //  StrBuilder contentOfFile=new StrBuilder();
+        //write everything to file.
+        File statText = new File(postingFilePath + File.separator + indexForTempFiles + ".txt");
+        indexForTempFiles++;
+        FileOutputStream is = null;
+        try {
+            is = new FileOutputStream(statText);
+
+            OutputStreamWriter osw = new OutputStreamWriter(is);
+            Writer w = new BufferedWriter(osw);
+            for (String term : valuesOfChunck.keySet()) {
+                int df = countMatches(valuesOfChunck.get(term), '<');
+
+                w.write(term + "|" + df + "|" + valuesOfChunck.get(term)+System.lineSeparator());
+            }
+            w.close();
+            osw.close();
+            is.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     //this function help to add segment to line in posting file .
     //segment = <docID, tf, weight>
     public String writeSegmentToPostingFileInFormat(String mainLine ,String docId,int tf,double weight){
-        String ans=mainLine.replaceAll("\n","")+"<" + docId + " ," + tf + "," + Double.toString(weight) + ">" + '\n';
+        String ans=StringUtils.removeEnd(mainLine,"\n") + "<" + docId + " ," + tf + "," + Double.toString(weight) + ">";
         return ans;
     }
 
@@ -146,147 +155,54 @@ public class DocIndexer {
         return filesPaths;
     }
 
-    public void mergeTwoDocuments(String path1, String path2) {
-        try {
-            sortDocument(path1);
-            sortDocument(path2);
-            BufferedReader br1 = null;
-            BufferedReader br2 = null;
-            br1 = new BufferedReader(new InputStreamReader(new FileInputStream(path1), "UTF-8"));
-            br2 = new BufferedReader(new InputStreamReader(new FileInputStream(path2), "UTF-8"));
-            File merged = new File(postingFilePath+File.separator+ "merged"+hashCode() +".txt");
-            FileWriter fileWriter = new FileWriter(merged.getPath());
-            PrintWriter out = new PrintWriter(fileWriter);
-            Iterator it1 = br1.lines().iterator();
-            Iterator it2 = br2.lines().iterator();
-            //line1 - current line in doc1. term1 is the term value
-            String line1 = (String) it1.next();
-            String term1 = findTerm(line1);
-            //line2 - current line in doc2 . term2 is the term value
-            String line2 = (String) it2.next();
-            String term2 = findTerm(line2);
-            while (it1.hasNext() && it2.hasNext()) {
-                //in case its same term
-                if (CASE_INSENSITIVE_ORDER.compare(term1,term2) == 0) {
 
-//                    if (Character.isUpperCase(term1.charAt(0)) &&(Character.isLowerCase(term2.charAt(0))))
-//                            term1=term1.toLowerCase();
-//
-////                    if((Character.isUpperCase(term2.charAt(0)) &&(Character.isLowerCase(term1.charAt(0))) ))
-////                        term2=term2.toLowerCase();
+    public void mergeFiles() {
+        ArrayList<String> paths=getListOfFilesPaths(postingFilePath);
+        paths.sort(new FileSizeCompare());
+        ArrayList<FilesMerger> mergers = new ArrayList<>();
+        while (paths.size()>1){
+            ExecutorService executorService = Executors.newFixedThreadPool(MAX_T);
 
-
-                    // extract from line1 and line2 only <....> parts
-                     line1= line1.substring(line1.indexOf("<"),line1.lastIndexOf(">")+1);
-                     line2=line2.substring(line2.indexOf("<"),line2.lastIndexOf(">")+1);
-                     String temp= line1.replaceAll("\n","")+line2;
-                     //count total df
-                     int df= countMatches(temp,'<');
-                    //out.write(term1+"|"+df+"|"+line1+line2+"\n");
-                    out.write(term1+"|"+df+"|"+temp+"\n");
-                    System.out.println(term1+"|"+df+"|"+temp+"\n");
-
-                    //int indexOfMetaData = line2.indexOf("<");
-                    //out.write(line2.substring(indexOfMetaData) + "\n");
-                    line1 = (String) it1.next();
-                    term1 = findTerm((line1));
-                    line2 = (String) it2.next();
-                    term2 = findTerm((line2));
-
-
-                } else if (!it1.hasNext() ||  CASE_INSENSITIVE_ORDER.compare(term1, term2)> 0) {
-                    out.write(line2 + "\n");
-                    System.out.println(line2 + "\n");
-                    line2 = (String) it2.next();
-                    term2 = findTerm(line2);
-                } else if (!it2.hasNext() || CASE_INSENSITIVE_ORDER.compare(term2, term1)> 0) {
-                    out.write(line1 + "\n");
-                    System.out.println(line1 + "\n");
-                    line1 = (String) it1.next();
-                    term1 = findTerm(line1);
+            int numberOfTaskers = 0;
+            int numberOfFiles = 0;
+            while(numberOfTaskers<MAX_T){
+                if ((paths.size()- numberOfTaskers*2)>1){
+                    String path1=paths.get(numberOfFiles);
+                    String path2=paths.get(numberOfFiles + 1);
+                    mergers.add(new FilesMerger(path1, path2, postingFilePath));
                 }
-
+                numberOfTaskers+=1;
+                numberOfFiles+=2;
             }
-
-            // in case doc2 end and doc1 not
-            if (!it2.hasNext() && it1.hasNext()){
-                while(it1.hasNext()) {
-                    out.write(line1 + "\n");
-                    line1 = (String) it1.next();
-                    term1 = findTerm(line1);
-                }
+            for (FilesMerger takser :
+                    mergers) {
+                executorService.execute(takser);
             }
-
-            // in case doc1 end and doc2 not
-            if (!it1.hasNext() && it2.hasNext()){
-                while(it2.hasNext()) {
-                    out.write(line2 + "\n");
-                    line2 = (String) it2.next();
-                    term2 = findTerm(line2);
-                }
-            }
-
-            out.flush();
-            //delete original files
-            File file1=new File (path1);
-            file1.delete();
-            File file2=new File (path2);
-            file2.delete();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-// this function extract the term from line in file (term came before '|')
-    private String findTerm(String line) {
-        int indexOfEnd = line.indexOf('|');
-        return line.substring(0, indexOfEnd);
-    }
-
-    public void sortDocument(String path) throws IOException {
-
-        FileReader fileReader = null;
-        try {
-            fileReader = new FileReader(path);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        BufferedReader bufferedReader = new BufferedReader(fileReader);
-        String inputLine = "";
-        ArrayList<String> lineList = new ArrayList<>();
-        while (true) {
+            executorService.shutdown();
             try {
-                if (!((inputLine = bufferedReader.readLine()) != null)) break;
-            } catch (IOException e) {
-                e.printStackTrace();
+                executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                System.out.println(e.getCause());
             }
-            lineList.add(inputLine);
-        }
-        fileReader.close();
 
-        Collections.sort(lineList,new RatingCompare());
-        FileWriter fileWriter = new FileWriter(path);
-        PrintWriter out = new PrintWriter(fileWriter);
-        for (String outputLine : lineList) {
-            out.println(outputLine);
+            paths=getListOfFilesPaths(postingFilePath);
+            Collections.sort(paths, new FileSizeCompare());
         }
-        out.flush();
-        out.close();
-        fileWriter.close();
-
     }
 
-
-    class RatingCompare implements Comparator<String> {
+    class FileSizeCompare implements Comparator<String> {
+        /**
+         *
+         * @param o1
+         * @param o2
+         * @return
+         */
 
         @Override
         public int compare(String o1, String o2) {
-            o1=o1.substring(0,o1.indexOf('|'));
-            o2=o2.substring(0,o2.indexOf('|'));
-            return  (CASE_INSENSITIVE_ORDER.compare(o1, o2));
-
+            File file1 = new File(o1);
+            File file2 = new File(o2);
+            return file1.length() > file2.length() ? 1 : file1.length()< file2.length() ? -1 : 0  ;
         }
     }
 
