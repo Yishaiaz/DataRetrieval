@@ -42,10 +42,20 @@ public class FilesMerger implements Runnable{
      */
     @Override
     public void run() {
-
         String path1 = this.firstPath;
         String path2 = this.secondPath;
         try {
+            // did is to check if any of the files are zeros:
+            File first_file = new File(path1);
+            File second_file = new File(path2);
+            if (first_file.length() == 0){
+                first_file.delete();
+                return;
+            }
+            if (second_file.length() == 0){
+                second_file.delete();
+                return;
+            }
             sortDocument(path1);
             sortDocument(path2);
             BufferedReader br1 = null;
@@ -127,9 +137,8 @@ public class FilesMerger implements Runnable{
                 File file2=new File (path2);
                 file2.delete();
             }catch(Exception e){
+                //
             }
-            br1.close();
-            br2.close();
         } catch (IOException e) {
 //            e.printStackTrace();
         }
@@ -150,7 +159,7 @@ public class FilesMerger implements Runnable{
             bufferedReader =  new BufferedReader(fileReader);
         } catch (FileNotFoundException e) {
 //            e.printStackTrace();
-            bufferedReader.close();
+
             return;
         }
 
@@ -160,8 +169,8 @@ public class FilesMerger implements Runnable{
             try {
                 if (!((inputLine = bufferedReader.readLine()) != null)) break;
             } catch (IOException e) {
-                bufferedReader.close();
                 e.printStackTrace();
+                return;
             }
             lineList.add(inputLine);
         }
@@ -176,8 +185,8 @@ public class FilesMerger implements Runnable{
             }
             out.close();
         }catch (StringIndexOutOfBoundsException e){
-            out.close();
             System.out.println(e.getMessage());
+            throw new IOException("couldn't");
         }
 
 

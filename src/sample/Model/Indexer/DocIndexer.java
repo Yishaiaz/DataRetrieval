@@ -20,7 +20,7 @@ import static java.lang.String.CASE_INSENSITIVE_ORDER;
 
 
 public class DocIndexer {
-    private int MAX_T = 20;
+    private int MAX_T = 50;
     public static int indexForTempFiles = 0;
     public static int indexForMergeFiles = 0;
     String postingFilePath = "";
@@ -165,7 +165,7 @@ public class DocIndexer {
 
             int numberOfTaskers = 0;
             int numberOfFiles = 0;
-            while(numberOfTaskers<MAX_T){
+            while(numberOfTaskers<MAX_T && numberOfFiles<paths.size()){
                 if ((paths.size()- numberOfTaskers*2)>1){
                     String path1=paths.get(numberOfFiles);
                     String path2=paths.get(numberOfFiles + 1);
@@ -180,7 +180,7 @@ public class DocIndexer {
             }
             executorService.shutdown();
             try {
-                executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
+                executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.MINUTES);
             } catch (InterruptedException e) {
                 System.out.println(e.getCause());
             }
