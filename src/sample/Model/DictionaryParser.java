@@ -52,7 +52,7 @@ public class DictionaryParser implements Runnable {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(postingFilePath));
             BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(this.pathToDictionaryDirectory +File.separator+ "DictionaryTest.txt"));
             String line = bufferedReader.readLine();
-            bufferedWriter.write("Term Name, Docs Appearances, Total Corpus Appearances, line in posting file\n");
+            bufferedWriter.write("Term Name, Total Corpus Appearances, Docs Appearances, line in posting file\n");
             while (line != null) {
                 int termEndIndex = StringUtils.indexOf(line, "|");
 
@@ -72,7 +72,7 @@ public class DictionaryParser implements Runnable {
                     }
                     singleTermTotalNumberOfApperance = sum;
                     // todo: here we have everything about the single term to write to the dictionary.
-                    bufferedWriter.write(String.format("%s,%d,%d,%d" + System.lineSeparator(), singleTerm, singleTermNumberOfDocsAppearance, singleTermTotalNumberOfApperance, postingLineNumber));
+                    bufferedWriter.write(String.format("%s,%d,%d,%d" + System.lineSeparator(), singleTerm,singleTermTotalNumberOfApperance, singleTermNumberOfDocsAppearance, postingLineNumber));
 //                    System.out.println(String.format("Term Name: %s - in Number Of Docs %d with total appearances %d line number in posting file %d", singleTerm, singleTermNumberOfDocsAppearance, singleTermTotalNumberOfApperance, postingLineNumber));
                 } catch (Exception e) {
                     System.out.println(e.getMessage());

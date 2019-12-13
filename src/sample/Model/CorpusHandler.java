@@ -23,8 +23,6 @@ public class CorpusHandler {
     private ArrayList<String> filesPaths; //list contains all paths in Corpus dir.
     public HashSet<String> stopWords = new HashSet<>();
     public HashSet<String> months = new HashSet<>();
-    // ExecutorService pool = Executors.newFixedThreadPool(3);
-    //WriteToFilePool writeToFilePool;
 
     public CorpusHandler(String corpusPath) {
         this.corpusPath = corpusPath;
@@ -41,7 +39,7 @@ public class CorpusHandler {
     }
 
     // This function add to 'filesPath' list with files paths.
-    public void initListOfFilesPaths() {  //"C:\\Users\\Sahar Ben Baruch\\Desktop\\corpus"
+    public void initListOfFilesPaths() {
         File corpusFolder = new File(corpusPath);
 
         //check if path exist
@@ -79,7 +77,7 @@ public class CorpusHandler {
         long start_time = System.currentTimeMillis();
         ReadFile readFile = new ReadFile(this.corpusPath, this.stopWords, this.months,withStemming,postingFilesPath);
 
-        File docsInfoFile= new File (Paths.get("").toAbsolutePath().toString()+"\\DocsInfo");
+        File docsInfoFile= new File (Paths.get("").toAbsolutePath().toString()+File.separator+"DocsInfo");
         for (String path : filesPaths) {
             if(path.endsWith(".DS_Store")){
                 System.out.println("you and your mac");
@@ -93,7 +91,8 @@ public class CorpusHandler {
         start_time = System.currentTimeMillis();
         readFile.indexer.mergeFiles();
         System.out.println(String.format("Total time to merge : %d seconds", (System.currentTimeMillis() - start_time)/1000));
-
+        DictionaryParser dicParser = new DictionaryParser("a","z",postingFilesPath,corpusPath,true);
+        dicParser.run();
 
 
 
