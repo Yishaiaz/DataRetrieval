@@ -49,4 +49,8 @@ public class Document {
     public void setParsedTerms(TermHashMapDataStructure parsedTerms) {
         this.parsedTerms = parsedTerms;
     }
+
+    public int howManyUniqTermsInDoc(){
+       return parsedTerms.howManyUniqTerms();
+    }
 }

@@ -1,13 +1,22 @@
 package sample.Model.DataStructures;
 
 import java.util.HashMap;
-
+/**
+ *This structure holds Hash Map .
+ * key is term in lower case
+ * value is TermHashMapEntry
+ * every Document has this TermHashMapDataStructure that holds all his terms.
+ */
 public class TermHashMapDataStructure {
     public HashMap<String, TermHashMapEntry> termsEntries = new HashMap<>();
 
     public TermHashMapDataStructure() {}
-
-    //change value to new low case value
+    /**
+     * change value to new low case value when so far term apper only as Upper case and now we saw it in
+     * lowwer case
+     * @param newValue
+     * @param weight
+     */
     public void updateValueToLowCastValue(String newValue, double weight) {
         String key = newValue.toLowerCase();
         TermHashMapEntry entry = termsEntries.get(key);
@@ -16,7 +25,12 @@ public class TermHashMapDataStructure {
         newEntry.termLocations = entry.termLocations;
         termsEntries.replace(key, entry, newEntry);
     }
-
+    /**
+     * insert new TermHashMapEntry to Hash Map termsEntries.
+     * * @param s is term
+     * @param iDFLocation location of term
+     * @param weight weight of term
+     */
     public void insert(String s, int iDFLocation, double weight) {
         String entryValue = s;
         String key = s.toLowerCase();
@@ -59,5 +73,19 @@ public class TermHashMapDataStructure {
 
     public void SaveToQueue() {
         return;
+    }
+
+    public int  howManyUniqTerms(){
+        return termsEntries.size();
+    }
+
+    public int getMaxTf(){
+        int max=0;
+       for (TermHashMapEntry entry: termsEntries.values()){
+           if (entry.getTF()>max) {
+               max = entry.getTF();
+           }
+       }
+           return max;
     }
 }

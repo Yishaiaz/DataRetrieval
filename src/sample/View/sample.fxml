@@ -1,50 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.text.Font?>
 
-<GridPane alignment="center" hgap="10" vgap="10" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.View.MyView">
+<GridPane alignment="center" hgap="10" prefHeight="600.0" prefWidth="900.0" vgap="10" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.View.MyView">
    <children>
       <BorderPane prefHeight="600.0" prefWidth="900.0">
-         <right>
-            <AnchorPane prefHeight="600.0" prefWidth="900.0" BorderPane.alignment="CENTER">
+         <left>
+            <AnchorPane prefHeight="600.0" prefWidth="600.0" BorderPane.alignment="CENTER">
                <children>
-                  <Button id="btn_browse" fx:id="btn_browse" layoutX="663.0" layoutY="165.0" mnemonicParsing="false" onAction="#chooseCorpusPath" text="Browse">
+                  <Button id="btn_browse" fx:id="btn_browse" layoutX="809.0" layoutY="209.0" mnemonicParsing="false" onAction="#chooseCorpusPath" text="Browse">
                      <font>
                         <Font name="Aharoni Bold" size="12.0" />
                      </font>
                   </Button>
-                  <TextField fx:id="txtField_corpusPath" layoutX="147.0" layoutY="164.0" prefHeight="26.0" prefWidth="500.0" />
-                  <Label layoutX="35.0" layoutY="169.0" prefHeight="18.0" prefWidth="90.0" text="Corpus Path">
+                  <TextField fx:id="txtField_corpusPath" layoutX="166.0" layoutY="207.0" prefHeight="26.0" prefWidth="618.0" />
+                  <Label layoutX="76.0" layoutY="211.0" prefHeight="18.0" prefWidth="90.0" text="Corpus Path">
                      <font>
                         <Font name="Aharoni Bold" size="12.0" />
                      </font>
                   </Label>
-                  <Button id="btn_parse" fx:id="btn_parse" layoutX="676.0" layoutY="337.0" mnemonicParsing="false" onAction="#activate" text="parse">
+                  <Button id="btn_parse" fx:id="btn_parse" layoutX="687.0" layoutY="365.0" mnemonicParsing="false" onAction="#activate" prefHeight="43.0" prefWidth="96.0" text="Start">
                      <font>
                         <Font name="Aharoni Bold" size="12.0" />
                      </font>
                   </Button>
-                  <TextField id="txtField_testInput" fx:id="txtField_postingFilesInput" layoutX="147.0" layoutY="209.0" prefHeight="26.0" prefWidth="500.0" />
-                  <Label layoutX="20.0" layoutY="213.0" text="Path for Posting Files">
+                  <TextField id="txtField_testInput" fx:id="txtField_postingFilesInput" layoutX="166.0" layoutY="249.0" prefHeight="26.0" prefWidth="618.0" />
+                  <Label layoutX="27.0" layoutY="253.0" text="Path for Posting Files">
                      <font>
                         <Font name="System Bold Italic" size="12.0" />
                      </font>
                   </Label>
-                  <Button id="btn_test" fx:id="btn_test" layoutX="663.0" layoutY="211.0" mnemonicParsing="false" onAction="#choosePostingFilesPath" text="Browse">
+                  <Button id="btn_test" fx:id="btn_test" layoutX="809.0" layoutY="250.0" mnemonicParsing="false" onAction="#choosePostingFilesPath" text="Browse">
                      <font>
                         <Font name="Aharoni Bold" size="12.0" />
                      </font>
                   </Button>
-                  <TextArea id="txtArea_resultScreen" layoutX="147.0" layoutY="300.0" prefHeight="277.0" prefWidth="506.0" />
-                  <ImageView fitHeight="116.0" fitWidth="443.0" layoutX="179.0" layoutY="42.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fitHeight="115.0" fitWidth="595.0" layoutX="276.0" layoutY="48.0" pickOnBounds="true" preserveRatio="true">
                      <image>
                         <Image url="@../resources/logo.JPG" />
                      </image>
                   </ImageView>
-                  <MenuBar layoutX="1.0" layoutY="1.0" prefHeight="26.0" prefWidth="900.0">
+                  <MenuBar layoutY="1.0" prefHeight="26.0" prefWidth="900.0">
                     <menus>
                       <Menu mnemonicParsing="false" text="File">
                         <items>
@@ -63,21 +73,21 @@
                       </Menu>
                     </menus>
                   </MenuBar>
-                  <CheckBox fx:id="stemming_cp" layoutX="653.0" layoutY="255.0" mnemonicParsing="false" text="Stemming">
+                  <CheckBox fx:id="stemming_cp" layoutX="792.0" layoutY="306.0" mnemonicParsing="false" text="Stemming">
                      <font>
                         <Font name="System Bold" size="14.0" />
                      </font>
                   </CheckBox>
-                  <Button fx:id="reset_btn" layoutX="676.0" layoutY="300.0" mnemonicParsing="false" text="Reset" onAction="#reset">
+                  <Button fx:id="reset_btn" layoutX="689.0" layoutY="297.0" mnemonicParsing="false" onAction="#reset" prefHeight="38.0" prefWidth="92.0" text="Reset">
                      <font>
                         <Font name="System Bold" size="12.0" />
                      </font>
                   </Button>
-                  <Button layoutX="20.0" layoutY="287.0" mnemonicParsing="false" text="Show Dictionary" />
-                  <Button layoutX="21.0" layoutY="323.0" mnemonicParsing="false" text="Load Dictionary" />
+                  <Button fx:id="showDictionary_btn" layoutX="214.0" layoutY="387.0" mnemonicParsing="false" onAction="#presentDictionary" prefHeight="48.0" prefWidth="162.0" text="Show Dictionary" />
+                  <Button fx:id="loadDictionary_btn" layoutX="216.0" layoutY="312.0" mnemonicParsing="false" onAction="#loadDictionary" prefHeight="46.0" prefWidth="158.0" text="Load Dictionary" />
                </children>
             </AnchorPane>
-         </right>
+         </left>
       </BorderPane>
    </children>
    <columnConstraints>
