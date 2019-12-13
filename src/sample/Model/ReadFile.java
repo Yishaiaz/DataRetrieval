@@ -24,7 +24,7 @@ public class ReadFile {
     public ReadFile(String corpusPath, HashSet<String> stopWords, HashSet<String> months, boolean withStemming, String postingFilesPath) {
         this.corpusPath = corpusPath;
         this.parser = new DocParser(withStemming, stopWords, months);
-        indexer=new DocIndexer(postingFilesPath);
+        indexer=new DocIndexer(postingFilesPath,withStemming);
         this.STOP_WORD_BAG = stopWords;
 //        readStopWordsFile();
     }

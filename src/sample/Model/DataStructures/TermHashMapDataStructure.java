@@ -2,10 +2,7 @@ package sample.Model.DataStructures;
 
 import java.util.HashMap;
 /**
- *This structure holds Hash Map .
- * key is term in lower case
- * value is TermHashMapEntry
- * every Document has this TermHashMapDataStructure that holds all his terms.
+ * This class help to hold all terms of one document. do it using HashMap
  */
 public class TermHashMapDataStructure {
     public HashMap<String, TermHashMapEntry> termsEntries = new HashMap<>();
@@ -43,8 +40,7 @@ public class TermHashMapDataStructure {
                 updateValueToLowCastValue(s, weight);
 
             termsEntries.get(key).addLocation(iDFLocation);
-        } else {
-            // in case its new Term in Structure.
+        } else {     // in case its new Term in Structure.
 
             //in case word start with uppercase.
             if (Character.isUpperCase(s.charAt(0)))
@@ -56,6 +52,11 @@ public class TermHashMapDataStructure {
         }
     }
 
+    /**
+     * checks if all characters in str are in lower case.
+     * @param str
+     * @return
+     */
     private static boolean isStringLowerCase(String str) {
 
         //convert String to char array
@@ -71,14 +72,18 @@ public class TermHashMapDataStructure {
         return true;
     }
 
-    public void SaveToQueue() {
-        return;
-    }
-
+    /**
+     *
+     * @return how many unique terms are in one doc
+     */
     public int  howManyUniqTerms(){
         return termsEntries.size();
     }
 
+    /**
+     *
+     * @return The term that most frequent in docs
+     */
     public int getMaxTf(){
         int max=0;
        for (TermHashMapEntry entry: termsEntries.values()){

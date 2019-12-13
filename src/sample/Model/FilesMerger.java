@@ -193,7 +193,11 @@ public class FilesMerger implements Runnable{
     }
 
     /**
+
+     * comparator that compare two lines in different docs (part of merge process) and remove '|'
+     * so the compare is only between terms. also insensitive order
      * a custom comparator class, implements Comparator<String>
+
      */
     class RatingCompare implements Comparator<String> {
         /**

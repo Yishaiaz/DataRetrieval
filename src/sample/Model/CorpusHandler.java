@@ -17,6 +17,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * class mange all preparing search engine
+ */
 public class CorpusHandler {
     private String corpusPath;
     public String postingFilesPath="";
@@ -38,7 +41,9 @@ public class CorpusHandler {
         this.postingFilesPath = postingFilesPath;
     }
 
-    // This function add to 'filesPath' list with files paths.
+    /**
+     * This function add to 'filesPath' list with files paths.
+     */
     public void initListOfFilesPaths() {
         File corpusFolder = new File(corpusPath);
 
@@ -72,6 +77,11 @@ public class CorpusHandler {
             System.out.println("Path doesn't exist.");
     }
 
+    /**
+     * This function start process of parsing to every path in corpus path
+     * @param withStemming
+     * @throws FileNotFoundException
+     */
     public void findTextInDocs(boolean withStemming) throws FileNotFoundException {
 
         long start_time = System.currentTimeMillis();
@@ -94,10 +104,12 @@ public class CorpusHandler {
         DictionaryParser dicParser = new DictionaryParser("a","z",postingFilesPath,corpusPath,true);
         dicParser.run();
 
-
-
-
     }
+
+    /**
+     * this function reads stop words from '05 stop_words.txt' file
+     * @return
+     */
     private HashSet<String> readStopWordsFile(){
         HashSet<String> stopWords = new HashSet<>();
         BufferedReader br = null;
