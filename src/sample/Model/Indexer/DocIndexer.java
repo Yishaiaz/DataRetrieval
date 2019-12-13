@@ -16,27 +16,29 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.lang.String.CASE_INSENSITIVE_ORDER;
-
-
+/**
+ * class that write temp posting files.
+ */
 public class DocIndexer {
     private int MAX_T = 20;
     public static int indexForTempFiles = 0;
-    public static int indexForMergeFiles = 0;
     String postingFilePath = "";
+    boolean stemming;
 
-    // WriteToFilePool writeToFilePool;
-    public DocIndexer(String postingFilePath/*,WriteToFilePool writeToFilePool*/) {
+    public DocIndexer(String postingFilePath,boolean withStemming) {
         this.postingFilePath = postingFilePath;
-        //this.writeToFilePool=writeToFilePool;
+        this.stemming=withStemming;
 
     }
 
+    /**
+     * index all docs in given docsContainer and write the out come to a file .
+     * @param docsContainer
+     */
+
     //this function receives document and put into file all terms inside it.
     public void indexChuckDocs(ArrayList<Document> docsContainer) {
-        //     try {
 
-        //<Term, postingString>
         HashMap<String, String> valuesOfChunck = new HashMap<>();
 
         for (Document doc : docsContainer) {
@@ -102,13 +104,27 @@ public class DocIndexer {
         }
     }
 
-    //this function help to add segment to line in posting file .
-    //segment = <docID, tf, weight>
-    public String writeSegmentToPostingFileInFormat(String mainLine ,String docId,int tf,double weight){
+
+    /**
+     * this function help to add segment to line in posting file .
+     * segment = <docID, tf, weight>
+     * @param mainLine original line that I want to append to it
+     * @param docId
+     * @param tf
+     * @param weight
+     * @return
+     */
+        public String writeSegmentToPostingFileInFormat(String mainLine ,String docId,int tf,double weight){
         String ans=StringUtils.removeEnd(mainLine,"\n") + "<" + docId + " ," + tf + "," + Double.toString(weight) + ">";
         return ans;
     }
 
+    /**
+     * how many times char c exist in str
+     * @param str
+     * @param c
+     * @return
+     */
     public int countMatches(String str, char c) {
         int count = 0;
 
@@ -121,7 +137,11 @@ public class DocIndexer {
     }
 
 
-    // This function add to 'filesPath' list with files paths.
+    /**
+     * This function add to 'filesPath' list with files paths.
+     * @param path
+     * @return
+     */
     public static ArrayList<String> getListOfFilesPaths(String path) {  //"C:\\Users\\Sahar Ben Baruch\\Desktop\\corpus"
         ArrayList<String> filesPaths= new ArrayList<>();
         File corpusFolder = new File(path);
@@ -155,9 +175,12 @@ public class DocIndexer {
         return filesPaths;
     }
 
-
+    /**
+     * this function merge all files in posting path- until left one merged file.
+     */
     public void mergeFiles() {
         ArrayList<String> paths=getListOfFilesPaths(postingFilePath);
+        paths.removeIf(path-> (path.endsWith("stemmingPostingFile.txt")|| path.endsWith("notStemmingPostingFile.txt")));
         paths.sort(new FileSizeCompare());
         ArrayList<FilesMerger> mergers = new ArrayList<>();
         while (paths.size()>1){
@@ -186,13 +209,28 @@ public class DocIndexer {
             }
 
             paths=getListOfFilesPaths(postingFilePath);
+            paths.removeIf(path-> (path.endsWith("stemmingPostingFile.txt")|| path.endsWith("notStemmingPostingFile.txt")));
             Collections.sort(paths, new FileSizeCompare());
+        }
+
+        File mergedFile = new File (getListOfFilesPaths(postingFilePath).get(0));
+        //change file name depend if including stemming or not.
+        if (stemming){
+            String pathToMergeFile=getListOfFilesPaths(postingFilePath).get(0);
+            File f= new File(postingFilePath+File.separator+"stemmingPostingFile.txt");
+            mergedFile.renameTo(f);
+        }
+        else{
+            String pathToMergeFile=getListOfFilesPaths(postingFilePath).get(0);
+            File f= new File(postingFilePath+File.separator+"notStemmingPostingFile.txt");
+            mergedFile.renameTo(f);
         }
     }
 
     class FileSizeCompare implements Comparator<String> {
         /**
-         *
+         *compere two files by their weights.
+         * because we want merge smaller files first.
          * @param o1
          * @param o2
          * @return

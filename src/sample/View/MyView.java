@@ -29,6 +29,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * view according MVC
+ */
 public class MyView {
     private Controller controller;
     private String dictionaryContent="";
@@ -42,6 +45,10 @@ public class MyView {
     public javafx.scene.control.TextField txtField_corpusPath;
     public javafx.scene.control.TextArea textAreaDic1;
 
+    /**
+     * function activate when press on 'browse' button
+     * get from user path to corpus
+     */
     public void chooseCorpusPath() {
         DirectoryChooser chooser = new DirectoryChooser();
         File f = chooser.showDialog(null);
@@ -58,6 +65,10 @@ public class MyView {
         }
     }
 
+    /**
+     * function activate when press on 'browse' button
+     * get from user path to posting files
+     */
     public void choosePostingFilesPath() {
         DirectoryChooser chooser = new DirectoryChooser();
         File f = chooser.showDialog(null);
@@ -74,11 +85,14 @@ public class MyView {
         }
     }
 
+    /**
+     * start process of preparing searching engine
+     */
     public void activate() {
 
+        //check both paths are fill up
         if (!txtField_postingFilesInput.getText().equals("") && !txtField_corpusPath.getText().equals("")) {
-            //clean posting file path before starting.
-            cleanPostingFilePath();
+
             long start_time = System.currentTimeMillis();
 
             if (stemming_cp.isSelected()) {
@@ -100,6 +114,10 @@ public class MyView {
 
         }
 
+    /**
+     * after indexing present info in pop up message.
+     * @param timeOfProcess
+     */
     private void showResults(long timeOfProcess) {
         try {
             Path pathToDocsInfo = Paths.get(Paths.get("").toAbsolutePath().toString()+File.separator+"DocsInfo.txt");
@@ -128,7 +146,10 @@ public class MyView {
         }
     }
 
-
+    /**
+     * activate by pressing 'reset' button
+     * delete content of posting path and field from gui
+     */
     public void reset() {
         cleanPostingFilePath();
         txtField_postingFilesInput.clear();
@@ -136,6 +157,9 @@ public class MyView {
         stemming_cp.setSelected(false);
     }
 
+    /**
+     * cleaning posting file path- delete all files ends with '.txt'
+     */
     public void cleanPostingFilePath() {
         //get all paths of Posting Files into 'pathsToPostFiles'.
         File folder = new File(txtField_postingFilesInput.getText());
@@ -182,6 +206,10 @@ public class MyView {
         this.controller = controller;
     }
 
+    /**
+     * activate by pressing 'load dictionary' button .
+     * load dictionary from "DictionaryTest.txt" to RAM .
+     */
     public void loadDictionary() {
         if (!txtField_postingFilesInput.getText().equals("") && !txtField_corpusPath.getText().equals("")) {
             String dictionaryPath = txtField_corpusPath.getText();
@@ -190,6 +218,8 @@ public class MyView {
             String str = "";
             try {
                 BufferedReader br = new BufferedReader(new FileReader(dictionary));
+
+                //present only 'term , how many times in all corpus'
                 while ((str = br.readLine()) != null) {
                     str = str.substring(0, str.lastIndexOf(',')); // remove from presentation pointer to line
                     str = str.substring(0, str.lastIndexOf(',')); // remove from presentation df
@@ -218,6 +248,10 @@ public class MyView {
 
     }
 
+    /**
+     * present dictionary from RAM in pop up window
+     * @throws IOException
+     */
     public void presentDictionary() throws IOException {
 
         if (dictionaryContent.equals("")) {

@@ -178,6 +178,10 @@ public class FilesMerger implements Runnable{
 
     }
 
+    /**
+     * comparator that compare two lines in different docs (part of merge process) and remove '|'
+     * so the compare is only between terms. also insensitive order
+     */
     class RatingCompare implements Comparator<String> {
 
         @Override
