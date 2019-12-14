@@ -124,6 +124,7 @@ public class FilesMerger implements Runnable{
                     term2 =  StringUtils.substring(line2, 0, StringUtils.indexOf(line2,'|'));
                 }
             }
+            out.flush();
             out.close();
             br1.close();
             br2.close();

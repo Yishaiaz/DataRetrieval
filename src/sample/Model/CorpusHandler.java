@@ -87,7 +87,13 @@ public class CorpusHandler {
         long start_time = System.currentTimeMillis();
         ReadFile readFile = new ReadFile(this.corpusPath, this.stopWords, this.months,withStemming,postingFilesPath);
 
-        File docsInfoFile= new File (Paths.get("").toAbsolutePath().toString()+File.separator+"DocsInfo");
+        if (withStemming) {
+            File docsInfoFile = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoStemming.txt");
+        }
+     else if (!withStemming){
+            File docsInfoFile = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoNoStemming");
+            }
+
         for (String path : filesPaths) {
             if(path.endsWith(".DS_Store")){
                 System.out.println("you and your mac");
@@ -101,7 +107,7 @@ public class CorpusHandler {
         start_time = System.currentTimeMillis();
         readFile.indexer.mergeFiles();
         System.out.println(String.format("Total time to merge : %d seconds", (System.currentTimeMillis() - start_time)/1000));
-        DictionaryParser dicParser = new DictionaryParser("a","z",postingFilesPath,corpusPath,true);
+        DictionaryParser dicParser = new DictionaryParser("a","z",postingFilesPath,corpusPath,true,withStemming);
         dicParser.run();
 
     }

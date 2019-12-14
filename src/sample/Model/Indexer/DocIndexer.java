@@ -213,15 +213,16 @@ public class DocIndexer {
             Collections.sort(paths, new FileSizeCompare());
         }
 
-        File mergedFile = new File (getListOfFilesPaths(postingFilePath).get(0));
+        ArrayList <String> paths1=getListOfFilesPaths(postingFilePath);
+        paths1.removeIf(p->(p.endsWith("stemmingPostingFile.txt")|| (p.endsWith("notStemmingPostingFile.txt"))));
+        String pathToMergeFile=paths1.get(0);
+        File mergedFile = new File (pathToMergeFile);
         //change file name depend if including stemming or not.
         if (stemming){
-            String pathToMergeFile=getListOfFilesPaths(postingFilePath).get(0);
             File f= new File(postingFilePath+File.separator+"stemmingPostingFile.txt");
             mergedFile.renameTo(f);
         }
         else{
-            String pathToMergeFile=getListOfFilesPaths(postingFilePath).get(0);
             File f= new File(postingFilePath+File.separator+"notStemmingPostingFile.txt");
             mergedFile.renameTo(f);
         }

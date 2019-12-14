@@ -21,13 +21,16 @@ public class DictionaryParser implements Runnable {
     private String pathToIndex;
     private String pathToDictionaryDirectory;
     private boolean isNumericParser;
+    private boolean isStemming;
 
-    public DictionaryParser(String alphabetRangeStart, String alphabetRangeEnd, String pathToIndex, String pathToDictionaryDirectory, Boolean numericParser) {
+    public DictionaryParser(String alphabetRangeStart, String alphabetRangeEnd, String pathToIndex, String pathToDictionaryDirectory, Boolean numericParser, boolean isStemming) {
         this.alphabetRangeStart = StringUtils.lowerCase(alphabetRangeStart);
         this.alphabetRangeEnd = StringUtils.lowerCase(alphabetRangeEnd);
         this.pathToIndex = pathToIndex;
         this.pathToDictionaryDirectory = pathToDictionaryDirectory;
         this.isNumericParser = numericParser;
+        this . isStemming=isStemming;
+
     }
 
     /**
@@ -48,9 +51,22 @@ public class DictionaryParser implements Runnable {
         int singleTermNumberOfDocsAppearance;
         int singleTermTotalNumberOfApperance;
         try {
-            String postingFilePath=  getPostingFilePath(getPathToIndex());
+            String postingFilePath= null;
+            if (isStemming){
+                postingFilePath=getPostingFilePath(getPathToIndex()+File.separator+"stemmingPostingFile.txt");
+            }
+            else{
+                postingFilePath=getPostingFilePath(getPathToIndex()+File.separator+"notStemmingPostingFile.txt");
+            }
+
             BufferedReader bufferedReader = new BufferedReader(new FileReader(postingFilePath));
-            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(this.pathToDictionaryDirectory +File.separator+ "DictionaryTest.txt"));
+            BufferedWriter bufferedWriter=null;
+            if (isStemming) {
+                bufferedWriter = new BufferedWriter(new FileWriter(this.pathToDictionaryDirectory + File.separator + "DictionaryStemming.txt"));
+            }
+            else{
+                bufferedWriter = new BufferedWriter(new FileWriter(this.pathToDictionaryDirectory + File.separator + "DictionaryNoStemming.txt"));
+            }
             String line = bufferedReader.readLine();
             bufferedWriter.write("Term Name, Total Corpus Appearances, Docs Appearances, line in posting file\n");
             while (line != null) {
@@ -80,6 +96,9 @@ public class DictionaryParser implements Runnable {
                 line = bufferedReader.readLine();
                 postingLineNumber += 1;
             }
+            bufferedReader.close();
+            bufferedWriter.flush();
+            bufferedWriter.close();
 
 
         } catch (IOException e) {

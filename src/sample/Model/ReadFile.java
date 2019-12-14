@@ -20,12 +20,14 @@ public class ReadFile {
     private final HashSet<String> STOP_WORD_BAG;
     public DocIndexer indexer;
     public static int indexForDocInfo=0;
+    public boolean withStemming;
 
     public ReadFile(String corpusPath, HashSet<String> stopWords, HashSet<String> months, boolean withStemming, String postingFilesPath) {
         this.corpusPath = corpusPath;
         this.parser = new DocParser(withStemming, stopWords, months);
         indexer=new DocIndexer(postingFilesPath,withStemming);
         this.STOP_WORD_BAG = stopWords;
+        this.withStemming=withStemming;
 //        readStopWordsFile();
     }
 
@@ -59,7 +61,13 @@ public class ReadFile {
                         //with timer
                         long start_time = System.currentTimeMillis();
                         Document doc = this.parser.Parse(fullDocStringBuilder.toString());
-                        File docInfo= new File(Paths.get("").toAbsolutePath().toString()+"\\DocsInfo.txt");
+                        File docInfo=null;
+                        if (withStemming) {
+                            docInfo = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoStemming.txt");
+                        }
+                        else{
+                            docInfo=new File(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoNoStemming.txt");
+                        }
 
 
                         FileWriter fw = new FileWriter(docInfo,true);
