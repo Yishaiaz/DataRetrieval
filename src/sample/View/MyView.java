@@ -120,10 +120,23 @@ public class MyView {
      */
     private void showResults(long timeOfProcess) {
         try {
-            Path pathToDocsInfo = Paths.get(Paths.get("").toAbsolutePath().toString()+File.separator+"DocsInfo.txt");
+            Path pathToDocsInfo=null;
+            if (stemming_cp.isSelected()){
+                 pathToDocsInfo = Paths.get(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoStemming.txt");
+        }
+            else{
+                 pathToDocsInfo = Paths.get(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoNoStemming.txt");
+            }
             long numOfDocs = Files.lines(pathToDocsInfo).count();
 
-            Path pathToDic = Paths.get(txtField_corpusPath.getText()+File.separator+"DictionaryTest.txt");
+            Path pathToDic =null;
+            if (stemming_cp.isSelected()){
+                pathToDic= Paths.get(txtField_corpusPath.getText()+File.separator+"DictionaryStemming.txt");
+            }
+            else{
+                pathToDic= Paths.get(txtField_corpusPath.getText()+File.separator+"DictionaryNoStemming.txt");
+            }
+
             long numOfTerms = Files.lines(pathToDic).count();
 
             StrBuilder content= new StrBuilder ();
@@ -155,6 +168,25 @@ public class MyView {
         txtField_postingFilesInput.clear();
         txtField_corpusPath.clear();
         stemming_cp.setSelected(false);
+        File docInfoStemming= new File(Paths.get("").toAbsolutePath().toString()+File.separator+"DocsInfoStemming.txt");
+        if (docInfoStemming.exists())
+        docInfoStemming.delete();
+
+        //delete docs info
+        File docInfoNoStemming= new File(Paths.get("").toAbsolutePath().toString()+File.separator+"DocsInfoNoStemming.txt");
+        if (docInfoNoStemming.exists())
+            docInfoNoStemming.delete();
+
+        //delete dics
+        File dicStemming= new File(txtField_corpusPath.getText()+File.separator+"DictionaryStemming.txt");
+        if (dicStemming.exists())
+            dicStemming.delete();
+
+        File dicNoStemming= new File(txtField_corpusPath.getText()+File.separator+"DictionaryNoStemming.txt");
+        if (dicNoStemming.exists())
+            dicNoStemming.delete();
+
+
     }
 
     /**
@@ -213,14 +245,20 @@ public class MyView {
     public void loadDictionary() {
         if (!txtField_postingFilesInput.getText().equals("") && !txtField_corpusPath.getText().equals("")) {
             String dictionaryPath = txtField_corpusPath.getText();
-            File dictionary = new File(dictionaryPath + File.separator + "DictionaryTest.txt");
+            File dictionary=null;
+            if (stemming_cp.isSelected()){
+                dictionary = new File(dictionaryPath + File.separator + "DictionaryStemming.txt");
+            }
+            else{
+                dictionary=new File(dictionaryPath + File.separator + "DictionaryNoStemming.txt");
+            }
             StrBuilder dictionaryContent = new StrBuilder();
             String str = "";
             try {
                 BufferedReader br = new BufferedReader(new FileReader(dictionary));
 
                 //present only 'term , how many times in all corpus'
-                while ((str = br.readLine()) != null) {
+                while ((str = br.readLine()) != null && (!str.equals(""))) {
                     str = str.substring(0, str.lastIndexOf(',')); // remove from presentation pointer to line
                     str = str.substring(0, str.lastIndexOf(',')); // remove from presentation df
                     dictionaryContent.append(str + System.lineSeparator());
