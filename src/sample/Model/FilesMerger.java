@@ -42,10 +42,20 @@ public class FilesMerger implements Runnable{
      */
     @Override
     public void run() {
-
         String path1 = this.firstPath;
         String path2 = this.secondPath;
         try {
+            // did is to check if any of the files are zeros:
+            File first_file = new File(path1);
+            File second_file = new File(path2);
+            if (first_file.length() == 0){
+                first_file.delete();
+                return;
+            }
+            if (second_file.length() == 0){
+                second_file.delete();
+                return;
+            }
             sortDocument(path1);
             sortDocument(path2);
             BufferedReader br1 = null;
@@ -128,8 +138,8 @@ public class FilesMerger implements Runnable{
                 File file2=new File (path2);
                 file2.delete();
             }catch(Exception e){
+                //
             }
-
         } catch (IOException e) {
 //            e.printStackTrace();
         }
@@ -150,6 +160,7 @@ public class FilesMerger implements Runnable{
             bufferedReader =  new BufferedReader(fileReader);
         } catch (FileNotFoundException e) {
 //            e.printStackTrace();
+
             return;
         }
 
@@ -160,31 +171,42 @@ public class FilesMerger implements Runnable{
                 if (!((inputLine = bufferedReader.readLine()) != null)) break;
             } catch (IOException e) {
                 e.printStackTrace();
+                return;
             }
             lineList.add(inputLine);
         }
-        fileReader.close();
+        bufferedReader.close();
+        FileWriter fileWriter = new FileWriter(path);
+        BufferedWriter out = null;
         try{
+            out = new BufferedWriter(fileWriter);
             Collections.sort(lineList,new RatingCompare());
-            FileWriter fileWriter = new FileWriter(path);
-            BufferedWriter out = new BufferedWriter(fileWriter);
             for (String outputLine : lineList) {
                 out.write(outputLine + System.lineSeparator());
             }
             out.close();
         }catch (StringIndexOutOfBoundsException e){
             System.out.println(e.getMessage());
+            throw new IOException("couldn't");
         }
 
 
     }
 
     /**
+
      * comparator that compare two lines in different docs (part of merge process) and remove '|'
      * so the compare is only between terms. also insensitive order
+     * a custom comparator class, implements Comparator<String>
+
      */
     class RatingCompare implements Comparator<String> {
-
+        /**
+         *  compares between two strings according to CASE_INSENSITIVE_ORDER, default by Java.
+         * @param o1 - String
+         * @param o2 - String
+         * @return int [>1,0,<-1]
+         */
         @Override
         public int compare(String o1, String o2) {
             o1=o1.substring(0,o1.indexOf('|'));
