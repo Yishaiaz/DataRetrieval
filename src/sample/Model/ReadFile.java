@@ -6,34 +6,39 @@ import sample.Model.Parser.IParser;
 import sample.Model.TaskPool.WriteToFilePool;
 
 import java.io.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-
+/**
+ * responsible for read corpse and parse it
+ */
 public class ReadFile {
     private final String corpusPath;
     private final IParser parser;
     private final HashSet<String> STOP_WORD_BAG;
     public DocIndexer indexer;
+    public static int indexForDocInfo=0;
+    public boolean withStemming;
 
-    public ReadFile(String corpusPath, HashSet<String> stopWords, HashSet<String> months, boolean withStemming, String postingFilesPath/*, WriteToFilePool writeToFilePool*/) {
+    public ReadFile(String corpusPath, HashSet<String> stopWords, HashSet<String> months, boolean withStemming, String postingFilesPath) {
         this.corpusPath = corpusPath;
         this.parser = new DocParser(withStemming, stopWords, months);
-        indexer=new DocIndexer(postingFilesPath /*,writeToFilePool*/);
+        indexer=new DocIndexer(postingFilesPath,withStemming);
         this.STOP_WORD_BAG = stopWords;
+        this.withStemming=withStemming;
 //        readStopWordsFile();
     }
 
-    public void run(){
-
-    }
-
-
-
-    //  prepare file for parsing by extract fields and create object of doc.
+    /**
+     *  prepare file for parsing by extract fields and create object of doc.
+     * @param corpusPath
+     * @param containerSize  its how many docs we write to one temp file .
+     */
     public void prepareDocToParse(String corpusPath,int containerSize) {
         long total_start_time = System.currentTimeMillis();
-        ArrayList <Document> docsContainer= new ArrayList<>();
+         ArrayList <Document> docsContainer= new ArrayList<>();
         BufferedReader br = null;
         StringBuilder fullDocStringBuilder = new StringBuilder();
 //        String fullDoc = "";
@@ -56,23 +61,37 @@ public class ReadFile {
                         //with timer
                         long start_time = System.currentTimeMillis();
                         Document doc = this.parser.Parse(fullDocStringBuilder.toString());
-                       // docsContainer not full yet
+                        File docInfo=null;
+                        if (withStemming) {
+                            docInfo = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoStemming.txt");
+                        }
+                        else{
+                            docInfo=new File(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoNoStemming.txt");
+                        }
+
+
+                        FileWriter fw = new FileWriter(docInfo,true);
+                        BufferedWriter w = new BufferedWriter(fw);
+                        w.write(doc.DocNo+" "+doc.howManyUniqTermsInDoc()+" "+doc.parsedTerms.getMaxTf()+System.lineSeparator());
+
+                        w.flush();
+                        w.close();
+                        fw.close();
+
+
+                        // docsContainer not full yet
                         if (docsContainer.size()<containerSize-1)
                             docsContainer.add(doc);
-                        // docs container full and ready for index
+                            // docs container full and ready for index
                         else {
                             docsContainer.add(doc);
                             this.indexer.indexChuckDocs(docsContainer);
                             docsContainer.clear();
                         }
-//                        Document doc = this.parser.Parse(fullDoc);
-//                        this.indexer.index(doc);
 
-//                        System.out.println(String.format("Time to parse doc- %s, took: %d Ms", doc.getDocNo(), (System.currentTimeMillis() - start_time)));
                         line = br.readLine();
                     }
                     else{
-//                        fullDoc += " "+line;
                         fullDocStringBuilder.append(line);
                         line = br.readLine();
                     }
@@ -80,10 +99,8 @@ public class ReadFile {
             }
 
             //if There are some docs left in docsContainer.
-       if (docsContainer.size()>0)
-           indexer.indexChuckDocs(docsContainer);
-
-
+            if (docsContainer.size()>0)
+                indexer.indexChuckDocs(docsContainer);
 
         } catch (Exception e) {
             e.printStackTrace();

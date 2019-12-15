@@ -3,9 +3,16 @@ package sample.Model;
 import java.io.FileNotFoundException;
 import java.util.Observable;
 
+/**
+ * model according MVC
+ */
 public class MyModel extends Observable {
     CorpusHandler corpusHandler;
 
+    /**
+     * create corpus manger
+     * @param path
+     */
     public void testInitFileOfTest(String path){
         corpusHandler=new CorpusHandler(path);
         corpusHandler.initListOfFilesPaths();
@@ -13,6 +20,10 @@ public class MyModel extends Observable {
 
     }
 
+    /**
+     * start process of parsing
+     * @param stemming
+     */
     public void startParse(boolean stemming) {
         try {
             corpusHandler.findTextInDocs(stemming);
@@ -21,6 +32,10 @@ public class MyModel extends Observable {
         }
     }
 
+    /**
+     * setter
+     * @param postingFilesPath
+     */
     public void setPostingFilesPath(String postingFilesPath) {
         corpusHandler.setPostingFilesPath(postingFilesPath);
     }

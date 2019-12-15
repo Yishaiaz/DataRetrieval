@@ -17,14 +17,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * class mange all preparing search engine
+ */
 public class CorpusHandler {
     private String corpusPath;
     public String postingFilesPath="";
     private ArrayList<String> filesPaths; //list contains all paths in Corpus dir.
     public HashSet<String> stopWords = new HashSet<>();
     public HashSet<String> months = new HashSet<>();
-    // ExecutorService pool = Executors.newFixedThreadPool(3);
-    //WriteToFilePool writeToFilePool;
 
     public CorpusHandler(String corpusPath) {
         this.corpusPath = corpusPath;
@@ -40,8 +41,10 @@ public class CorpusHandler {
         this.postingFilesPath = postingFilesPath;
     }
 
-    // This function add to 'filesPath' list with files paths.
-    public void initListOfFilesPaths() {  //"C:\\Users\\Sahar Ben Baruch\\Desktop\\corpus"
+    /**
+     * This function add to 'filesPath' list with files paths.
+     */
+    public void initListOfFilesPaths() {
         File corpusFolder = new File(corpusPath);
 
         //check if path exist
@@ -74,20 +77,23 @@ public class CorpusHandler {
             System.out.println("Path doesn't exist.");
     }
 
+    /**
+     * This function start process of parsing to every path in corpus path
+     * @param withStemming
+     * @throws FileNotFoundException
+     */
     public void findTextInDocs(boolean withStemming) throws FileNotFoundException {
-//        writeToFilePool= new WriteToFilePool();
-//        WriteToFileTask tasker1= new WriteToFileTask("task1",writeToFilePool,postingFilesPath);
-//        WriteToFileTask tasker2= new WriteToFileTask("task2",writeToFilePool,postingFilesPath);
-//        WriteToFileTask tasker3= new WriteToFileTask("task3",writeToFilePool,postingFilesPath);
-//
-//
-//        pool.execute(tasker1);
-//        pool.execute(tasker2);
-//        pool.execute(tasker3);
 
         long start_time = System.currentTimeMillis();
-        ReadFile readFile = new ReadFile(this.corpusPath, this.stopWords, this.months,withStemming,postingFilesPath/*,writeToFilePool*/);
-        //send every file to ReadFile for preparation for parsing.
+        ReadFile readFile = new ReadFile(this.corpusPath, this.stopWords, this.months,withStemming,postingFilesPath);
+
+        if (withStemming) {
+            File docsInfoFile = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoStemming.txt");
+        }
+     else if (!withStemming){
+            File docsInfoFile = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoNoStemming");
+            }
+
         for (String path : filesPaths) {
             if(path.endsWith(".DS_Store")){
                 System.out.println("you and your mac");
@@ -101,14 +107,15 @@ public class CorpusHandler {
         start_time = System.currentTimeMillis();
         readFile.indexer.mergeFiles();
         System.out.println(String.format("Total time to merge : %d seconds", (System.currentTimeMillis() - start_time)/1000));
-
-
-//        while(writeToFilePool.areTasksLeft()){}
-//        pool.shutdown();
-//        System.out.println("end");
-
+        DictionaryParser dicParser = new DictionaryParser("a","z",postingFilesPath,corpusPath,true,withStemming);
+        dicParser.run();
 
     }
+
+    /**
+     * this function reads stop words from '05 stop_words.txt' file
+     * @return
+     */
     private HashSet<String> readStopWordsFile(){
         HashSet<String> stopWords = new HashSet<>();
         BufferedReader br = null;

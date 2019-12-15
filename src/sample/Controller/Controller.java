@@ -6,6 +6,9 @@ import sample.View.MyView;
 import java.util.Observable;
 import java.util.Observer;
 
+/**
+ * controller part of MVC
+ */
 public class Controller extends Observable implements Observer {
     private MyModel model;
     private MyView view;
@@ -17,6 +20,9 @@ public class Controller extends Observable implements Observer {
         this.view=view;
     }
     @Override
+    /**
+     * function update calls to function from model.
+     */
     public void update(Observable o, Object arg) {
         switch ((String)arg){
             case "corpusPath":
@@ -35,9 +41,16 @@ public class Controller extends Observable implements Observer {
         }
     }
 
+    /**
+     * set corpus path from gui.
+     * @param corpusPath
+     */
     public void setCorpusPath(String corpusPath) {
         this.corpusPath = corpusPath;
     }
-
+    /**
+     * set posting path from gui.
+     * @param postingFilesPath
+     */
     public void setPostingFilesPath(String postingFilesPath) {this.postingFilesPath=postingFilesPath;}
 }

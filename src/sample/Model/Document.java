@@ -2,6 +2,9 @@ package sample.Model;
 
 import sample.Model.DataStructures.TermHashMapDataStructure;
 
+/**
+ * This class represent one Document
+ */
 public class Document {
     public String DocNo;
     public String date;
@@ -48,5 +51,12 @@ public class Document {
 
     public void setParsedTerms(TermHashMapDataStructure parsedTerms) {
         this.parsedTerms = parsedTerms;
+    }
+
+    /**
+     * @return how many uniq terms in doc
+     */
+    public int howManyUniqTermsInDoc(){
+       return parsedTerms.howManyUniqTerms();
     }
 }

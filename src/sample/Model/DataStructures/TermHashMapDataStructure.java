@@ -1,13 +1,19 @@
 package sample.Model.DataStructures;
 
 import java.util.HashMap;
-
+/**
+ * This class help to hold all terms of one document. do it using HashMap
+ */
 public class TermHashMapDataStructure {
     public HashMap<String, TermHashMapEntry> termsEntries = new HashMap<>();
 
     public TermHashMapDataStructure() {}
-
-    //change value to new low case value
+    /**
+     * change value to new low case value when so far term apper only as Upper case and now we saw it in
+     * lowwer case
+     * @param newValue
+     * @param weight
+     */
     public void updateValueToLowCastValue(String newValue, double weight) {
         String key = newValue.toLowerCase();
         TermHashMapEntry entry = termsEntries.get(key);
@@ -16,7 +22,12 @@ public class TermHashMapDataStructure {
         newEntry.termLocations = entry.termLocations;
         termsEntries.replace(key, entry, newEntry);
     }
-
+    /**
+     * insert new TermHashMapEntry to Hash Map termsEntries.
+     * * @param s is term
+     * @param iDFLocation location of term
+     * @param weight weight of term
+     */
     public void insert(String s, int iDFLocation, double weight) {
         String entryValue = s;
         String key = s.toLowerCase();
@@ -29,8 +40,7 @@ public class TermHashMapDataStructure {
                 updateValueToLowCastValue(s, weight);
 
             termsEntries.get(key).addLocation(iDFLocation);
-        } else {
-            // in case its new Term in Structure.
+        } else {     // in case its new Term in Structure.
 
             //in case word start with uppercase.
             if (Character.isUpperCase(s.charAt(0)))
@@ -42,6 +52,11 @@ public class TermHashMapDataStructure {
         }
     }
 
+    /**
+     * checks if all characters in str are in lower case.
+     * @param str
+     * @return
+     */
     private static boolean isStringLowerCase(String str) {
 
         //convert String to char array
@@ -57,7 +72,25 @@ public class TermHashMapDataStructure {
         return true;
     }
 
-    public void SaveToQueue() {
-        return;
+    /**
+     *
+     * @return how many unique terms are in one doc
+     */
+    public int  howManyUniqTerms(){
+        return termsEntries.size();
+    }
+
+    /**
+     *
+     * @return The term that most frequent in docs
+     */
+    public int getMaxTf(){
+        int max=0;
+       for (TermHashMapEntry entry: termsEntries.values()){
+           if (entry.getTF()>max) {
+               max = entry.getTF();
+           }
+       }
+           return max;
     }
 }
