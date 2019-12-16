@@ -33,6 +33,7 @@ public class TermHashMapDataStructure {
     public void insert(String s, int iDFLocation, double weight) {
         s = StringUtils.removeStartIgnoreCase(s, " ");
         s = StringUtils.removeStartIgnoreCase(s, "'");
+        s = s.replaceFirst("^0+(?!$)", "");
         String entryValue = s;
         String key = s.toLowerCase();
         // Term exist in structure.
