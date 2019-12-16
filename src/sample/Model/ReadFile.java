@@ -74,7 +74,6 @@ public class ReadFile {
                         BufferedWriter w = new BufferedWriter(fw);
                         w.write(doc.DocNo+" "+doc.howManyUniqTermsInDoc()+" "+doc.parsedTerms.getMaxTf()+System.lineSeparator());
 
-                        w.flush();
                         w.close();
                         fw.close();
 
