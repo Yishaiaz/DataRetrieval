@@ -20,7 +20,7 @@ import java.util.stream.Stream;
  * class that write temp posting files.
  */
 public class DocIndexer {
-    private int MAX_T = 50;
+    private int MAX_T = 40;
     public static int indexForTempFiles = 0;
     String postingFilePath = "";
     boolean stemming;
