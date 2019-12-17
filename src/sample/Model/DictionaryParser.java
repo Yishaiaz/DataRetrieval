@@ -7,7 +7,7 @@ import java.nio.Buffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -46,6 +46,11 @@ public class DictionaryParser implements Runnable {
      * all in a '.csv' format, to allow after quick reading.
      */
     public void parseInvertedIndex() {
+        HashMap<String,Integer> topTerms=new HashMap<>();
+        for (int i=0; i<10;i++){
+            topTerms.put(String.valueOf(i),0);
+        }
+        int minTerm=0;
         int postingLineNumber = 0;
         String singleTerm;
         int singleTermNumberOfDocsAppearance;
@@ -89,6 +94,12 @@ public class DictionaryParser implements Runnable {
                     singleTermTotalNumberOfApperance = sum;
                     // todo: here we have everything about the single term to write to the dictionary.
                     bufferedWriter.write(String.format("%s,%d,%d,%d" + System.lineSeparator(), singleTerm,singleTermTotalNumberOfApperance, singleTermNumberOfDocsAppearance, postingLineNumber));
+
+                    if (singleTermTotalNumberOfApperance>minTerm){
+                        topTerms.remove(getKeyWithSpecificValue(topTerms,minTerm));
+                        topTerms.put(singleTerm,singleTermTotalNumberOfApperance);
+                        minTerm=getMin(topTerms.values());
+                    }
 //                    System.out.println(String.format("Term Name: %s - in Number Of Docs %d with total appearances %d line number in posting file %d", singleTerm, singleTermNumberOfDocsAppearance, singleTermTotalNumberOfApperance, postingLineNumber));
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
@@ -100,10 +111,35 @@ public class DictionaryParser implements Runnable {
             bufferedWriter.flush();
             bufferedWriter.close();
 
+            System.out.println("top 10 :");
+            for (String key: topTerms.keySet()){
+                System.out.println(key+ " "+ topTerms.get(key));
+            }
+
 
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    private int getMin(Collection<Integer> values) {
+        Iterator it =values.iterator();
+        int min=(Integer) it.next();
+        int cur;
+     while (it.hasNext()){
+         cur=(Integer) it.next();
+        if (cur<min)
+            min=cur;
+     }
+     return min;
+    }
+
+    private String getKeyWithSpecificValue(HashMap<String,Integer> map,int minTerm) {
+        for (String key : map.keySet()){
+            if (map.get(key)==minTerm)
+                return key;
+        }
+        return null;
     }
 
     /**
