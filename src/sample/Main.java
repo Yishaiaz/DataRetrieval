@@ -51,12 +51,12 @@ public class Main extends Application {
 
 
     public static void main(String[] args) {
-    launch(args);
-
-//     DictionaryParser dp= new DictionaryParser("a","b","C:\\Users\\Sahar Ben Baruch\\Desktop\\temp","C:\\Users\\Sahar Ben Baruch\\Desktop\\testCorpus",true);
+   launch(args);
 //
+//
+//        DictionaryParser dp= new DictionaryParser("a","b","C:\\Users\\Sahar Ben Baruch\\Desktop\\temp2","C:\\Users\\Sahar Ben Baruch\\Desktop",true,false);
 //     dp.run();
-     System.exit(0);
+//     System.exit(0);
 
     }
 }

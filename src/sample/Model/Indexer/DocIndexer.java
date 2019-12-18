@@ -16,6 +16,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
+
 /**
  * class that write temp posting files.
  */
@@ -175,6 +177,78 @@ public class DocIndexer {
         return filesPaths;
     }
 
+
+    /**
+     * private method, receives a full path to a txt document, reads it, and sorts it
+     * using a custom comparator object. @see RatingComparator inner class.
+     * catches all exeptions internally
+     * @param path - String, full path to a .txt file
+     */
+    private void sortDocument(String path) throws IOException {
+
+        FileReader fileReader = null;
+        BufferedReader bufferedReader = null;
+        try {
+            fileReader = new FileReader(path);
+            bufferedReader =  new BufferedReader(fileReader);
+        } catch (FileNotFoundException e) {
+//            e.printStackTrace();
+
+            return;
+        }
+
+        String inputLine = "";
+        ArrayList<String> lineList = new ArrayList<>();
+        while (true) {
+            try {
+                if (!((inputLine = bufferedReader.readLine()) != null)) break;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+            lineList.add(inputLine);
+        }
+        bufferedReader.close();
+        FileWriter fileWriter = new FileWriter(path);
+        BufferedWriter out = null;
+        try{
+            out = new BufferedWriter(fileWriter);
+            Collections.sort(lineList,new RatingCompare());
+            for (String outputLine : lineList) {
+                out.write(outputLine + System.lineSeparator());
+            }
+            out.close();
+        }catch (StringIndexOutOfBoundsException e){
+            System.out.println(e.getMessage());
+            throw new IOException("couldn't");
+        }
+
+
+    }
+
+    /**
+
+     * comparator that compare two lines in different docs (part of merge process) and remove '|'
+     * so the compare is only between terms. also insensitive order
+     * a custom comparator class, implements Comparator<String>
+
+     */
+    class RatingCompare implements Comparator<String> {
+        /**
+         *  compares between two strings according to CASE_INSENSITIVE_ORDER, default by Java.
+         * @param o1 - String
+         * @param o2 - String
+         * @return int [>1,0,<-1]
+         */
+        @Override
+        public int compare(String o1, String o2) {
+            o1=o1.substring(0,o1.indexOf('|'));
+            o2=o2.substring(0,o2.indexOf('|'));
+            return  (CASE_INSENSITIVE_ORDER.compare(o1, o2));
+
+        }
+    }
+
     /**
      * this function merge all files in posting path- until left one merged file.
      */
@@ -183,6 +257,14 @@ public class DocIndexer {
         paths.removeIf(path-> (path.endsWith("stemmingPostingFile.txt")|| path.endsWith("notStemmingPostingFile.txt")));
         paths.sort(new FileSizeCompare());
         ArrayList<FilesMerger> mergers = new ArrayList<>();
+        if (paths.size()==1) {
+            try {
+                sortDocument(paths.get(0));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         while (paths.size()>1){
             ExecutorService executorService = Executors.newFixedThreadPool(MAX_T);
 

@@ -44,6 +44,7 @@ public class MyView {
     //public javafx.scene.control.TextArea textAreaDic1;
     public ListView listView_dic;
 
+
     /**
      * function activate when press on 'browse' button
      * get from user path to corpus
@@ -103,6 +104,7 @@ public class MyView {
                timeOfProcess= ((System.currentTimeMillis() - start_time)/60000);
 
             showResults(timeOfProcess);
+
         } else {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Information Dialog");
