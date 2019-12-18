@@ -1,15 +1,14 @@
 package sample.View;
 
+import javafx.beans.InvalidationListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.PopupControl;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -23,9 +22,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,7 +31,8 @@ import java.util.stream.Stream;
  */
 public class MyView {
     private Controller controller;
-    private String dictionaryContent="";
+   // private String dictionaryContent="";
+    private  ObservableList <String> dictionaryContent;
     private long timeOfProcess=0;
 
     @FXML
@@ -43,7 +41,8 @@ public class MyView {
     public javafx.scene.control.CheckBox stemming_cp;
     public javafx.scene.control.TextField txtField_postingFilesInput;
     public javafx.scene.control.TextField txtField_corpusPath;
-    public javafx.scene.control.TextArea textAreaDic1;
+    //public javafx.scene.control.TextArea textAreaDic1;
+    public ListView listView_dic;
 
     /**
      * function activate when press on 'browse' button
@@ -252,7 +251,9 @@ public class MyView {
             else{
                 dictionary=new File(dictionaryPath + File.separator + "DictionaryNoStemming.txt");
             }
-            StrBuilder dictionaryContent = new StrBuilder();
+          //  StrBuilder dictionaryContent = new StrBuilder();
+            dictionaryContent = FXCollections.observableArrayList();
+
             String str = "";
             try {
                 BufferedReader br = new BufferedReader(new FileReader(dictionary));
@@ -261,11 +262,12 @@ public class MyView {
                 while ((str = br.readLine()) != null && (!str.equals(""))) {
                     str = str.substring(0, str.lastIndexOf(',')); // remove from presentation pointer to line
                     str = str.substring(0, str.lastIndexOf(',')); // remove from presentation df
-                    dictionaryContent.append(str + System.lineSeparator());
+                   // dictionaryContent.append(str + System.lineSeparator());
+                    dictionaryContent.add(str);
                 }
 
+
                 br.close();
-                this.dictionaryContent = dictionaryContent.toString();
                 System.out.println("finish loading");
             } catch (IOException e) {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -304,13 +306,16 @@ public class MyView {
             Parent root = fxmlLoader1.load();
             Stage secondaryStage = new Stage();
             secondaryStage.setTitle("Dictionary");
-            Scene scene = new Scene(root, 1060, 600);
+            Scene scene = new Scene(root, 1060, 370);
             secondaryStage.setScene(scene);
             secondaryStage.show();
-            textAreaDic1 = (javafx.scene.control.TextArea) scene.lookup("#textAreaDic1");
-            textAreaDic1.setScrollLeft(1);
-            textAreaDic1.setWrapText(true);
-            textAreaDic1.setText(dictionaryContent);
+          //  textAreaDic1 = (javafx.scene.control.TextArea) scene.lookup("#textAreaDic1");
+            listView_dic = (javafx.scene.control.ListView) scene.lookup("#listView_dic");
+            listView_dic.setItems(dictionaryContent);
+//            textAreaDic1.setScrollLeft(1);
+//            textAreaDic1.setWrapText(true);
+//            textAreaDic1.setText(dictionaryContent);
+
         }
     }
 }

@@ -572,9 +572,9 @@ public class DocParser implements IParser{
 
                     } else {
                         Pattern regex = Pattern.compile("[^A-Za-z0-9]");
-                        docText[textIterator] = word.replaceAll(  regex.toString(), "");
+                        word = word.replaceAll(  regex.toString(), "");
                     }
-                    if (this.stopWords.contains(StringUtils.lowerCase(word))) {
+                    if (this.stopWords.contains(StringUtils.lowerCase(word))|| !StringUtils.isAlphanumeric(new StringBuffer(word))) {
                         //a stop word, ignore it.
                         textIterator += 1;
 

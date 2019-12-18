@@ -1,5 +1,7 @@
 package sample.Model.DataStructures;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.HashMap;
 /**
  * This class help to hold all terms of one document. do it using HashMap
@@ -29,6 +31,9 @@ public class TermHashMapDataStructure {
      * @param weight weight of term
      */
     public void insert(String s, int iDFLocation, double weight) {
+        s = StringUtils.removeStartIgnoreCase(s, " ");
+        s = StringUtils.removeStartIgnoreCase(s, "'");
+        s = s.replaceFirst("^0+(?!$)", "");
         String entryValue = s;
         String key = s.toLowerCase();
         // Term exist in structure.
