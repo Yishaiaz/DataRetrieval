@@ -46,10 +46,11 @@ public class DictionaryParser implements Runnable {
      * all in a '.csv' format, to allow after quick reading.
      */
     public void parseInvertedIndex() {
-        HashMap<String,Integer> topTerms=new HashMap<>();
-        for (int i=0; i<10;i++){
-            topTerms.put(String.valueOf(i),0);
-        }
+        //---- for finding top 10 :
+//        HashMap<String,Integer> topTerms=new HashMap<>();
+//        for (int i=0; i<10;i++){
+//            topTerms.put(String.valueOf(i),0);
+//        }
         int minTerm=0;
         int postingLineNumber = 0;
         String singleTerm;
@@ -95,11 +96,15 @@ public class DictionaryParser implements Runnable {
                     // todo: here we have everything about the single term to write to the dictionary.
                     bufferedWriter.write(String.format("%s,%d,%d,%d" + System.lineSeparator(), singleTerm,singleTermTotalNumberOfApperance, singleTermNumberOfDocsAppearance, postingLineNumber));
 
-                    if (singleTermTotalNumberOfApperance>minTerm){
-                        topTerms.remove(getKeyWithSpecificValue(topTerms,minTerm));
-                        topTerms.put(singleTerm,singleTermTotalNumberOfApperance);
-                        minTerm=getMin(topTerms.values());
-                    }
+                    // ---- for finding top 10 :
+//                    if (singleTermTotalNumberOfApperance>minTerm){
+//                        topTerms.remove(getKeyWithSpecificValue(topTerms,minTerm));
+//                        topTerms.put(singleTerm,singleTermTotalNumberOfApperance);
+//                        minTerm=getMin(topTerms.values());
+//                    }
+
+
+
 //                    System.out.println(String.format("Term Name: %s - in Number Of Docs %d with total appearances %d line number in posting file %d", singleTerm, singleTermNumberOfDocsAppearance, singleTermTotalNumberOfApperance, postingLineNumber));
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
@@ -107,14 +112,16 @@ public class DictionaryParser implements Runnable {
                 line = bufferedReader.readLine();
                 postingLineNumber += 1;
             }
+
             bufferedReader.close();
             bufferedWriter.flush();
             bufferedWriter.close();
 
-            System.out.println("top 10 :");
-            for (String key: topTerms.keySet()){
-                System.out.println(key+ " "+ topTerms.get(key));
-            }
+            //------ for finding top 10:
+//            System.out.println("top 10 :");
+//            for (String key: topTerms.keySet()){
+//                System.out.println(key+ " "+ topTerms.get(key));
+//            }
 
 
         } catch (IOException e) {
