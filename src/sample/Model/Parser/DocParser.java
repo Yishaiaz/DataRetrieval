@@ -174,10 +174,10 @@ public class DocParser implements IParser{
                         Character.isUpperCase(docText[textIterator + 1].charAt(0))) {
                     // Emtities - Llll Llll , capital letter at both words 1st and 2rd.
                     // adding each word as a seperate term
-                    termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.7);
-                    termLocationIterator += 1;
-                    termHashMapDataStructure.insert(docText[textIterator + 1], termLocationIterator, 1.7);
-                    termLocationIterator += 1;
+//                    termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.7);
+//                    termLocationIterator += 1;
+//                    termHashMapDataStructure.insert(docText[textIterator + 1], termLocationIterator, 1.7);
+//                    termLocationIterator += 1;
                     // adding the entire entity as a term
                     stringBuilder.append(docText[textIterator]);
                     stringBuilder.append(" ");
