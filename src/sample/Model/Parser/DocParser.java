@@ -70,18 +70,6 @@ public class DocParser implements IParser{
             termLocationIterator+=1;
         }
 
-        // adding doc title's words as seperate terms
-        docData = initialBadCharacterRemoval(docData);
-        for (String word :
-                docData[2].split("\t | \n | ")) {
-            word = word.replaceAll("[^\\d.]", "");
-            if(StringUtils.equals(word, "")){
-                continue;
-            }else{
-                termHashMapDataStructure.insert(word, termLocationIterator, 1.8);
-                termLocationIterator+=1;
-            }
-        }
 
 
         fullDoc = StringUtils.substring(fullDoc,StringUtils.indexOf(fullDoc, "<TEXT>")+6, StringUtils.indexOf(fullDoc, "</TEXT>"));
@@ -120,7 +108,7 @@ public class DocParser implements IParser{
                         } else {
                             //not eligible for a range, split and pass as differnet terms
                             for (int i = 0; i < seperated.length; i++) {
-                                if (!StringUtils.equals(seperated[i], "")){
+                                if (!StringUtils.equals(seperated[i], "") && !this.stopWords.contains(seperated[i])){
                                     termHashMapDataStructure.insert(seperated[i], termLocationIterator, 1);
                                     termLocationIterator += 1;
                                 }
