@@ -51,7 +51,8 @@ public class DictionaryParser implements Runnable {
 //        for (int i=0; i<10;i++){
 //            topTerms.put(String.valueOf(i),0);
 //        }
-        int minTerm=0;
+//        int minTerm=0;
+
         int postingLineNumber = 0;
         String singleTerm;
         int singleTermNumberOfDocsAppearance;
