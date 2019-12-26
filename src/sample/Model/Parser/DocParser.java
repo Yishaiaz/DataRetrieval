@@ -40,8 +40,10 @@ public class DocParser implements IParser{
      */
     @Override
     public Document Parse(String fullDoc) throws Exception {
-//        StringUtils stringUtils = new StringUtils();
+        // todo: need a new argument, boolean isQuery
+        Document doc = null;
         TermHashMapDataStructure termHashMapDataStructure = new TermHashMapDataStructure();
+        // todo: if not query
         String[] docData = getDocData(fullDoc);
         //creating a regex to recognize american phone numbers
         String regexForAmericanPhoneNumbers = "^\\(?([0-9]{3})\\)?[-.\\s]?([0-9]{3})[-.\\s]?([0-9]{4})$";
@@ -50,7 +52,6 @@ public class DocParser implements IParser{
         int textIterator=0;
         int termLocationIterator = 0;
 
-        Document doc = new Document(docData[0], docData[1], docData[2], docData[3]);
         //add doc date as term
         if(!StringUtils.isEmpty(docData[1])){
             termHashMapDataStructure.insert(docData[1], termLocationIterator, 1.8);
@@ -73,11 +74,19 @@ public class DocParser implements IParser{
 
 
         fullDoc = StringUtils.substring(fullDoc,StringUtils.indexOf(fullDoc, "<TEXT>")+6, StringUtils.indexOf(fullDoc, "</TEXT>"));
+
+        doc = new Document(docData[0], docData[1], docData[2], docData[3]);
+        //todo: end of if NOT query
+        // todo: if is query, build 'doc = new Document(queryNumber, "","","")
+        // todo: also extract the text you want to parse from the query (title, narrative, etc.)
+        // todo: and insert it to full doc.
+
+
         String[] docText =fullDoc.split(" | \n | \t");
-        long start = System.currentTimeMillis();
+
         docText = initialBadCharacterRemoval(docText);
 //        System.out.println(String.format("time to clean %d", System.currentTimeMillis() - start));
-        start = System.currentTimeMillis();
+
         while(textIterator<docText.length) {
             try {
                 docText[textIterator] = StringUtils.remove(docText[textIterator]," ");
