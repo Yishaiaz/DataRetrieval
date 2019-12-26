@@ -83,6 +83,7 @@ public class DocParser implements IParser{
         // todo: and insert it to full doc.
 
        else if (isQuery){
+
             String queryId= getQueryData(fullDoc);
             doc=new Document(queryId,"","",String.valueOf(fullDoc.length()));
             fullDoc=StringUtils.substring(fullDoc,StringUtils.indexOf(fullDoc,"<title>")+7,StringUtils.indexOf(fullDoc,"</top>"));
