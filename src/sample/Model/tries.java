@@ -2,6 +2,10 @@ package sample.Model;
 
 
 import sample.Model.TasksPoolsRunners.MergeTasksPool;
+
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -46,28 +50,31 @@ class Task implements Runnable
 
 public class tries {
     static final int MAX_T = 3;
+    private Timestamp convert(String day, String month, String year){
+        try{
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Date parsedDate = dateFormat.parse(year+"-"+month+"-"+day);
+            Timestamp timestamp = new java.sql.Timestamp(parsedDate.getTime());
+            return timestamp;
+        }catch (Exception e) {
+            return null;
+        }
+    }
 
     public static void main(String[] args) {
         //TESTING THE STEMMER:
-        String path = "/Users/yishaiazabary/Desktop/University/שנה ד/TestForDataRetrievelMultiThread";
-        MergeTasksPool t1 = new MergeTasksPool(path);
+        String day = "04";
+        String month = "11";
+        String year = "1997";
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Date parsedDate = dateFormat.parse(year+"-"+month+"-"+day);
+            Timestamp timestamp = new java.sql.Timestamp(parsedDate.getTime());
+        } catch(Exception e) { //this generic but you can control another types of exception
+            // look the origin of excption
+        }
 
-        Runnable tasker1 = new Task("task1", t1);
-        Runnable tasker2 = new Task("task2", t1);
-        Runnable tasker3 = new Task("task3", t1);
-        Runnable tasker4 = new Task("task4", t1);
-        Runnable tasker5 = new Task("task5", t1);
-
-        t1.updateFilesList();
-        ExecutorService pool = Executors.newFixedThreadPool(MAX_T);
-        pool.execute(tasker1);
-        pool.execute(tasker2);
-        pool.execute(tasker3);
-        pool.execute(tasker4);
-        pool.execute(tasker5);
-
-
-        pool.shutdown();
+//        Timestamp ts = new Timestamp()
     }
 
 }
