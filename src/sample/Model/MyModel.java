@@ -39,4 +39,8 @@ public class MyModel extends Observable {
     public void setPostingFilesPath(String postingFilesPath) {
         corpusHandler.setPostingFilesPath(postingFilesPath);
     }
+
+    public void search(String queryPath) {
+        corpusHandler.search(queryPath);
+    }
 }

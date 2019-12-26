@@ -14,6 +14,7 @@ public class Controller extends Observable implements Observer {
     private MyView view;
     public String corpusPath;
     public String postingFilesPath;
+    public String queryPath;
 
     public Controller(MyModel model, MyView view){
         this.model=model;
@@ -37,6 +38,8 @@ public class Controller extends Observable implements Observer {
             case "parseWithoutStemming":
                 model.startParse (false);
                 break;
+            case "search":
+                model.search(queryPath);
 
         }
     }
@@ -53,4 +56,8 @@ public class Controller extends Observable implements Observer {
      * @param postingFilesPath
      */
     public void setPostingFilesPath(String postingFilesPath) {this.postingFilesPath=postingFilesPath;}
+
+    public void setQueryPath(String queryPath) {
+        this.queryPath=queryPath;
+    }
 }

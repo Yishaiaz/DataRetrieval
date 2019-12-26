@@ -87,13 +87,13 @@
                   </Button>
                   <Button fx:id="showDictionary_btn" layoutX="14.0" layoutY="465.0" mnemonicParsing="false" onAction="#presentDictionary" prefHeight="48.0" prefWidth="162.0" text="Show Dictionary" />
                   <Button fx:id="loadDictionary_btn" layoutX="16.0" layoutY="407.0" mnemonicParsing="false" onAction="#loadDictionary" prefHeight="46.0" prefWidth="158.0" text="Load Dictionary" />
-                  <Button layoutX="809.0" layoutY="289.0" mnemonicParsing="false" text="Browse">
+                  <Button fx:id="query_browse" layoutX="809.0" layoutY="289.0" mnemonicParsing="false" onAction="#chooseQueryPath" text="Browse">
                      <font>
                         <Font name="Aharoni Bold" size="12.0" />
                      </font>
                   </Button>
                   <TextField fx:id="txtField_queryPath" layoutX="166.0" layoutY="288.0" prefHeight="26.0" prefWidth="617.0" />
-                  <Label layoutX="48.0" layoutY="292.0" text="Path for sample.Model.Query File">
+                  <Label layoutX="42.0" layoutY="292.0" text="Path for Query File">
                      <font>
                         <Font name="System Bold Italic" size="12.0" />
                      </font>
@@ -113,7 +113,7 @@
                         <Font size="14.0" />
                      </font>
                   </Text>
-                  <Button fx:id="search_btn" layoutX="791.0" layoutY="529.0" mnemonicParsing="false" prefHeight="41.0" prefWidth="96.0" text="Search">
+                  <Button fx:id="search_btn" layoutX="791.0" layoutY="529.0" mnemonicParsing="false" onAction="#search" prefHeight="41.0" prefWidth="96.0" text="Search">
                      <font>
                         <Font name="System Bold Italic" size="12.0" />
                      </font>

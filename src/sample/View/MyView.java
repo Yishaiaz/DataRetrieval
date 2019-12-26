@@ -10,6 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.StringUtils;
@@ -41,6 +42,7 @@ public class MyView {
     public javafx.scene.control.CheckBox stemming_cp;
     public javafx.scene.control.TextField txtField_postingFilesInput;
     public javafx.scene.control.TextField txtField_corpusPath;
+    public javafx.scene.control.TextField txtField_queryPath;
     //public javafx.scene.control.TextArea textAreaDic1;
     public ListView listView_dic;
 
@@ -77,6 +79,19 @@ public class MyView {
             controller.setPostingFilesPath(f.getPath());
             controller.update(controller, "postingFilesPath");
         } else {
+            Alert a = new Alert(Alert.AlertType.ERROR, "Not found file.");
+            Optional<ButtonType> result = a.showAndWait();
+            if (result.get() == ButtonType.OK) {
+                a.close();
+            }
+        }
+    }
+
+    public void chooseQueryPath() {
+        FileChooser chooser = new FileChooser();
+        File f = chooser.showOpenDialog(null);
+        txtField_queryPath.appendText(f.getPath());
+        if (f ==null){
             Alert a = new Alert(Alert.AlertType.ERROR, "Not found file.");
             Optional<ButtonType> result = a.showAndWait();
             if (result.get() == ButtonType.OK) {
@@ -319,5 +334,11 @@ public class MyView {
 //            textAreaDic1.setText(dictionaryContent);
 
         }
+    }
+
+    public void search(){
+        String queryPath= txtField_queryPath.getText();
+        controller.setQueryPath(queryPath);
+        controller.update(controller,"search");
     }
 }

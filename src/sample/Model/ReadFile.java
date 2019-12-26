@@ -134,6 +134,10 @@ public class ReadFile {
                     Document query = this.parser.Parse(fullDocStringBuilder.toString(), true);
                     searcher.search(query);
                 }
+                else{
+                    fullDocStringBuilder.append(line);
+                    line = br.readLine();
+                }
             }
         }
 
