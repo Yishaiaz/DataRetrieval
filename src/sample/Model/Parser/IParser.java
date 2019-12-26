@@ -6,6 +6,6 @@ import java.io.BufferedReader;
 
 public interface IParser {
 
-    public Document Parse(String fullDoc) throws Exception;
+    public Document Parse(String fullDoc,boolean isQuery) throws Exception;
 
 }

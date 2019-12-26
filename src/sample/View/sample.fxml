@@ -93,7 +93,7 @@
                      </font>
                   </Button>
                   <TextField fx:id="txtField_queryPath" layoutX="166.0" layoutY="288.0" prefHeight="26.0" prefWidth="617.0" />
-                  <Label layoutX="48.0" layoutY="292.0" text="Path for Query File">
+                  <Label layoutX="48.0" layoutY="292.0" text="Path for sample.Model.Query File">
                      <font>
                         <Font name="System Bold Italic" size="12.0" />
                      </font>
