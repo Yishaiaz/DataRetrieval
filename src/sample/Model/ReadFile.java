@@ -21,6 +21,7 @@ public class ReadFile {
     public DocIndexer indexer;
     public static int indexForDocInfo=0;
     public boolean withStemming;
+    public Searcher searcher;
 
     public ReadFile(String corpusPath, HashSet<String> stopWords, HashSet<String> months, boolean withStemming, String postingFilesPath) {
         this.corpusPath = corpusPath;
@@ -28,6 +29,7 @@ public class ReadFile {
         indexer=new DocIndexer(postingFilesPath,withStemming);
         this.STOP_WORD_BAG = stopWords;
         this.withStemming=withStemming;
+        searcher=new Searcher();
 //        readStopWordsFile();
     }
 
@@ -60,7 +62,7 @@ public class ReadFile {
                         //we've reached the end of the doc.
                         //with timer
                         long start_time = System.currentTimeMillis();
-                        Document doc = this.parser.Parse(fullDocStringBuilder.toString());
+                        Document doc = this.parser.Parse(fullDocStringBuilder.toString(),false);
                         File docInfo=null;
                         if (withStemming) {
                             docInfo = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoStemming.txt");
@@ -107,4 +109,33 @@ public class ReadFile {
         System.out.println(String.format("Total parsing for single FILE took: %d Ms", (System.currentTimeMillis() - total_start_time)));
     }
 
+    /**
+     * prepare query to parse.
+     * @param queryPath
+     * @throws Exception
+     */
+    public void prepareDocOfQueriesToParse(String queryPath) throws Exception {
+        BufferedReader br = null;
+        StringBuilder fullDocStringBuilder = new StringBuilder();
+        br = new BufferedReader(new InputStreamReader(new FileInputStream(queryPath), "UTF-8"));
+        String line = br.readLine();
+        while (line!=null){
+            if(line.equals("") || line.equals("\n") || line.equals(" ")){
+                line = br.readLine();
+            }
+                else if (line.equals("<top>")){
+            fullDocStringBuilder.setLength(0);
+            line = br.readLine();
+        }
+        else {
+                // we're inside a query, read it all
+                if (line.equals("</top>")) {
+                    //we've reached the end of the query.
+                    Document query = this.parser.Parse(fullDocStringBuilder.toString(), true);
+                    searcher.search(query);
+                }
+            }
+        }
+
+    }
 }

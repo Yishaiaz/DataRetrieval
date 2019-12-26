@@ -19,6 +19,7 @@ public class DocParser implements IParser{
     private HashSet<String> stopWords;
     private HashSet<String> months;
     private Stemmer stemmer;
+
 //    private Document doc;
 
     public DocParser(Boolean wordStemming, HashSet<String> stopWords, HashSet<String> months) {
@@ -39,48 +40,53 @@ public class DocParser implements IParser{
      * @throws Exception
      */
     @Override
-    public Document Parse(String fullDoc) throws Exception {
+    public Document Parse(String fullDoc, boolean isQuery) throws Exception {
         // todo: need a new argument, boolean isQuery
         Document doc = null;
         TermHashMapDataStructure termHashMapDataStructure = new TermHashMapDataStructure();
         // todo: if not query
-        String[] docData = getDocData(fullDoc);
-        //creating a regex to recognize american phone numbers
-        String regexForAmericanPhoneNumbers = "^\\(?([0-9]{3})\\)?[-.\\s]?([0-9]{3})[-.\\s]?([0-9]{4})$";
-        Pattern patternForAmericanPhoneNumbers  = Pattern.compile(regexForAmericanPhoneNumbers);
-
-        int textIterator=0;
+        int textIterator = 0;
         int termLocationIterator = 0;
 
-        //add doc date as term
-        if(!StringUtils.isEmpty(docData[1])){
-            termHashMapDataStructure.insert(docData[1], termLocationIterator, 1.8);
-            termLocationIterator+=1;
-        }
-        // adding doc title as a whole term
-        if(!StringUtils.isEmpty(docData[2])){
-            StrBuilder temp = new StrBuilder();
-            String[] clean = initialBadCharacterRemoval(docData[2].split(" "));
-            for (String word :
-                    clean) {
-                temp.append(word);
-                temp.append(" ");
+            //creating a regex to recognize american phone numbers
+            String regexForAmericanPhoneNumbers = "^\\(?([0-9]{3})\\)?[-.\\s]?([0-9]{3})[-.\\s]?([0-9]{4})$";
+            Pattern patternForAmericanPhoneNumbers = Pattern.compile(regexForAmericanPhoneNumbers);
+        if (!isQuery) {
+            String[] docData = getDocData(fullDoc);
+            //add doc date as term
+            if (!StringUtils.isEmpty(docData[1])) {
+                termHashMapDataStructure.insert(docData[1], termLocationIterator, 1.8);
+                termLocationIterator += 1;
             }
-            docData[2] = temp.toString();
-            termHashMapDataStructure.insert(docData[2],termLocationIterator, 2);
-            termLocationIterator+=1;
+            // adding doc title as a whole term
+            if (!StringUtils.isEmpty(docData[2])) {
+                StrBuilder temp = new StrBuilder();
+                String[] clean = initialBadCharacterRemoval(docData[2].split(" "));
+                for (String word :
+                        clean) {
+                    temp.append(word);
+                    temp.append(" ");
+                }
+                docData[2] = temp.toString();
+                termHashMapDataStructure.insert(docData[2], termLocationIterator, 2);
+                termLocationIterator += 1;
+            }
+
+
+            fullDoc = StringUtils.substring(fullDoc, StringUtils.indexOf(fullDoc, "<TEXT>") + 6, StringUtils.indexOf(fullDoc, "</TEXT>"));
+
+            doc = new Document(docData[0], docData[1], docData[2], docData[3]);
         }
-
-
-
-        fullDoc = StringUtils.substring(fullDoc,StringUtils.indexOf(fullDoc, "<TEXT>")+6, StringUtils.indexOf(fullDoc, "</TEXT>"));
-
-        doc = new Document(docData[0], docData[1], docData[2], docData[3]);
         //todo: end of if NOT query
         // todo: if is query, build 'doc = new Document(queryNumber, "","","")
         // todo: also extract the text you want to parse from the query (title, narrative, etc.)
         // todo: and insert it to full doc.
 
+       else if (isQuery){
+            String queryId= getQueryData(fullDoc);
+            doc=new Document(queryId,"","","");
+            fullDoc=StringUtils.substring(fullDoc,StringUtils.indexOf(fullDoc,"<title>")+7,StringUtils.indexOf(fullDoc,"</top>")+7);
+        }
 
         String[] docText =fullDoc.split(" | \n | \t");
 
@@ -592,7 +598,26 @@ public class DocParser implements IParser{
 //        System.out.println(String.format("time to parse %d", System.currentTimeMillis() - start));
         //adding it into the Document object.
         doc.setParsedTerms(termHashMapDataStructure);
+
         return doc;
+    }
+
+    /**
+     * extract only queryId
+     * @param fullDoc
+     * @return
+     */
+    private String getQueryData(String fullDoc) {
+        //QueryId tag info
+        String queryId;
+        int startIndex = StringUtils.indexOf(fullDoc, "<num>")+5;
+        int endIndex = StringUtils.indexOf(fullDoc, "<desc>");
+        if (endIndex<0 || startIndex-7 < 0){
+            queryId = "";
+        }else{
+            queryId = StringUtils.substring(fullDoc, startIndex, endIndex).replace(" ", "");
+        }
+        return queryId;
     }
 
     /**

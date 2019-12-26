@@ -115,7 +115,6 @@ public class DictionaryParser implements Runnable {
             }
 
             bufferedReader.close();
-            bufferedWriter.flush();
             bufferedWriter.close();
 
             //------ for finding top 10:

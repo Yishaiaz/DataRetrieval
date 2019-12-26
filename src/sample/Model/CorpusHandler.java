@@ -1,8 +1,5 @@
 package sample.Model;
 
-import sample.Model.TaskPool.WriteToFilePool;
-import sample.Model.TasksPoolsRunners.WriteToFileTask;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,9 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,9 +17,11 @@ import java.util.stream.Stream;
 public class CorpusHandler {
     private String corpusPath;
     public String postingFilesPath="";
+    public String queryPath="";
     private ArrayList<String> filesPaths; //list contains all paths in Corpus dir.
     public HashSet<String> stopWords = new HashSet<>();
     public HashSet<String> months = new HashSet<>();
+    public ReadFile readFile;
 
     public CorpusHandler(String corpusPath) {
         this.corpusPath = corpusPath;
@@ -41,6 +37,9 @@ public class CorpusHandler {
         this.postingFilesPath = postingFilesPath;
     }
 
+    public void setQueryPath(String queryPath) {
+        this.queryPath = queryPath;
+    }
     /**
      * This function add to 'filesPath' list with files paths.
      */
@@ -85,7 +84,7 @@ public class CorpusHandler {
     public void findTextInDocs(boolean withStemming) throws FileNotFoundException {
 
         long start_time = System.currentTimeMillis();
-        ReadFile readFile = new ReadFile(this.corpusPath, this.stopWords, this.months,withStemming,postingFilesPath);
+         readFile = new ReadFile(this.corpusPath, this.stopWords, this.months,withStemming,postingFilesPath);
 
         if (withStemming) {
             File docsInfoFile = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoStemming.txt");
@@ -134,5 +133,16 @@ public class CorpusHandler {
         }
         return stopWords;
     }
+
+    public void search(){
+        try {
+            readFile= new ReadFile(corpusPath,stopWords,months,false,postingFilesPath);
+            readFile.prepareDocOfQueriesToParse(queryPath);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
 }
