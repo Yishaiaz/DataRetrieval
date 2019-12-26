@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 public class CorpusHandler {
     private String corpusPath;
     public String postingFilesPath="";
-    public String queryPath="";
     private ArrayList<String> filesPaths; //list contains all paths in Corpus dir.
     public HashSet<String> stopWords = new HashSet<>();
     public HashSet<String> months = new HashSet<>();
@@ -37,9 +36,6 @@ public class CorpusHandler {
         this.postingFilesPath = postingFilesPath;
     }
 
-    public void setQueryPath(String queryPath) {
-        this.queryPath = queryPath;
-    }
     /**
      * This function add to 'filesPath' list with files paths.
      */
@@ -134,7 +130,7 @@ public class CorpusHandler {
         return stopWords;
     }
 
-    public void search(){
+    public void search(String queryPath){
         try {
             readFile= new ReadFile(corpusPath,stopWords,months,false,postingFilesPath);
             readFile.prepareDocOfQueriesToParse(queryPath);

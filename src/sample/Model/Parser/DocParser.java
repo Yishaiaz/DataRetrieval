@@ -84,8 +84,8 @@ public class DocParser implements IParser{
 
        else if (isQuery){
             String queryId= getQueryData(fullDoc);
-            doc=new Document(queryId,"","","");
-            fullDoc=StringUtils.substring(fullDoc,StringUtils.indexOf(fullDoc,"<title>")+7,StringUtils.indexOf(fullDoc,"</top>")+7);
+            doc=new Document(queryId,"","",String.valueOf(fullDoc.length()));
+            fullDoc=StringUtils.substring(fullDoc,StringUtils.indexOf(fullDoc,"<title>")+7,StringUtils.indexOf(fullDoc,"</top>"));
         }
 
         String[] docText =fullDoc.split(" | \n | \t");
@@ -610,9 +610,9 @@ public class DocParser implements IParser{
     private String getQueryData(String fullDoc) {
         //QueryId tag info
         String queryId;
-        int startIndex = StringUtils.indexOf(fullDoc, "<num>")+5;
-        int endIndex = StringUtils.indexOf(fullDoc, "<desc>");
-        if (endIndex<0 || startIndex-7 < 0){
+        int startIndex = StringUtils.indexOf(fullDoc, "<num>")+13;
+        int endIndex = StringUtils.indexOf(fullDoc, "<title>");
+        if (endIndex<0 || startIndex-13 < 0){
             queryId = "";
         }else{
             queryId = StringUtils.substring(fullDoc, startIndex, endIndex).replace(" ", "");
