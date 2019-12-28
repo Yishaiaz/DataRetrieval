@@ -19,6 +19,7 @@ public class DocParser implements IParser{
     private HashSet<String> stopWords;
     private HashSet<String> months;
     private Stemmer stemmer;
+    public static int typedQueryIdIndex=0;
 
 //    private Document doc;
 
@@ -86,7 +87,11 @@ public class DocParser implements IParser{
 
             String queryId= getQueryData(fullDoc);
             doc=new Document(queryId,"","",String.valueOf(fullDoc.length()));
-            fullDoc=StringUtils.substring(fullDoc,StringUtils.indexOf(fullDoc,"<title>")+7,StringUtils.indexOf(fullDoc,"</top>"));
+
+            //only if query not typed - cut according tags.
+            if (!queryId.startsWith("free")){
+                fullDoc = StringUtils.substring(fullDoc, StringUtils.indexOf(fullDoc, "<title>") + 7, StringUtils.indexOf(fullDoc, "</top>"));
+            }
         }
 
         String[] docText =fullDoc.split(" | \n | \t");
@@ -611,12 +616,18 @@ public class DocParser implements IParser{
     private String getQueryData(String fullDoc) {
         //QueryId tag info
         String queryId;
-        int startIndex = StringUtils.indexOf(fullDoc, "<num>")+13;
-        int endIndex = StringUtils.indexOf(fullDoc, "<title>");
-        if (endIndex<0 || startIndex-13 < 0){
-            queryId = "";
-        }else{
-            queryId = StringUtils.substring(fullDoc, startIndex, endIndex).replace(" ", "");
+        if (StringUtils.contains(fullDoc,"<num>")) {
+            int startIndex = StringUtils.indexOf(fullDoc, "<num>") + 13;
+            int endIndex = StringUtils.indexOf(fullDoc, "<title>");
+            if (endIndex < 0 || startIndex - 13 < 0) {
+                queryId = "";
+            } else {
+                queryId = StringUtils.substring(fullDoc, startIndex, endIndex).replace(" ", "");
+            }
+        }
+        else{
+            queryId="free "+String.valueOf(typedQueryIdIndex);
+            typedQueryIdIndex++;
         }
         return queryId;
     }

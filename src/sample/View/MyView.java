@@ -32,9 +32,9 @@ import java.util.stream.Stream;
  */
 public class MyView {
     private Controller controller;
-   // private String dictionaryContent="";
-    private  ObservableList <String> dictionaryContent;
-    private long timeOfProcess=0;
+    // private String dictionaryContent="";
+    private ObservableList<String> dictionaryContent;
+    private long timeOfProcess = 0;
 
     @FXML
     public javafx.scene.control.Button btn_browse;
@@ -43,6 +43,7 @@ public class MyView {
     public javafx.scene.control.TextField txtField_postingFilesInput;
     public javafx.scene.control.TextField txtField_corpusPath;
     public javafx.scene.control.TextField txtField_queryPath;
+    public javafx.scene.control.TextField txtField_freeSearch;
     //public javafx.scene.control.TextArea textAreaDic1;
     public ListView listView_dic;
 
@@ -91,7 +92,7 @@ public class MyView {
         FileChooser chooser = new FileChooser();
         File f = chooser.showOpenDialog(null);
         txtField_queryPath.appendText(f.getPath());
-        if (f ==null){
+        if (f == null) {
             Alert a = new Alert(Alert.AlertType.ERROR, "Not found file.");
             Optional<ButtonType> result = a.showAndWait();
             if (result.get() == ButtonType.OK) {
@@ -116,7 +117,7 @@ public class MyView {
                 controller.update(controller, "parseWithoutStemming");
             }
 
-               timeOfProcess= ((System.currentTimeMillis() - start_time)/60000);
+            timeOfProcess = ((System.currentTimeMillis() - start_time) / 60000);
 
             showResults(timeOfProcess);
 
@@ -126,39 +127,38 @@ public class MyView {
             alert.setHeaderText(null);
             alert.setContentText("Please fill up all fields before start.");
             alert.showAndWait();
-            }
-
         }
+
+    }
 
     /**
      * after indexing present info in pop up message.
+     *
      * @param timeOfProcess
      */
     private void showResults(long timeOfProcess) {
         try {
-            Path pathToDocsInfo=null;
-            if (stemming_cp.isSelected()){
-                 pathToDocsInfo = Paths.get(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoStemming.txt");
-        }
-            else{
-                 pathToDocsInfo = Paths.get(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoNoStemming.txt");
+            Path pathToDocsInfo = null;
+            if (stemming_cp.isSelected()) {
+                pathToDocsInfo = Paths.get(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoStemming.txt");
+            } else {
+                pathToDocsInfo = Paths.get(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoNoStemming.txt");
             }
             long numOfDocs = Files.lines(pathToDocsInfo).count();
 
-            Path pathToDic =null;
-            if (stemming_cp.isSelected()){
-                pathToDic= Paths.get(txtField_corpusPath.getText()+File.separator+"DictionaryStemming.txt");
-            }
-            else{
-                pathToDic= Paths.get(txtField_corpusPath.getText()+File.separator+"DictionaryNoStemming.txt");
+            Path pathToDic = null;
+            if (stemming_cp.isSelected()) {
+                pathToDic = Paths.get(txtField_corpusPath.getText() + File.separator + "DictionaryStemming.txt");
+            } else {
+                pathToDic = Paths.get(txtField_corpusPath.getText() + File.separator + "DictionaryNoStemming.txt");
             }
 
             long numOfTerms = Files.lines(pathToDic).count();
 
-            StrBuilder content= new StrBuilder ();
-            content.append("Time: " + timeOfProcess+ System.lineSeparator());
-            content.append("num of docs: " + numOfDocs+System.lineSeparator());
-            content.append("num of terms: "+ numOfTerms+ System.lineSeparator());
+            StrBuilder content = new StrBuilder();
+            content.append("Time: " + timeOfProcess + System.lineSeparator());
+            content.append("num of docs: " + numOfDocs + System.lineSeparator());
+            content.append("num of terms: " + numOfTerms + System.lineSeparator());
 
             //show result
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -167,7 +167,6 @@ public class MyView {
             alert.setContentText(content.toString());
 
             alert.showAndWait();
-
 
 
         } catch (IOException e) {
@@ -184,21 +183,21 @@ public class MyView {
         txtField_postingFilesInput.clear();
         txtField_corpusPath.clear();
         stemming_cp.setSelected(false);
-        File docInfoStemming= new File(Paths.get("").toAbsolutePath().toString()+File.separator+"DocsInfoStemming.txt");
+        File docInfoStemming = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoStemming.txt");
         if (docInfoStemming.exists())
-        docInfoStemming.delete();
+            docInfoStemming.delete();
 
         //delete docs info
-        File docInfoNoStemming= new File(Paths.get("").toAbsolutePath().toString()+File.separator+"DocsInfoNoStemming.txt");
+        File docInfoNoStemming = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoNoStemming.txt");
         if (docInfoNoStemming.exists())
             docInfoNoStemming.delete();
 
         //delete dics
-        File dicStemming= new File(txtField_corpusPath.getText()+File.separator+"DictionaryStemming.txt");
+        File dicStemming = new File(txtField_corpusPath.getText() + File.separator + "DictionaryStemming.txt");
         if (dicStemming.exists())
             dicStemming.delete();
 
-        File dicNoStemming= new File(txtField_corpusPath.getText()+File.separator+"DictionaryNoStemming.txt");
+        File dicNoStemming = new File(txtField_corpusPath.getText() + File.separator + "DictionaryNoStemming.txt");
         if (dicNoStemming.exists())
             dicNoStemming.delete();
 
@@ -261,14 +260,13 @@ public class MyView {
     public void loadDictionary() {
         if (!txtField_postingFilesInput.getText().equals("") && !txtField_corpusPath.getText().equals("")) {
             String dictionaryPath = txtField_corpusPath.getText();
-            File dictionary=null;
-            if (stemming_cp.isSelected()){
+            File dictionary = null;
+            if (stemming_cp.isSelected()) {
                 dictionary = new File(dictionaryPath + File.separator + "DictionaryStemming.txt");
+            } else {
+                dictionary = new File(dictionaryPath + File.separator + "DictionaryNoStemming.txt");
             }
-            else{
-                dictionary=new File(dictionaryPath + File.separator + "DictionaryNoStemming.txt");
-            }
-          //  StrBuilder dictionaryContent = new StrBuilder();
+            //  StrBuilder dictionaryContent = new StrBuilder();
             dictionaryContent = FXCollections.observableArrayList();
 
             String str = "";
@@ -279,7 +277,7 @@ public class MyView {
                 while ((str = br.readLine()) != null && (!str.equals(""))) {
                     str = str.substring(0, str.lastIndexOf(',')); // remove from presentation pointer to line
                     str = str.substring(0, str.lastIndexOf(',')); // remove from presentation df
-                   // dictionaryContent.append(str + System.lineSeparator());
+                    // dictionaryContent.append(str + System.lineSeparator());
                     dictionaryContent.add(str);
                 }
 
@@ -294,8 +292,7 @@ public class MyView {
 
                 alert.showAndWait();
             }
-        }
-        else{
+        } else {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Information Dialog");
             alert.setHeaderText(null);
@@ -307,6 +304,7 @@ public class MyView {
 
     /**
      * present dictionary from RAM in pop up window
+     *
      * @throws IOException
      */
     public void presentDictionary() throws IOException {
@@ -326,7 +324,7 @@ public class MyView {
             Scene scene = new Scene(root, 1060, 370);
             secondaryStage.setScene(scene);
             secondaryStage.show();
-          //  textAreaDic1 = (javafx.scene.control.TextArea) scene.lookup("#textAreaDic1");
+            //  textAreaDic1 = (javafx.scene.control.TextArea) scene.lookup("#textAreaDic1");
             listView_dic = (javafx.scene.control.ListView) scene.lookup("#listView_dic");
             listView_dic.setItems(dictionaryContent);
 //            textAreaDic1.setScrollLeft(1);
@@ -336,9 +334,27 @@ public class MyView {
         }
     }
 
-    public void search(){
-        String queryPath= txtField_queryPath.getText();
-        controller.setQueryPath(queryPath);
-        controller.update(controller,"search");
+    public void search() {
+        //if both fields are empties.
+        if (txtField_queryPath.getText().equals("") && txtField_freeSearch.getText().equals("")) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Information Dialog");
+            alert.setHeaderText(null);
+            alert.setContentText("For searching need to fill 'free typing search' or insert path for query file.");
+
+            alert.showAndWait();
+        }
+
+
+        if (!txtField_queryPath.getText().equals("")) {
+            String queryPath = txtField_queryPath.getText();
+            controller.setQueryPath(queryPath);
+            controller.update(controller, "search");
+        }
+
+        else if (!txtField_freeSearch.getText().equals("")){
+            controller.setFreeTypingQuery(txtField_freeSearch.getText());
+            controller.update(controller, "searchFreeTyping");
+        }
     }
 }

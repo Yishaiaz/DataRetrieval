@@ -43,4 +43,8 @@ public class MyModel extends Observable {
     public void search(String queryPath) {
         corpusHandler.search(queryPath);
     }
+
+    public void searchFreeTyping(String freeTypingQuery) throws Exception {
+        corpusHandler.searchFreeTyping(freeTypingQuery);
+    }
 }
