@@ -98,4 +98,18 @@ public class TermHashMapDataStructure {
        }
            return max;
     }
+
+    /**
+     * this function return only entities from doc
+     * @return
+     */
+    public HashMap <String,Integer> getOnlyEntities(){
+        HashMap<String,Integer> entities=new HashMap<>();
+        for (String term: termsEntries.keySet()){
+            if (termsEntries.get(term).getWeight()==1.7){
+                entities.put(termsEntries.get(term).getValue(),termsEntries.get(term).getTF());
+            }
+        }
+        return entities;
+    }
 }

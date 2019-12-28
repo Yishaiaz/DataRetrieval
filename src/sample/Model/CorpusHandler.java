@@ -83,6 +83,7 @@ public class CorpusHandler {
         this.isStemming=withStemming;
         long start_time = System.currentTimeMillis();
          readFile = new ReadFile(this.corpusPath, this.stopWords, this.months,withStemming,postingFilesPath);
+        File docsEntities = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "docsEntities");
 
         if (withStemming) {
             File docsInfoFile = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoStemming.txt");
