@@ -4,10 +4,16 @@ import org.apache.commons.lang3.text.StrBuilder;
 import sample.Model.DataStructures.TermHashMapDataStructure;
 import sample.Model.Document;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.math.RoundingMode;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
-import java.util.HashSet;
+import java.util.*;
+
 import org.apache.commons.lang3.StringUtils;
+
 import java.util.regex.Pattern;
 
 public class DocParser implements IParser{
@@ -42,6 +48,7 @@ public class DocParser implements IParser{
      */
     @Override
     public Document Parse(String fullDoc, boolean isQuery) throws Exception {
+
         // todo: need a new argument, boolean isQuery
         Document doc = null;
         TermHashMapDataStructure termHashMapDataStructure = new TermHashMapDataStructure();
@@ -53,6 +60,7 @@ public class DocParser implements IParser{
             String regexForAmericanPhoneNumbers = "^\\(?([0-9]{3})\\)?[-.\\s]?([0-9]{3})[-.\\s]?([0-9]{4})$";
             Pattern patternForAmericanPhoneNumbers = Pattern.compile(regexForAmericanPhoneNumbers);
         if (!isQuery) {
+            //<TERM,IMPORTANCE>
             String[] docData = getDocData(fullDoc);
             //add doc date as term
             if (!StringUtils.isEmpty(docData[1])) {
@@ -168,6 +176,7 @@ public class DocParser implements IParser{
                 ////////////////// ENTITIES AND ACRONYMS /////
                 else if (docText[textIterator].matches("(?:[a-zA-Z]\\.){2,}")) {
                     //Acronyms, if the word is char.char.char. ...
+
                     termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.7);
                     termLocationIterator += 1;
                     textIterator += 1;
@@ -178,8 +187,11 @@ public class DocParser implements IParser{
                     // Emtities - Llll of Llll , capital letter at both words 1st and 3rd.
                     // adding each word as a seperate term
                     termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.7);
+
                     termLocationIterator += 1;
                     termHashMapDataStructure.insert(docText[textIterator + 2], termLocationIterator, 1.7);
+
+
                     termLocationIterator += 1;
                     // adding the entire entity as a term
                     stringBuilder.append(docText[textIterator]);
@@ -188,6 +200,7 @@ public class DocParser implements IParser{
                     stringBuilder.append(" ");
                     stringBuilder.append(docText[textIterator + 2]);
                     termHashMapDataStructure.insert(stringBuilder.toString(), termLocationIterator, 1.7);
+
                     termLocationIterator += 1;
                     textIterator += 3;
                 } else if (textIterator + 1 < docText.length &&
@@ -204,6 +217,7 @@ public class DocParser implements IParser{
                     stringBuilder.append(" ");
                     stringBuilder.append(docText[textIterator + 1]);
                     termHashMapDataStructure.insert(stringBuilder.toString(), termLocationIterator, 1.7);
+
                     termLocationIterator += 1;
                     textIterator += 2;
                 }
@@ -605,7 +619,61 @@ public class DocParser implements IParser{
         //adding it into the Document object.
         doc.setParsedTerms(termHashMapDataStructure);
 
+       //get best 5 entities
+    if (!isQuery) {
+        HashMap <String,Integer> entities=doc.getParsedTerms().getOnlyEntities();
+        HashMap<String, Integer> topEntities = new HashMap<>();
+        List<Integer> occurences = new ArrayList<>(); //contain all scores from documents.
+        occurences.addAll(entities.values());
+        Collections.sort(occurences, Collections.reverseOrder()); // sort in decanting
+
+        int size;
+        //if there are less then 5 entities in doc.
+    if(occurences.size()<5)
+        size=occurences.size();
+    else
+        size=5;
+
+    for (int i = 0; i < size; i++) {
+        int curOccurrence = occurences.get(i);
+        String key = getKeyWithSpecificValue(entities, curOccurrence);
+        topEntities.put(key, curOccurrence);
+        entities.remove(key);
+    }
+
+        File docsEntities=new File(Paths.get("").toAbsolutePath().toString() + File.separator + "docsEntities.txt");
+
+        FileWriter fw = new FileWriter(docsEntities,true);
+        BufferedWriter w = new BufferedWriter(fw);
+        String info=topEntities.toString();
+        info=StringUtils.remove(info,'{');
+        info=StringUtils.remove(info,'}');
+
+        w.write(doc.DocNo+"|"+info+System.lineSeparator());
+
+        w.close();
+        fw.close();
+
+
+
+
+
+
+}
+
         return doc;
+    }
+
+    /**
+     * given value , return key that satisfied <key,value> in documents.
+     * @param value
+     * @return
+     */
+    private String getKeyWithSpecificValue(HashMap<String,Integer> map,int value){
+        for (String curKey: map.keySet()){
+                return curKey;
+            }
+        return null;
     }
 
     /**
