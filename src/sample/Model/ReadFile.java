@@ -133,6 +133,7 @@ public class ReadFile {
                     //we've reached the end of the query.
                     Document query = this.parser.Parse(fullDocStringBuilder.toString(), true);
                     searcher.search(query);
+                    line=br.readLine();
                 }
                 else{
                     fullDocStringBuilder.append(line);
