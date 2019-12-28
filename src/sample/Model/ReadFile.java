@@ -143,4 +143,15 @@ public class ReadFile {
         }
 
     }
+
+    public void prepareFreeTypingQueryParse(String query) {
+        try {
+            Document queryDoc = null;
+            queryDoc = this.parser.Parse(query, true);
+            searcher.search(queryDoc);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 }

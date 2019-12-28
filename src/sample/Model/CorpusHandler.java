@@ -21,6 +21,7 @@ public class CorpusHandler {
     public HashSet<String> stopWords = new HashSet<>();
     public HashSet<String> months = new HashSet<>();
     public ReadFile readFile;
+    public boolean isStemming;
 
     public CorpusHandler(String corpusPath) {
         this.corpusPath = corpusPath;
@@ -79,6 +80,7 @@ public class CorpusHandler {
      */
     public void findTextInDocs(boolean withStemming) throws FileNotFoundException {
 
+        this.isStemming=withStemming;
         long start_time = System.currentTimeMillis();
          readFile = new ReadFile(this.corpusPath, this.stopWords, this.months,withStemming,postingFilesPath);
 
@@ -132,12 +134,22 @@ public class CorpusHandler {
 
     public void search(String queryPath){
         try {
-            readFile= new ReadFile(corpusPath,stopWords,months,false,postingFilesPath);
+            readFile= new ReadFile(corpusPath,stopWords,months,isStemming,postingFilesPath);
             readFile.prepareDocOfQueriesToParse(queryPath);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void searchFreeTyping(String query)  {
+        try {
+            readFile= new ReadFile(corpusPath,stopWords,months,isStemming,postingFilesPath);
+            readFile.prepareFreeTypingQueryParse(query);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 
 

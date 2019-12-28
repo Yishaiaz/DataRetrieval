@@ -15,6 +15,8 @@ public class Controller extends Observable implements Observer {
     public String corpusPath;
     public String postingFilesPath;
     public String queryPath;
+    public String freeTypingQuery;
+    public Boolean withStemming;
 
     public Controller(MyModel model, MyView view){
         this.model=model;
@@ -40,6 +42,14 @@ public class Controller extends Observable implements Observer {
                 break;
             case "search":
                 model.search(queryPath);
+                break;
+            case "searchFreeTyping":
+                try {
+                    model.searchFreeTyping(freeTypingQuery);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
 
         }
     }
@@ -59,5 +69,9 @@ public class Controller extends Observable implements Observer {
 
     public void setQueryPath(String queryPath) {
         this.queryPath=queryPath;
+    }
+
+    public void setFreeTypingQuery(String text) {
+        this.freeTypingQuery=text;
     }
 }
