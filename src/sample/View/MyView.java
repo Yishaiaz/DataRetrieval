@@ -4,15 +4,13 @@ import javafx.beans.InvalidationListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
+import javafx.stage.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrBuilder;
 import sample.Controller.Controller;
@@ -87,7 +85,6 @@ public class MyView {
             }
         }
     }
-
     public void chooseQueryPath() {
         FileChooser chooser = new FileChooser();
         File f = chooser.showOpenDialog(null);
@@ -357,4 +354,6 @@ public class MyView {
             controller.update(controller, "searchFreeTyping");
         }
     }
+
+
 }
