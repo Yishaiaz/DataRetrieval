@@ -63,18 +63,28 @@ public class tries {
 
     public static void main(String[] args) {
         //TESTING THE STEMMER:
-        String day = "04";
-        String month = "11";
-        String year = "1997";
-        try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            Date parsedDate = dateFormat.parse(year+"-"+month+"-"+day);
-            Timestamp timestamp = new java.sql.Timestamp(parsedDate.getTime());
-        } catch(Exception e) { //this generic but you can control another types of exception
-            // look the origin of excption
-        }
+//        String day = "04";
+//        String month = "11";
+//        String year = "1997";
+//        try {
+//            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+//            Date parsedDate = dateFormat.parse(year+"-"+month+"-"+day);
+//            Timestamp timestamp = new java.sql.Timestamp(parsedDate.getTime());
+//        } catch(Exception e) { //this generic but you can control another types of exception
+//            // look the origin of excption
+//        }
 
 //        Timestamp ts = new Timestamp()
+
+//        TESTING RANKER
+        String pathToDictionary = "/Users/yishaiazabary/Desktop/University/שנה ד/Engine/DataRetrieval/sample files to work with/DictionaryNoStemming.txt";
+        String pathToPosting = "/Users/yishaiazabary/Desktop/University/שנה ד/Engine/DataRetrieval/sample files to work with/notStemmingPostingFile.txt";
+        String pathToDocsInfo = "/Users/yishaiazabary/Desktop/University/שנה ד/Engine/DataRetrieval/sample files to work with/DocsInfoNoStemming.txt";
+
+//        Ranker ranker = new Ranker(pathToDictionary, pathToPosting, pathToDocsInfo);
+//        ranker.testDicToPos("$1.5-billion");
+
+
     }
 
 }
