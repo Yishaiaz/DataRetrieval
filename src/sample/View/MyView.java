@@ -342,8 +342,17 @@ public class MyView {
             alert.showAndWait();
         }
 
+        //in case both fields filled .
+       else if (!txtField_queryPath.getText().equals("") && !txtField_freeSearch.getText().equals("")) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Information Dialog");
+            alert.setHeaderText(null);
+            alert.setContentText("For searching need to fill 'free typing search' OR insert path for query file. not both.");
+            alert.showAndWait();
+        }
 
-        if (!txtField_queryPath.getText().equals("")) {
+
+        else if (!txtField_queryPath.getText().equals("")) {
             String queryPath = txtField_queryPath.getText();
             controller.setQueryPath(queryPath);
             controller.update(controller, "search");

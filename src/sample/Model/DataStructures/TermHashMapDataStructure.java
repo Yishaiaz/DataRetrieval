@@ -107,7 +107,7 @@ public class TermHashMapDataStructure {
         HashMap<String,Integer> entities=new HashMap<>();
         for (String term: termsEntries.keySet()){
             if (termsEntries.get(term).getWeight()==1.7){
-                entities.put(termsEntries.get(term).getValue(),termsEntries.get(term).getTF());
+                entities.put(termsEntries.get(term).getValue(), termsEntries.get(term).getTF());
             }
         }
         return entities;
