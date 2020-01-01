@@ -3,8 +3,9 @@ package sample.Model;
 import java.util.*;
 
 public class RankedDocumentsStructure {
-    public HashMap<String, Double> documents = new HashMap<>();
     public String queryId;
+    public HashMap<String, Double> documents = new HashMap<>();
+
 
     public RankedDocumentsStructure(String queryId) {
         this.queryId=queryId;

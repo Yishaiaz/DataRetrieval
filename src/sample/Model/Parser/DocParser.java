@@ -622,7 +622,7 @@ public class DocParser implements IParser{
        //get best 5 entities
     if (!isQuery) {
         HashMap <String,Integer> entities=doc.getParsedTerms().getOnlyEntities();
-        HashMap<String, Integer> topEntities = new HashMap<>();
+        HashMap<String, Double> topEntities = new HashMap<>();
         List<Integer> occurences = new ArrayList<>(); //contain all scores from documents.
         occurences.addAll(entities.values());
         Collections.sort(occurences, Collections.reverseOrder()); // sort in decanting
@@ -635,9 +635,10 @@ public class DocParser implements IParser{
         size=5;
 
     for (int i = 0; i < size; i++) {
-        int curOccurrence = occurences.get(i);
+        double curOccurrence = occurences.get(i);
         String key = getKeyWithSpecificValue(entities, curOccurrence);
-        topEntities.put(key, curOccurrence);
+        //normalize : tf/maxTfInDoc
+        topEntities.put(key, curOccurrence/doc.parsedTerms.getMaxTf());
         entities.remove(key);
     }
 
@@ -669,7 +670,7 @@ public class DocParser implements IParser{
      * @param value
      * @return
      */
-    private String getKeyWithSpecificValue(HashMap<String,Integer> map,int value){
+    private String getKeyWithSpecificValue(HashMap<String,Integer> map,Double value){
         for (String curKey: map.keySet()){
                 return curKey;
             }

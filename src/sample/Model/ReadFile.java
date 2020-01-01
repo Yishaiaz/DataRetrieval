@@ -29,7 +29,7 @@ public class ReadFile {
         indexer=new DocIndexer(postingFilesPath,withStemming);
         this.STOP_WORD_BAG = stopWords;
         this.withStemming=withStemming;
-        searcher=new Searcher();
+        searcher=new Searcher(corpusPath,postingFilesPath);
 //        readStopWordsFile();
     }
 
