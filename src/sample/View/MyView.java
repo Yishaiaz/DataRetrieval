@@ -38,6 +38,7 @@ public class MyView {
     public javafx.scene.control.Button btn_browse;
     public javafx.scene.control.Button btn_parse;
     public javafx.scene.control.CheckBox stemming_cp;
+    public javafx.scene.control.CheckBox cb_semantic;
     public javafx.scene.control.TextField txtField_postingFilesInput;
     public javafx.scene.control.TextField txtField_corpusPath;
     public javafx.scene.control.TextField txtField_queryPath;
@@ -355,11 +356,13 @@ public class MyView {
         else if (!txtField_queryPath.getText().equals("")) {
             String queryPath = txtField_queryPath.getText();
             controller.setQueryPath(queryPath);
+            controller.setIsWithSemantic(cb_semantic.isSelected());
             controller.update(controller, "search");
         }
 
         else if (!txtField_freeSearch.getText().equals("")){
             controller.setFreeTypingQuery(txtField_freeSearch.getText());
+            controller.setIsWithSemantic(cb_semantic.isSelected());
             controller.update(controller, "searchFreeTyping");
         }
     }

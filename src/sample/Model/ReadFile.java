@@ -114,7 +114,7 @@ public class ReadFile {
      * @param queryPath
      * @throws Exception
      */
-    public void prepareDocOfQueriesToParse(String queryPath) throws Exception {
+    public void prepareDocOfQueriesToParse(String queryPath,Boolean withSemantic) throws Exception {
         BufferedReader br = null;
         StringBuilder fullDocStringBuilder = new StringBuilder();
         br = new BufferedReader(new InputStreamReader(new FileInputStream(queryPath), "UTF-8"));
@@ -132,7 +132,7 @@ public class ReadFile {
                 if (line.equals("</top>")) {
                     //we've reached the end of the query.
                     Document query = this.parser.Parse(fullDocStringBuilder.toString(), true);
-                    searcher.search(query);
+                    searcher.search(query,withStemming,withSemantic);
                     line=br.readLine();
                 }
                 else{
@@ -144,11 +144,11 @@ public class ReadFile {
 
     }
 
-    public void prepareFreeTypingQueryParse(String query) {
+    public void prepareFreeTypingQueryParse(String query,Boolean withSemantic) {
         try {
             Document queryDoc = null;
             queryDoc = this.parser.Parse(query, true);
-            searcher.search(queryDoc);
+            searcher.search(queryDoc,withStemming,withSemantic);
         } catch (Exception e) {
             e.printStackTrace();
         }

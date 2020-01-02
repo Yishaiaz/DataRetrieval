@@ -17,6 +17,7 @@ public class Controller extends Observable implements Observer {
     public String queryPath;
     public String freeTypingQuery;
     public Boolean withStemming;
+    public Boolean withSemantic;
 
     public Controller(MyModel model, MyView view){
         this.model=model;
@@ -41,10 +42,12 @@ public class Controller extends Observable implements Observer {
                 model.startParse (false);
                 break;
             case "search":
+                model.setIsWithSemantic(withSemantic);
                 model.search(queryPath);
                 break;
             case "searchFreeTyping":
                 try {
+                    model.setIsWithSemantic(withSemantic);
                     model.searchFreeTyping(freeTypingQuery);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -73,5 +76,9 @@ public class Controller extends Observable implements Observer {
 
     public void setFreeTypingQuery(String text) {
         this.freeTypingQuery=text;
+    }
+
+    public void setIsWithSemantic(boolean selected) {
+        this.withSemantic=selected;
     }
 }

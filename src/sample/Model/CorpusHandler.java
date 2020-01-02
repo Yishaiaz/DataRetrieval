@@ -133,20 +133,20 @@ public class CorpusHandler {
         return stopWords;
     }
 
-    public void search(String queryPath){
+    public void search(String queryPath,Boolean withSemantic){
         try {
             readFile= new ReadFile(corpusPath,stopWords,months,isStemming,postingFilesPath);
-            readFile.prepareDocOfQueriesToParse(queryPath);
+            readFile.prepareDocOfQueriesToParse(queryPath,withSemantic);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void searchFreeTyping(String query)  {
+    public void searchFreeTyping(String query,Boolean withSemantic)  {
         try {
             readFile= new ReadFile(corpusPath,stopWords,months,isStemming,postingFilesPath);
-            readFile.prepareFreeTypingQueryParse(query);
+            readFile.prepareFreeTypingQueryParse(query,withSemantic);
         } catch (Exception e) {
             e.printStackTrace();
         }
