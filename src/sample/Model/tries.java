@@ -77,7 +77,7 @@ public class tries {
 //        TESTING RANKER
         //building a fake termHashMap
         TermHashMapDataStructure fakeTermHashMap = new TermHashMapDataStructure();
-        String[] someTerms = {"airbus", "airplane", "manufacturing"};
+        String[] someTerms = {"airbus", "airplane", "manufacturing", "guy", "tall", "great", "chamberline", "rude"};
         int ctr = 0;
         for (String termName :
                 someTerms) {

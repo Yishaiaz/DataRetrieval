@@ -77,7 +77,7 @@ public class Ranker {
             String currDocToProcess = allQueryRelatedDocsID.get(j);
             // for each of the terms we found
             for (int k = 0; k < termToDocData.size(); k++) {
-                Pair<String,String>[] termToDocsPairs = termToDocData.get(k).keySet().toArray(new Pair[2]);
+                Pair<String,String>[] termToDocsPairs = termToDocData.get(k).keySet().toArray(new Pair[0]);
                 // for each of the Dod, term we found for that term.
                 for (int l = 0; l < termToDocsPairs.length; l++) {
                     if(termToDocsPairs[l].left.equals(currDocToProcess)){
@@ -92,7 +92,7 @@ public class Ranker {
         RankedDocumentsStructure ans = new RankedDocumentsStructure(queryID);
         Set<String> keySet = docsRanking.keySet();
         for (int j = 0; j < docsRanking.size(); j++) {
-            ans.insert(keySet.toArray(new String[2])[j], docsRanking.get(keySet.toArray(new String[2])[j]));
+            ans.insert(keySet.toArray(new String[0])[j], docsRanking.get(keySet.toArray(new String[0])[j]));
         }
         return ans;
     }
