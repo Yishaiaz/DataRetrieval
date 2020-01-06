@@ -98,7 +98,7 @@ public class DocParser implements IParser{
 
             //only if query not typed - cut according tags.
             if (!queryId.startsWith("free")){
-                fullDoc = StringUtils.substring(fullDoc, StringUtils.indexOf(fullDoc, "<title>") + 7, StringUtils.indexOf(fullDoc, "</top>"));
+                fullDoc = StringUtils.substring(fullDoc, StringUtils.indexOf(fullDoc, "<title>") + 7, StringUtils.indexOf(fullDoc, "<desc>"));
             }
         }
 

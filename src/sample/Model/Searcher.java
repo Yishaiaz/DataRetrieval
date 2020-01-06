@@ -16,33 +16,39 @@ import java.util.ArrayList;
 
 
 public class Searcher {
-
+    String corpusPath;
     String dictionaryPath;
     String postingFilesPath;
     ArrayList<String> dictionaryContent = new ArrayList<>();
     private int Max_Additional_Terms_API = 4;
+    private boolean isStemming=false;
 
-    public Searcher(String corpusPath, String postingFilesPath) {
-        this.dictionaryPath = corpusPath; //that's where we save the dictionary.
-        this.postingFilesPath = postingFilesPath;
+    public Searcher(String corpusPath, String postingFilesPath,boolean isStemming) {
+        this.corpusPath=corpusPath;
+        if (!isStemming) {
+            this.dictionaryPath = corpusPath + File.separator + "DictionaryNoStemming.txt"; //that's where we save the dictionary.
+            this.postingFilesPath = postingFilesPath+File.separator+"notStemmingPostingFile.txt";
+        } else if (isStemming) {
+            this.dictionaryPath = corpusPath + File.separator + "DictionaryStemming.txt";
+            this.postingFilesPath = postingFilesPath+File.separator+"stemmingPostingFile.txt";
+        }
     }
-
     public void search(Document query, boolean isStemming,Boolean withSemantic) {
         /** will hold the result ->relevant documents in decreasing order.*/
-        RankedDocumentsStructure rankedDocumentsStructure = new RankedDocumentsStructure(query.getDocNo());
+        RankedDocumentsStructure rankedDocumentsStructure ;
         String pathToDocsInfo = Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoNoStemming.txt";
         long numOfDocs = 0;
 
         try {
             numOfDocs = Files.lines(Paths.get(pathToDocsInfo)).count();
-            Ranker ranker = new Ranker(dictionaryPath, postingFilesPath, pathToDocsInfo, (int) numOfDocs, 0);
+            Ranker ranker = new Ranker(dictionaryPath, postingFilesPath, pathToDocsInfo, (int) numOfDocs, 250);
 
             if (withSemantic) {
                 Document queryWithSemantic = useSemanticTreat(query, isStemming);
-                ranker.rankQuery(queryWithSemantic.parsedTerms);
+                rankedDocumentsStructure=ranker.rankDocsForQuery(queryWithSemantic.parsedTerms,query.DocNo);
 
             } else //without semantic treat.
-                ranker.rankQuery(query.parsedTerms);
+                rankedDocumentsStructure=ranker.rankDocsForQuery(query.parsedTerms,query.DocNo);
 
             rankedDocumentsStructure.onlyBest50(); // leave only best 50 docs.
             writeResultsToFile(rankedDocumentsStructure); //write final results to file
@@ -57,7 +63,7 @@ public class Searcher {
      */
     public void writeResultsToFile(RankedDocumentsStructure rankedDocumentStructure) {
         try {
-            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(this.dictionaryPath + File.separator + "results.txt"));
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(this.corpusPath + File.separator + "results.txt"));
 
             for (String key : rankedDocumentStructure.documents.keySet()) {
                 Double rank = rankedDocumentStructure.documents.get(key);
@@ -71,7 +77,6 @@ public class Searcher {
                 line.append("run"); // some name, ignore.
                 bufferedWriter.write(line.toString()+ System.lineSeparator());
             }
-
             bufferedWriter.close();
 
         } catch (IOException e) {
@@ -80,7 +85,8 @@ public class Searcher {
     }
 
     public Document useSemanticTreat(Document query, boolean isStemming) throws IOException {
-        readDictionary(isStemming); //read dictionary to memory.
+        this.isStemming=isStemming;
+        readDictionary(); //read dictionary to memory.
         ArrayList<String> termsFromAPI=new ArrayList<>(); //hold all terms from API
         for (String key : query.parsedTerms.termsEntries.keySet()) {
             if(key.contains(" ")) //we will not check terms contain more then one word
@@ -144,20 +150,14 @@ public class Searcher {
             final_term += stemmer.toString() + " ";
         }
         return final_term.substring(0, final_term.length() - 1);
-
     }
 
     /**
      * load dictionary to RAM
-     * @param isStemming
+     * @param
      */
-    public void readDictionary(boolean isStemming) {
-        File dictionary = null;
-        if (isStemming) {
-            dictionary = new File(dictionaryPath + File.separator + "DictionaryStemming.txt");
-        } else {
-            dictionary = new File(dictionaryPath + File.separator + "DictionaryNoStemming.txt");
-        }
+    public void readDictionary() {
+        File dictionary = new File(dictionaryPath );;
 
         String str = "";
         BufferedReader br = null;
@@ -165,7 +165,6 @@ public class Searcher {
             br = new BufferedReader(new FileReader(dictionary));
 
             while (true) {
-
                 if (!((str = br.readLine()) != null && (!str.equals("")))) break;
 
                 str = str.substring(0, str.lastIndexOf(',')); // remove from presentation pointer to line
@@ -173,7 +172,6 @@ public class Searcher {
                 str = str.substring(0, str.lastIndexOf(','));//remove Total Corpus Appearances
                 dictionaryContent.add(str);
             }
-
             br.close();
         } catch (IOException e) {
             e.printStackTrace();
