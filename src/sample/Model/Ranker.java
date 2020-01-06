@@ -33,7 +33,7 @@ public class Ranker {
      *
      * @param queryTerms
      */
-    public void rankDocsForQuery(TermHashMapDataStructure queryTerms){
+    public RankedDocumentsStructure rankDocsForQuery(TermHashMapDataStructure queryTerms, String queryID){
         Iterator<Entry<String, TermHashMapEntry>> iterator = queryTerms.termsEntries.entrySet().iterator();
         String[] termIDs = new String[queryTerms.termsEntries.size()];
         int i = 0;
@@ -66,7 +66,13 @@ public class Ranker {
                 }
             }
         }
-        System.out.println(BM25Ranker.rank(relatedDocsToTermValues));
+        Map<String, Double> docsRanking = BM25Ranker.rank(relatedDocsToTermValues);
+        RankedDocumentsStructure ans = new RankedDocumentsStructure(queryID);
+        Set<String> keySet = docsRanking.keySet();
+        for (int j = 0; j < docsRanking.size(); j++) {
+            ans.insert(keySet.toArray(new String[2])[j], docsRanking.get(keySet.toArray(new String[2])[j]));
+        }
+        return ans;
     }
 
     /**
@@ -100,7 +106,9 @@ public class Ranker {
         for (String termID :
                 termsIds) {
             Map<Pair<String, String>, ArrayList> singleTermAllData =  this.collectTermToDocData(termID);
-            allDataAllTerms.add(singleTermAllData);
+            if(singleTermAllData!=null) {
+                allDataAllTerms.add(singleTermAllData);
+            }
         }
         return allDataAllTerms;
     }

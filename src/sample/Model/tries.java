@@ -77,7 +77,7 @@ public class tries {
 //        TESTING RANKER
         //building a fake termHashMap
         TermHashMapDataStructure fakeTermHashMap = new TermHashMapDataStructure();
-        String[] someTerms = {"amazing", "work"};
+        String[] someTerms = {"extortion", "romanis"};
         int ctr = 0;
         for (String termName :
                 someTerms) {
@@ -92,7 +92,7 @@ public class tries {
 
         Ranker ranker = new Ranker(pathToDictionary, pathToPosting, pathToDocsInfo, 500000, 250);
 //        ranker.fakeRankQuery(someTerms);
-        ranker.rankDocsForQuery(fakeTermHashMap);
+        ranker.rankDocsForQuery(fakeTermHashMap, "asdfasdf");
 
 
     }
