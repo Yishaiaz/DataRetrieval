@@ -19,21 +19,21 @@ public class Ranker {
     String pathToPosting;
     String pathToDocInfo;
     int totalNumOfDocs;
-    double avgDocLength;
+    double docMaxTF;
 
-    public Ranker(String pathToDictionary, String pathToPosting, String pathToDocInfo, int totalNumOfDocs, double avgDocLength) {
+    public Ranker(String pathToDictionary, String pathToPosting, String pathToDocInfo, int totalNumOfDocs, double docMaxTF) {
         this.pathToDictionary = pathToDictionary;
         this.pathToPosting = pathToPosting;
         this.pathToDocInfo = pathToDocInfo;
         this.totalNumOfDocs = totalNumOfDocs;
-        this.avgDocLength = avgDocLength;
+        this.docMaxTF = docMaxTF;
     }
 
     /**
      *
      * @param queryTerms
      */
-    public void rankDocsForQuery(TermHashMapDataStructure queryTerms){
+    public RankedDocumentsStructure rankDocsForQuery(TermHashMapDataStructure queryTerms, String queryID){
         Iterator<Entry<String, TermHashMapEntry>> iterator = queryTerms.termsEntries.entrySet().iterator();
         String[] termIDs = new String[queryTerms.termsEntries.size()];
         int i = 0;
@@ -47,7 +47,7 @@ public class Ranker {
         ArrayList<Map<Pair<String, String>, ArrayList>> termToDocData = collectAllTermsToDocData(termIDs);
         ArrayList<String> allQueryRelatedDocsID = getAllDocsID(termToDocData);
         // preparing all docs to term calculation values
-        IRankingAlgorithm BM25Ranker = new BM25RankingAlgorithm(this.totalNumOfDocs, this.avgDocLength, BM25RankingAlgorithm.IdfFormula.OKAPIREGULAR);
+        IRankingAlgorithm BM25Ranker = new BM25RankingAlgorithm(this.totalNumOfDocs, this.docMaxTF, BM25RankingAlgorithm.IdfFormula.OKAPIREGULAR);
         ArrayList<Pair<String, double[]>> relatedDocsToTermValues = new ArrayList<>();
         //for each possible term name
         for (int j = 0; j < allQueryRelatedDocsID.size(); j++) {
@@ -66,7 +66,13 @@ public class Ranker {
                 }
             }
         }
-        System.out.println(BM25Ranker.rank(relatedDocsToTermValues));
+        Map<String, Double> docsRanking = BM25Ranker.rank(relatedDocsToTermValues);
+        RankedDocumentsStructure ans = new RankedDocumentsStructure(queryID);
+        Set<String> keySet = docsRanking.keySet();
+        for (int j = 0; j < docsRanking.size(); j++) {
+            ans.insert(keySet.toArray(new String[2])[j], docsRanking.get(keySet.toArray(new String[2])[j]));
+        }
+        return ans;
     }
 
     /**
@@ -100,7 +106,9 @@ public class Ranker {
         for (String termID :
                 termsIds) {
             Map<Pair<String, String>, ArrayList> singleTermAllData =  this.collectTermToDocData(termID);
-            allDataAllTerms.add(singleTermAllData);
+            if(singleTermAllData!=null) {
+                allDataAllTerms.add(singleTermAllData);
+            }
         }
         return allDataAllTerms;
     }
@@ -139,7 +147,7 @@ public class Ranker {
                         valuesOfTermToDoc.add(termWeightInDoc); //kParam = term weight
                         valuesOfTermToDoc.add(0.75); //bParam - 0.75
                         valuesOfTermToDoc.add((double)numberOfDocContainTerm); //numberOfDocContainTerm - n(qi) counted
-                        valuesOfTermToDoc.add((double) getDocMaxTF(docID)); //docLength
+                        valuesOfTermToDoc.add((double) getDocMaxTF(docID)); //docMaxTF
                         docToTerm.put(new Pair<>(docID, termIdentifier), valuesOfTermToDoc);
                     }
                     // docID - TermID :
