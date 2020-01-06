@@ -20,12 +20,16 @@ public class Ranker {
      * different from what we learned in class.
      *
      */
-    IRankingAlgorithm rankingAlgorithm;
-    String pathToDictionary;
-    String pathToPosting;
-    String pathToDocInfo;
-    int totalNumOfDocs;
-    double docsAvgLength;
+    private IRankingAlgorithm rankingAlgorithm;
+    private String pathToDictionary;
+    private String pathToPosting;
+    private String pathToDocInfo;
+    private int totalNumOfDocs;
+    private double docsAvgLength;
+    private HashMap<Integer, String> lineInMemoryHash = new HashMap<>();// contains line number, and the line string value
+    private HashMap<String, Integer> docsMaxTFMemoryHash = new HashMap<>();// contains docID, Doc max tf integer
+    private HashMap<String, Map<Pair<String, String>, ArrayList>> termsMapToDocsDataInMemoryHash = new HashMap<>();// contains docID, Doc max tf integer
+
 
     /**
      * constructor - receives the paths to all necessary files,
@@ -147,9 +151,10 @@ public class Ranker {
      * @return Map<Pair<String, String>, ArrayList>
      */
     private Map<Pair<String, String>, ArrayList> collectTermToDocData(String termIdentifier){
+        if(this.termsMapToDocsDataInMemoryHash.containsKey(termIdentifier)){
+            return this.termsMapToDocsDataInMemoryHash.get(termIdentifier);
+        }
         BufferedReader br = null;
-        // HashMap of <DocId, currentScore>
-        HashMap<String, Double> currentDocsScore = new HashMap<>();
         try{
             br = new BufferedReader(new FileReader(this.pathToDictionary));
             String line = br.readLine();
@@ -180,6 +185,7 @@ public class Ranker {
                         docToTerm.put(new Pair<>(docID, termIdentifier), valuesOfTermToDoc);
                     }
                     // docID - TermID :
+                    this.termsMapToDocsDataInMemoryHash.put(termIdentifier, docToTerm);
                     return docToTerm;
                 }
                 else{
@@ -199,6 +205,9 @@ public class Ranker {
      * @return
      */
     private String getPostingLine(int pointerToLine){
+        if(this.lineInMemoryHash.containsKey(pointerToLine)){
+            return lineInMemoryHash.get(pointerToLine);
+        }
         BufferedReader bufferedReader = null;
         try{
             bufferedReader = new BufferedReader(new FileReader(this.pathToPosting));
@@ -206,6 +215,7 @@ public class Ranker {
             int currentLineNum = 0;
             while(line!=null){
                 if(currentLineNum==pointerToLine){
+                    this.lineInMemoryHash.put(pointerToLine, line);
                     return line;
                 }
                 line = bufferedReader.readLine();
@@ -227,11 +237,15 @@ public class Ranker {
      * @return
      */
     private int getDocMaxTF(String docID){
+        if(this.docsMaxTFMemoryHash.containsKey(docID)){
+            return this.docsMaxTFMemoryHash.get(docID);
+        }
         try{
             BufferedReader bufferedReader = new BufferedReader(new FileReader(this.pathToDocInfo));
             String line = bufferedReader.readLine();
             while(line!=null){
                 if (StringUtils.startsWith(line, docID)){
+                    this.docsMaxTFMemoryHash.put(docID, Integer.parseInt(StringUtils.split(line," ")[2]));
                     return Integer.parseInt(StringUtils.split(line," ")[2]);
                 }
                 else{

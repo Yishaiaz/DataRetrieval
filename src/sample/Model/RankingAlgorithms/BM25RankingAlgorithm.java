@@ -81,7 +81,7 @@ public class BM25RankingAlgorithm extends IRankingAlgorithm{
     private double calcSingleTermScoreForDoc(int termFreqInDoc, double kParam, double bParam, int numberOfDocContainTerm, int docLength){
         double idfRes = calcIDF(numberOfDocContainTerm);
         double freq = ((termFreqInDoc) *(kParam + 1)/ (termFreqInDoc + kParam*((1-bParam)+bParam*(docLength/this.avgDocLength))));
-        return idfRes * freq;
+        return idfRes > 0 ? idfRes * freq : freq;
 
     }
 
