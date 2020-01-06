@@ -19,14 +19,14 @@ public class Ranker {
     String pathToPosting;
     String pathToDocInfo;
     int totalNumOfDocs;
-    double avgDocLength;
+    double docMaxTF;
 
-    public Ranker(String pathToDictionary, String pathToPosting, String pathToDocInfo, int totalNumOfDocs, double avgDocLength) {
+    public Ranker(String pathToDictionary, String pathToPosting, String pathToDocInfo, int totalNumOfDocs, double docMaxTF) {
         this.pathToDictionary = pathToDictionary;
         this.pathToPosting = pathToPosting;
         this.pathToDocInfo = pathToDocInfo;
         this.totalNumOfDocs = totalNumOfDocs;
-        this.avgDocLength = avgDocLength;
+        this.docMaxTF = docMaxTF;
     }
 
     /**
@@ -47,7 +47,7 @@ public class Ranker {
         ArrayList<Map<Pair<String, String>, ArrayList>> termToDocData = collectAllTermsToDocData(termIDs);
         ArrayList<String> allQueryRelatedDocsID = getAllDocsID(termToDocData);
         // preparing all docs to term calculation values
-        IRankingAlgorithm BM25Ranker = new BM25RankingAlgorithm(this.totalNumOfDocs, this.avgDocLength, BM25RankingAlgorithm.IdfFormula.OKAPIREGULAR);
+        IRankingAlgorithm BM25Ranker = new BM25RankingAlgorithm(this.totalNumOfDocs, this.docMaxTF, BM25RankingAlgorithm.IdfFormula.OKAPIREGULAR);
         ArrayList<Pair<String, double[]>> relatedDocsToTermValues = new ArrayList<>();
         //for each possible term name
         for (int j = 0; j < allQueryRelatedDocsID.size(); j++) {
@@ -139,7 +139,7 @@ public class Ranker {
                         valuesOfTermToDoc.add(termWeightInDoc); //kParam = term weight
                         valuesOfTermToDoc.add(0.75); //bParam - 0.75
                         valuesOfTermToDoc.add((double)numberOfDocContainTerm); //numberOfDocContainTerm - n(qi) counted
-                        valuesOfTermToDoc.add((double) getDocMaxTF(docID)); //docLength
+                        valuesOfTermToDoc.add((double) getDocMaxTF(docID)); //docMaxTF
                         docToTerm.put(new Pair<>(docID, termIdentifier), valuesOfTermToDoc);
                     }
                     // docID - TermID :
