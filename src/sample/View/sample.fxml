@@ -118,6 +118,11 @@
                         <Font name="System Bold Italic" size="12.0" />
                      </font>
                   </Button>
+                  <Label layoutX="42.0" layoutY="163.0" text="Prepare Serach Engine">
+                     <font>
+                        <Font name="System Bold" size="14.0" />
+                     </font>
+                  </Label>
                </children>
             </AnchorPane>
          </center>

@@ -29,7 +29,7 @@ public class ReadFile {
         indexer=new DocIndexer(postingFilesPath,withStemming);
         this.STOP_WORD_BAG = stopWords;
         this.withStemming=withStemming;
-        searcher=new Searcher(corpusPath,postingFilesPath);
+        searcher=new Searcher(corpusPath,postingFilesPath,withStemming);
 //        readStopWordsFile();
     }
 
@@ -44,6 +44,7 @@ public class ReadFile {
         BufferedReader br = null;
         StringBuilder fullDocStringBuilder = new StringBuilder();
 //        String fullDoc = "";
+
         try {
             // stream to file
             br = new BufferedReader(new InputStreamReader(new FileInputStream(corpusPath), "UTF-8"));
