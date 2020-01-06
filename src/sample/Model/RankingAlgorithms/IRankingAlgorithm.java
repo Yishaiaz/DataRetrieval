@@ -1,7 +1,8 @@
 package sample.Model.RankingAlgorithms;
-
-import java.util.Dictionary;
+import org.apache.commons.lang3.Pair;
+import java.util.ArrayList;
+import java.util.Map;
 
 public abstract class IRankingAlgorithm {
-    public Dictionary rank(){return null;};
+    public Map<String, Double> rank(ArrayList<Pair<String, double[]>> allDocsToTermsValues){return null;};
 }

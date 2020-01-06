@@ -1,14 +1,12 @@
 package sample.Model;
 
 
+import sample.Model.DataStructures.TermHashMapDataStructure;
 import sample.Model.TasksPoolsRunners.MergeTasksPool;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 
 
 class Task implements Runnable
@@ -77,12 +75,24 @@ public class tries {
 //        Timestamp ts = new Timestamp()
 
 //        TESTING RANKER
+        //building a fake termHashMap
+        TermHashMapDataStructure fakeTermHashMap = new TermHashMapDataStructure();
+        String[] someTerms = {"amazing", "work"};
+        int ctr = 0;
+        for (String termName :
+                someTerms) {
+            fakeTermHashMap.insert(termName, ctr, 1);
+            ctr+=1;
+        }
+
+
         String pathToDictionary = "/Users/yishaiazabary/Desktop/University/שנה ד/Engine/DataRetrieval/sample files to work with/DictionaryNoStemming.txt";
         String pathToPosting = "/Users/yishaiazabary/Desktop/University/שנה ד/Engine/DataRetrieval/sample files to work with/notStemmingPostingFile.txt";
         String pathToDocsInfo = "/Users/yishaiazabary/Desktop/University/שנה ד/Engine/DataRetrieval/sample files to work with/DocsInfoNoStemming.txt";
 
-//        Ranker ranker = new Ranker(pathToDictionary, pathToPosting, pathToDocsInfo);
-//        ranker.testDicToPos("$1.5-billion");
+        Ranker ranker = new Ranker(pathToDictionary, pathToPosting, pathToDocsInfo, 500000, 250);
+//        ranker.fakeRankQuery(someTerms);
+        ranker.rankDocsForQuery(fakeTermHashMap);
 
 
     }
