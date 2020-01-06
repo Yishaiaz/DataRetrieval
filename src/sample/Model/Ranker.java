@@ -14,24 +14,47 @@ import java.util.*;
 import java.util.Map.Entry;
 
 public class Ranker {
+    /**
+     * Class for ranking documents using an IAlgorithm implemented class.
+     * This implementation uses BM25 ranking algorithm implementation, slightly
+     * different from what we learned in class.
+     *
+     */
     IRankingAlgorithm rankingAlgorithm;
     String pathToDictionary;
     String pathToPosting;
     String pathToDocInfo;
     int totalNumOfDocs;
-    double docMaxTF;
+    double docsAvgLength;
 
-    public Ranker(String pathToDictionary, String pathToPosting, String pathToDocInfo, int totalNumOfDocs, double docMaxTF) {
+    /**
+     * constructor - receives the paths to all necessary files,
+     * such as dictionary, posting, and documents' info.
+     * it also receives the total number of documents in the corpus,
+     * and the avg document length
+     * @param pathToDictionary - String
+     * @param pathToPosting - String
+     * @param pathToDocInfo - String
+     * @param totalNumOfDocs - int
+     * @param docsAvgLength - double
+     */
+    public Ranker(String pathToDictionary, String pathToPosting, String pathToDocInfo, int totalNumOfDocs, double docsAvgLength) {
         this.pathToDictionary = pathToDictionary;
         this.pathToPosting = pathToPosting;
         this.pathToDocInfo = pathToDocInfo;
         this.totalNumOfDocs = totalNumOfDocs;
-        this.docMaxTF = docMaxTF;
+        this.docsAvgLength = docsAvgLength;
     }
 
     /**
-     *
-     * @param queryTerms
+     * the main public function, receives a TermHasHMapDataStructure as
+     * a container for all the query terms.
+     * it extracts the termIDs', retrieves the relevant information for each term-doc
+     * pair, using private functions that accesses the posting, dictionary and doc info files.
+     * it returns a  RankedDocumentsStructure instance, containing all the scores for each doc.
+     * @param queryTerms - TermHashMapDataStructure
+     * @param queryID - String
+     * @return RankedDocumentsStructure
      */
     public RankedDocumentsStructure rankDocsForQuery(TermHashMapDataStructure queryTerms, String queryID){
         Iterator<Entry<String, TermHashMapEntry>> iterator = queryTerms.termsEntries.entrySet().iterator();
@@ -47,7 +70,7 @@ public class Ranker {
         ArrayList<Map<Pair<String, String>, ArrayList>> termToDocData = collectAllTermsToDocData(termIDs);
         ArrayList<String> allQueryRelatedDocsID = getAllDocsID(termToDocData);
         // preparing all docs to term calculation values
-        IRankingAlgorithm BM25Ranker = new BM25RankingAlgorithm(this.totalNumOfDocs, this.docMaxTF, BM25RankingAlgorithm.IdfFormula.OKAPIREGULAR);
+        IRankingAlgorithm BM25Ranker = new BM25RankingAlgorithm(this.totalNumOfDocs, this.docsAvgLength, BM25RankingAlgorithm.IdfFormula.OKAPIREGULAR);
         ArrayList<Pair<String, double[]>> relatedDocsToTermValues = new ArrayList<>();
         //for each possible term name
         for (int j = 0; j < allQueryRelatedDocsID.size(); j++) {
@@ -60,7 +83,6 @@ public class Ranker {
                     if(termToDocsPairs[l].left.equals(currDocToProcess)){
                         double[] singleTermValues = this.getValuesAsDoubleArray(termToDocData.get(k).get(termToDocsPairs[l]).toArray());
                         Pair<String, double[]> singleDocAllSingleTermsValues = new Pair<>(currDocToProcess,singleTermValues) ;
-//                        singleDocAllSingleTermsValues.left = currDocToProcess, singleTermValues);
                         relatedDocsToTermValues.add(singleDocAllSingleTermsValues);
                     }
                 }
@@ -75,18 +97,14 @@ public class Ranker {
         return ans;
     }
 
+
+
     /**
-     * because java functions don't work as they say they should in the documentation.
+     *  extracts from an ArrayList<Pair<DocID, TermID>, ArrayList>
+     *  only the documents' IDs.
+     * @param allData
      * @return
      */
-    private double[] getValuesAsDoubleArray(Object[] values){
-        double[] ans = new double[values.length];
-        for (int i = 0; i < ans.length; i++) {
-            ans[i] = (double)(values[i]);
-        }
-        return ans;
-    }
-
     private ArrayList<String> getAllDocsID(ArrayList<Map<Pair<String, String>, ArrayList>> allData){
         ArrayList<String> docsIDs = new ArrayList<>();
         for (Map<Pair<String, String>, ArrayList> termToDocData :
@@ -101,6 +119,12 @@ public class Ranker {
         return docsIDs;
     }
 
+    /**
+     *  using private function, collects all the information on a
+     *  each doc-term pair.
+     * @param termsIds
+     * @return
+     */
     private ArrayList<Map<Pair<String, String>, ArrayList>>  collectAllTermsToDocData(String[] termsIds){
         ArrayList<Map<Pair<String, String>, ArrayList>> allDataAllTerms = new ArrayList<>();
         for (String termID :
@@ -113,11 +137,15 @@ public class Ranker {
         return allDataAllTerms;
     }
 
-//termFreqInDoc
-//kParam = term weight
-//bParam - 0.75
-//numberOfDocContainTerm - n(qi) counted
-//docMaxTF
+    /**
+     * using private functions, collects all the information
+     * on a doc-term pair, i.e. it extracts for term-doc the TF, weight paramter,
+     * location & total term appearances in the corpus.
+     * returns a Map instance with the keys being Pair object of <DocID, TermID>
+     * and the values is an ArrayList of Doubles.
+     * @param termIdentifier - String
+     * @return Map<Pair<String, String>, ArrayList>
+     */
     private Map<Pair<String, String>, ArrayList> collectTermToDocData(String termIdentifier){
         BufferedReader br = null;
         // HashMap of <DocId, currentScore>
@@ -147,7 +175,8 @@ public class Ranker {
                         valuesOfTermToDoc.add(termWeightInDoc); //kParam = term weight
                         valuesOfTermToDoc.add(0.75); //bParam - 0.75
                         valuesOfTermToDoc.add((double)numberOfDocContainTerm); //numberOfDocContainTerm - n(qi) counted
-                        valuesOfTermToDoc.add((double) getDocMaxTF(docID)); //docMaxTF
+                        double docsMaxTF = (double)getDocMaxTF(docID);
+                        valuesOfTermToDoc.add(docsMaxTF==-1? 1: docsMaxTF); //docsAvgLength
                         docToTerm.put(new Pair<>(docID, termIdentifier), valuesOfTermToDoc);
                     }
                     // docID - TermID :
@@ -215,6 +244,18 @@ public class Ranker {
             return -1;
         }
         return -1; //wasn't found
+    }
+
+    /**
+     * because java functions don't work as they say they should in the documentation.
+     * @return
+     */
+    private double[] getValuesAsDoubleArray(Object[] values){
+        double[] ans = new double[values.length];
+        for (int i = 0; i < ans.length; i++) {
+            ans[i] = (double)(values[i]);
+        }
+        return ans;
     }
 
 
