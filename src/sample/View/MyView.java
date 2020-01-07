@@ -59,8 +59,8 @@ public class MyView {
     public void chooseCorpusPath() {
         DirectoryChooser chooser = new DirectoryChooser();
         File f = chooser.showDialog(null);
-        txtField_corpusPath.appendText(f.getPath());
         if (f != null) {
+            txtField_corpusPath.appendText(f.getPath());
             controller.setCorpusPath(f.getPath());
             controller.update(controller, "corpusPath");
         } else {
@@ -79,8 +79,9 @@ public class MyView {
     public void choosePostingFilesPath() {
         DirectoryChooser chooser = new DirectoryChooser();
         File f = chooser.showDialog(null);
-        txtField_postingFilesInput.appendText(f.getPath());
+
         if (f != null) {
+            txtField_postingFilesInput.appendText(f.getPath());
             controller.setPostingFilesPath(f.getPath());
             controller.update(controller, "postingFilesPath");
         } else {
@@ -95,7 +96,7 @@ public class MyView {
     public void chooseQueryPath() {
         FileChooser chooser = new FileChooser();
         File f = chooser.showOpenDialog(null);
-        txtField_queryPath.appendText(f.getPath());
+
         if (f == null) {
             Alert a = new Alert(Alert.AlertType.ERROR, "Not found file.");
             Optional<ButtonType> result = a.showAndWait();
@@ -103,12 +104,15 @@ public class MyView {
                 a.close();
             }
         }
+        else
+            txtField_queryPath.appendText(f.getPath());
     }
     public void chooseResultPath() {
         DirectoryChooser chooser = new DirectoryChooser();
         File f = chooser.showDialog(null);
-        result_path.appendText(f.getPath());
+
         if (f != null) {
+            result_path.appendText(f.getPath());
             controller.setResultsPath(f.getPath());
             controller.update(controller, "resultPathUpdate");
         } else {
@@ -411,19 +415,21 @@ public class MyView {
     }
 
     public void presentSearchResults() {
-        //StrBuilder resultContent=new StrBuilder();
+        this.resultContent=FXCollections.observableArrayList();
         File resultsFile = new File(result_path.getText() + File.separator + "results.txt");
         String str = "";
+        String[] line=null;
         try {
             BufferedReader br = new BufferedReader(new FileReader(resultsFile));
             int numOfQueries=0;
+
             String queryId="";
             int counter=0;
             while ((str = br.readLine()) != null && (!str.equals(""))) {
-                String[] line = str.split(" ");
+                 line = str.split(" ");
                 if (queryId.equals(line[0])) {
                     counter++;
-                    this.resultContent.add("\t" + line[2] + line[3]);
+                    this.resultContent.add("\t" + line[2] +" "+ line[3]);
                 } else {
                     if (numOfQueries > 0)
                         resultContent.add("Total Documents: " + counter + System.lineSeparator());  //for prev query
@@ -432,15 +438,16 @@ public class MyView {
                     counter = 1;
                     numOfQueries++;
                     resultContent.add(queryId);
-                    resultContent.add("\t" + line[2] + line[3]);
+                    resultContent.add("\t" + line[2] +" "+ line[3]);
                 }
             }
+            resultContent.add("Total Documents: " + counter + System.lineSeparator());  //for last query
             br.close();
                     FXMLLoader fxmlLoader1 = new FXMLLoader(getClass().getResource("results.fxml"));
                     Parent root = fxmlLoader1.load();
                     Stage secondaryStage = new Stage();
                     secondaryStage.setTitle("Search Results");
-                    Scene scene = new Scene(root, 946, 550);
+                    Scene scene = new Scene(root, 600, 400);
                     secondaryStage.setScene(scene);
                     secondaryStage.show();
 

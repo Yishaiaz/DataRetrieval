@@ -695,7 +695,7 @@ public class DocParser implements IParser{
             }
         }
         else{
-            queryId="free "+String.valueOf(typedQueryIdIndex);
+            queryId="free"+String.valueOf(typedQueryIdIndex);
             typedQueryIdIndex++;
         }
         return queryId;

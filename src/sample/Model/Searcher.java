@@ -3,6 +3,7 @@ package sample.Model;
 import org.apache.commons.lang3.text.StrBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import sample.Model.DataStructures.TermHashMapDataStructure;
 import sample.Model.DataStructures.TermHashMapEntry;
 import sample.Model.Parser.Stemmer;
 
@@ -12,7 +13,10 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.*;
+
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
+import static java.lang.String.valueOf;
 
 
 public class Searcher {
@@ -49,9 +53,9 @@ public class Searcher {
                 Document queryWithSemantic = useSemanticTreat(query, isStemming);
                 rankedDocumentsStructure=ranker.rankDocsForQuery(queryWithSemantic.parsedTerms,query.DocNo);
 
-            } else //without semantic treat.
-                rankedDocumentsStructure=ranker.rankDocsForQuery(query.parsedTerms,query.DocNo);
-
+            } else {//without semantic treat.
+                rankedDocumentsStructure = ranker.rankDocsForQuery(query.parsedTerms, query.DocNo);
+            }
             rankedDocumentsStructure.onlyBest50(); // leave only best 50 docs.
             writeResultsToFile(rankedDocumentsStructure); //write final results to file
         }catch (IOException e) {
@@ -73,7 +77,7 @@ public class Searcher {
                 StrBuilder line=new StrBuilder();
                 line.append(rankedDocumentStructure.queryId+" "); //queryId
                 line.append("0 "); //ignore
-                line.append(key+" ");
+                line.append(key);
                 line.append(rank+" ");
                 line.append("42.38 "); //Double , ignore.
                 line.append("run"); // some name, ignore.
