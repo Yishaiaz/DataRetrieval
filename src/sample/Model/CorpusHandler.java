@@ -82,7 +82,7 @@ public class CorpusHandler {
 
         this.isStemming=withStemming;
         long start_time = System.currentTimeMillis();
-         readFile = new ReadFile(this.corpusPath, this.stopWords, this.months,withStemming,postingFilesPath);
+         readFile = new ReadFile(this.corpusPath, this.stopWords, this.months,withStemming,postingFilesPath,"");
         File docsEntities = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "docsEntities");
 
         if (withStemming) {
@@ -133,9 +133,9 @@ public class CorpusHandler {
         return stopWords;
     }
 
-    public void search(String queryPath,Boolean withSemantic){
+    public void search(String queryPath,Boolean withSemantic,String resultPath){
         try {
-            readFile= new ReadFile(corpusPath,stopWords,months,isStemming,postingFilesPath);
+            readFile= new ReadFile(corpusPath,stopWords,months,isStemming,postingFilesPath,resultPath);
             readFile.prepareDocOfQueriesToParse(queryPath,withSemantic);
 
         } catch (Exception e) {
@@ -143,9 +143,9 @@ public class CorpusHandler {
         }
     }
 
-    public void searchFreeTyping(String query,Boolean withSemantic)  {
+    public void searchFreeTyping(String query,Boolean withSemantic,String resultPath)  {
         try {
-            readFile= new ReadFile(corpusPath,stopWords,months,isStemming,postingFilesPath);
+            readFile= new ReadFile(corpusPath,stopWords,months,isStemming,postingFilesPath,resultPath);
             readFile.prepareFreeTypingQueryParse(query,withSemantic);
         } catch (Exception e) {
             e.printStackTrace();

@@ -32,6 +32,7 @@ public class MyView {
     private Controller controller;
     // private String dictionaryContent="";
     private ObservableList<String> dictionaryContent;
+    private ObservableList<String> resultContent;
     private long timeOfProcess = 0;
 
     @FXML
@@ -45,6 +46,10 @@ public class MyView {
     public javafx.scene.control.TextField txtField_freeSearch;
     //public javafx.scene.control.TextArea textAreaDic1;
     public ListView listView_dic;
+    public ListView listView_result;
+    public javafx.scene.control.Button results_btn;
+    public javafx.scene.control.Button showDictionary_btn;
+    public javafx.scene.control.TextField result_path;
 
 
     /**
@@ -86,6 +91,7 @@ public class MyView {
             }
         }
     }
+
     public void chooseQueryPath() {
         FileChooser chooser = new FileChooser();
         File f = chooser.showOpenDialog(null);
@@ -97,6 +103,22 @@ public class MyView {
                 a.close();
             }
         }
+    }
+    public void chooseResultPath() {
+        DirectoryChooser chooser = new DirectoryChooser();
+        File f = chooser.showDialog(null);
+        result_path.appendText(f.getPath());
+        if (f != null) {
+            controller.setResultsPath(f.getPath());
+            controller.update(controller, "resultPathUpdate");
+        } else {
+            Alert a = new Alert(Alert.AlertType.ERROR, "Not found file.");
+            Optional<ButtonType> result = a.showAndWait();
+            if (result.get() == ButtonType.OK) {
+                a.close();
+            }
+        }
+
     }
 
     /**
@@ -281,6 +303,7 @@ public class MyView {
 
 
                 br.close();
+                showDictionary_btn.setDisable(false);
                 System.out.println("finish loading");
             } catch (IOException e) {
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -333,39 +356,106 @@ public class MyView {
     }
 
     public void search() {
-        //if both fields are empties.
-        if (txtField_queryPath.getText().equals("") && txtField_freeSearch.getText().equals("")) {
+
+        if (txtField_corpusPath.getText().equals("") || txtField_postingFilesInput.getText().equals("")|| result_path.getText().equals("")) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Information Dialog");
             alert.setHeaderText(null);
-            alert.setContentText("For searching need to fill 'free typing search' or insert path for query file.");
-
+            alert.setContentText("For searching need to fill 'Corpus path' and 'Posting file' and 'Results Path', so Dictionary and posting will be available.");
             alert.showAndWait();
-        }
 
-        //in case both fields filled .
-       else if (!txtField_queryPath.getText().equals("") && !txtField_freeSearch.getText().equals("")) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Information Dialog");
-            alert.setHeaderText(null);
-            alert.setContentText("For searching need to fill 'free typing search' OR insert path for query file. not both.");
-            alert.showAndWait();
-        }
+        } else {
 
+            //if both fields are empties.
+            if (txtField_queryPath.getText().equals("") && txtField_freeSearch.getText().equals("")) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Information Dialog");
+                alert.setHeaderText(null);
+                alert.setContentText("For searching need to fill 'free typing search' or insert path for query file.");
+                alert.showAndWait();
+            }
 
-        else if (!txtField_queryPath.getText().equals("")) {
-            String queryPath = txtField_queryPath.getText();
-            controller.setQueryPath(queryPath);
-            controller.setIsWithSemantic(cb_semantic.isSelected());
-            controller.update(controller, "search");
-        }
+            //in case both fields filled .
+            else if (!txtField_queryPath.getText().equals("") && !txtField_freeSearch.getText().equals("")) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Information Dialog");
+                alert.setHeaderText(null);
+                alert.setContentText("For searching need to fill 'free typing search' OR insert path for query file. not both.");
+                alert.showAndWait();
+            } else if (!txtField_queryPath.getText().equals("")) {
+                String queryPath = txtField_queryPath.getText();
+                controller.setQueryPath(queryPath);
+                controller.setIsWithSemantic(cb_semantic.isSelected());
+                controller.update(controller, "search");
 
-        else if (!txtField_freeSearch.getText().equals("")){
-            controller.setFreeTypingQuery(txtField_freeSearch.getText());
-            controller.setIsWithSemantic(cb_semantic.isSelected());
-            controller.update(controller, "searchFreeTyping");
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Information Dialog");
+                alert.setHeaderText(null);
+                alert.setContentText("Searching finish. Results saved");
+                alert.showAndWait();
+                results_btn.setDisable(false);
+
+            } else if (!txtField_freeSearch.getText().equals("")) {
+                controller.setFreeTypingQuery(txtField_freeSearch.getText());
+                controller.setIsWithSemantic(cb_semantic.isSelected());
+                controller.update(controller, "searchFreeTyping");
+
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Information Dialog");
+                alert.setHeaderText(null);
+                alert.setContentText("Searching finish. Results saved");
+                alert.showAndWait();
+                results_btn.setDisable(false);
+            }
         }
     }
 
+    public void presentSearchResults() {
+        //StrBuilder resultContent=new StrBuilder();
+        File resultsFile = new File(result_path.getText() + File.separator + "results.txt");
+        String str = "";
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(resultsFile));
+            int numOfQueries=0;
+            String queryId="";
+            int counter=0;
+            while ((str = br.readLine()) != null && (!str.equals(""))) {
+                String[] line = str.split(" ");
+                if (queryId.equals(line[0])) {
+                    counter++;
+                    this.resultContent.add("\t" + line[2] + line[3]);
+                } else {
+                    if (numOfQueries > 0)
+                        resultContent.add("Total Documents: " + counter + System.lineSeparator());  //for prev query
 
-}
+                    queryId = line[0];
+                    counter = 1;
+                    numOfQueries++;
+                    resultContent.add(queryId);
+                    resultContent.add("\t" + line[2] + line[3]);
+                }
+            }
+            br.close();
+                    FXMLLoader fxmlLoader1 = new FXMLLoader(getClass().getResource("results.fxml"));
+                    Parent root = fxmlLoader1.load();
+                    Stage secondaryStage = new Stage();
+                    secondaryStage.setTitle("Search Results");
+                    Scene scene = new Scene(root, 946, 550);
+                    secondaryStage.setScene(scene);
+                    secondaryStage.show();
+
+                 listView_result = (javafx.scene.control.ListView) scene.lookup("#result_listView");
+                 listView_result.setItems(resultContent);
+
+
+            } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+
+    }
+
+    }
+

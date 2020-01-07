@@ -18,6 +18,7 @@ public class Controller extends Observable implements Observer {
     public String freeTypingQuery;
     public Boolean withStemming;
     public Boolean withSemantic;
+    private String resultPath;
 
     public Controller(MyModel model, MyView view){
         this.model=model;
@@ -34,6 +35,9 @@ public class Controller extends Observable implements Observer {
                 break;
             case "postingFilesPath":
                 model.setPostingFilesPath(postingFilesPath);
+                break;
+            case "resultPathUpdate":
+                model.setResultPath(resultPath);
                 break;
             case "parseWithStemming":
                 model.startParse (true);
@@ -80,5 +84,9 @@ public class Controller extends Observable implements Observer {
 
     public void setIsWithSemantic(boolean selected) {
         this.withSemantic=selected;
+    }
+
+    public void setResultsPath(String path) {
+        this.resultPath=path;
     }
 }
