@@ -3,11 +3,13 @@ package sample.Model.DataStructures;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
+import java.util.TreeMap;
+
 /**
  * This class help to hold all terms of one document. do it using HashMap
  */
 public class TermHashMapDataStructure {
-    public HashMap<String, TermHashMapEntry> termsEntries = new HashMap<>();
+    public TreeMap<String, TermHashMapEntry> termsEntries = new TreeMap<>();
 
     public TermHashMapDataStructure() {}
     /**
