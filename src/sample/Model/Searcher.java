@@ -16,6 +16,7 @@ import java.util.ArrayList;
 
 
 public class Searcher {
+    private final String resultPath;
     String corpusPath;
     String dictionaryPath;
     String postingFilesPath;
@@ -23,8 +24,9 @@ public class Searcher {
     private int Max_Additional_Terms_API = 4;
     private boolean isStemming=false;
 
-    public Searcher(String corpusPath, String postingFilesPath,boolean isStemming) {
+    public Searcher(String corpusPath, String postingFilesPath,boolean isStemming,String resultPath) {
         this.corpusPath=corpusPath;
+        this.resultPath=resultPath;
         if (!isStemming) {
             this.dictionaryPath = corpusPath + File.separator + "DictionaryNoStemming.txt"; //that's where we save the dictionary.
             this.postingFilesPath = postingFilesPath+File.separator+"notStemmingPostingFile.txt";
@@ -63,17 +65,17 @@ public class Searcher {
      */
     public void writeResultsToFile(RankedDocumentsStructure rankedDocumentStructure) {
         try {
-            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(this.corpusPath + File.separator + "results.txt"));
+            BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(resultPath + File.separator + "results.txt",true));
 
             for (String key : rankedDocumentStructure.documents.keySet()) {
                 Double rank = rankedDocumentStructure.documents.get(key);
                 //format requested for Track_Eval program
                 StrBuilder line=new StrBuilder();
-                line.append(rankedDocumentStructure.queryId+","); //queryId
-                line.append("0,"); //ignore
-                line.append(key+",");
-                line.append(rank+",");
-                line.append("42.38,"); //Double , ignore.
+                line.append(rankedDocumentStructure.queryId+" "); //queryId
+                line.append("0 "); //ignore
+                line.append(key+" ");
+                line.append(rank+" ");
+                line.append("42.38 "); //Double , ignore.
                 line.append("run"); // some name, ignore.
                 bufferedWriter.write(line.toString()+ System.lineSeparator());
             }

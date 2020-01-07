@@ -9,6 +9,7 @@ import java.util.Observable;
 public class MyModel extends Observable {
     CorpusHandler corpusHandler;
     public Boolean withSemantic;
+    private String resultPath;
 
     /**
      * create corpus manger
@@ -42,14 +43,18 @@ public class MyModel extends Observable {
     }
 
     public void search(String queryPath) {
-        corpusHandler.search(queryPath,withSemantic);
+        corpusHandler.search(queryPath,withSemantic,resultPath);
     }
 
     public void searchFreeTyping(String freeTypingQuery) throws Exception {
-        corpusHandler.searchFreeTyping(freeTypingQuery,withSemantic);
+        corpusHandler.searchFreeTyping(freeTypingQuery,withSemantic,resultPath);
     }
 
     public void setIsWithSemantic(Boolean withSemantic) {
         this.withSemantic=withSemantic;
+    }
+
+    public void setResultPath(String resultPath) {
+        this.resultPath=resultPath;
     }
 }

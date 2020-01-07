@@ -23,13 +23,13 @@ public class ReadFile {
     public boolean withStemming;
     public Searcher searcher;
 
-    public ReadFile(String corpusPath, HashSet<String> stopWords, HashSet<String> months, boolean withStemming, String postingFilesPath) {
+    public ReadFile(String corpusPath, HashSet<String> stopWords, HashSet<String> months, boolean withStemming, String postingFilesPath,String resultPath) {
         this.corpusPath = corpusPath;
         this.parser = new DocParser(withStemming, stopWords, months);
         indexer=new DocIndexer(postingFilesPath,withStemming);
         this.STOP_WORD_BAG = stopWords;
         this.withStemming=withStemming;
-        searcher=new Searcher(corpusPath,postingFilesPath,withStemming);
+        searcher=new Searcher(corpusPath,postingFilesPath,withStemming,resultPath);
 //        readStopWordsFile();
     }
 

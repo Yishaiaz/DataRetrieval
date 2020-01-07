@@ -53,7 +53,12 @@ public class RankedDocumentsStructure {
         List<Double> scores = new ArrayList<>(); //contain all scores from documents.
         scores.addAll(documents.values());
         Collections.sort(scores,Collections.reverseOrder()); // sort in decanting
-        for (int i=0; i<50; i++){
+        int size;
+        if (scores.size()<50)
+            size=scores.size();
+        else
+            size=50;
+        for (int i=0; i<size; i++){
             double curScore=scores.get(i);
             String key=getKeyWithSpecificValue(curScore);
             topDocuments.put(key,curScore);
