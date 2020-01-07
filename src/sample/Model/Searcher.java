@@ -71,13 +71,13 @@ public class Searcher {
         try {
             BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(resultPath + File.separator + "results.txt",true));
 
-            for (String key : rankedDocumentStructure.documents.keySet()) {
-                Double rank = rankedDocumentStructure.documents.get(key);
+            for (RankedDocumentsStructure.Pair pair : rankedDocumentStructure.topRankedDocs) {
+                Double rank = pair.getScore();
                 //format requested for Track_Eval program
                 StrBuilder line=new StrBuilder();
                 line.append(rankedDocumentStructure.queryId+" "); //queryId
                 line.append("0 "); //ignore
-                line.append(key);
+                line.append(pair.getDocId());
                 line.append(rank+" ");
                 line.append("42.38 "); //Double , ignore.
                 line.append("run"); // some name, ignore.
@@ -163,7 +163,7 @@ public class Searcher {
      * @param
      */
     public void readDictionary() {
-        File dictionary = new File(dictionaryPath );;
+        File dictionary = new File(dictionaryPath );
 
         String str = "";
         BufferedReader br = null;
