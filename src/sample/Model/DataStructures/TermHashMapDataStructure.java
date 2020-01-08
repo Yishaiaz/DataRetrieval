@@ -33,6 +33,9 @@ public class TermHashMapDataStructure {
      * @param weight weight of term
      */
     public void insert(String s, int iDFLocation, double weight) {
+        if(StringUtils.startsWith(s,"-")){
+            StringUtils.remove(s, "-");
+        }
         s = StringUtils.removeStartIgnoreCase(s, " ");
         s = StringUtils.removeStartIgnoreCase(s, "'");
         s = s.replaceFirst("^0+(?!$)", "");

@@ -80,7 +80,7 @@ public class Searcher {
                 line.append(pair.getDocId());
                 line.append(rank+" ");
                 line.append("42.38 "); //Double , ignore.
-                line.append("run"); // some name, ignore.
+                line.append("mt"); // some name, ignore.
                 bufferedWriter.write(line.toString()+ System.lineSeparator());
             }
             bufferedWriter.close();

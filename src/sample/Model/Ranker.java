@@ -171,6 +171,12 @@ public class Ranker {
             String line = br.readLine();
             while(line!=null){
                 String[] splitLine = StringUtils.split(line, ",");
+                // if we haven't found the term in our dictionary
+                if(StringUtils.startsWith(splitLine[0].toLowerCase(), String.valueOf((char)(termIdentifier.toCharArray()[0]+1)))){
+                    br.close();
+                    this.termDictionaryReader = new BufferedReader(new FileReader(this.pathToDictionary));
+                    return null;
+                }
                 if (StringUtils.equals(termIdentifier, splitLine[0].toLowerCase())){
                     int pointerToLine = Integer.parseInt(splitLine[3]); // extracting the pointer
                     String lineData = this.getPostingLine(pointerToLine);

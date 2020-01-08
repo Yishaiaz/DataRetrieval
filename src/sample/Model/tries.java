@@ -76,29 +76,31 @@ public class tries {
 
 //        TESTING RANKER
         //building a fake termHashMap
-        TermHashMapDataStructure fakeTermHashMap = new TermHashMapDataStructure();
-        String[] someTerms = {"bus", "tall"};
-        int ctr = 0;
-        for (String termName :
-                someTerms) {
-            fakeTermHashMap.insert(termName, ctr, 1);
-            ctr+=1;
-        }
-
-
-        String pathToDictionary = "/Users/yishaiazabary/Desktop/University/שנה ד/Engine/DataRetrieval/sample files to work with/DictionaryNoStemming.txt";
-        String pathToPosting = "/Users/yishaiazabary/Desktop/University/שנה ד/Engine/DataRetrieval/sample files to work with/notStemmingPostingFile.txt";
-        String pathToDocsInfo = "/Users/yishaiazabary/Desktop/University/שנה ד/Engine/DataRetrieval/sample files to work with/DocsInfoNoStemming.txt";
-        Ranker ranker;
-        try{
-            ranker = new Ranker(pathToDictionary, pathToPosting, pathToDocsInfo, 500000, 250);
-            RankedDocumentsStructure rm = ranker.rankDocsForQuery(fakeTermHashMap, "asdfasdf");
-            System.out.println(rm);
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-//        ranker.fakeRankQuery(someTerms);
-        System.out.println("s");
+//        TermHashMapDataStructure fakeTermHashMap = new TermHashMapDataStructure();
+//        String[] someTerms = {"bus", "tall"};
+//        int ctr = 0;
+//        for (String termName :
+//                someTerms) {
+//            fakeTermHashMap.insert(termName, ctr, 1);
+//            ctr+=1;
+//        }
+//
+//
+//        String pathToDictionary = "/Users/yishaiazabary/Desktop/University/שנה ד/Engine/DataRetrieval/sample files to work with/DictionaryNoStemming.txt";
+//        String pathToPosting = "/Users/yishaiazabary/Desktop/University/שנה ד/Engine/DataRetrieval/sample files to work with/notStemmingPostingFile.txt";
+//        String pathToDocsInfo = "/Users/yishaiazabary/Desktop/University/שנה ד/Engine/DataRetrieval/sample files to work with/DocsInfoNoStemming.txt";
+//        Ranker ranker;
+//        try{
+//            ranker = new Ranker(pathToDictionary, pathToPosting, pathToDocsInfo, 500000, 250);
+//            RankedDocumentsStructure rm = ranker.rankDocsForQuery(fakeTermHashMap, "asdfasdf");
+//            System.out.println(rm);
+//        }catch(Exception e){
+//            e.printStackTrace();
+//        }
+////        ranker.fakeRankQuery(someTerms);
+//        System.out.println("s");
+        char c = 'f';
+        System.out.println(String.valueOf((char)(c+1)));
 
 
 
