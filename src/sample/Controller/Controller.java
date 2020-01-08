@@ -33,6 +33,9 @@ public class Controller extends Observable implements Observer {
             case "corpusPath":
                 model.testInitFileOfTest(corpusPath);
                 break;
+            case "corpusPath2":
+                model.createCorpusHandler(corpusPath);
+                break;
             case "postingFilesPath":
                 model.setPostingFilesPath(postingFilesPath);
                 break;
