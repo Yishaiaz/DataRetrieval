@@ -78,7 +78,6 @@ public class ReadFile {
                         w.write(doc.DocNo+" "+doc.howManyUniqTermsInDoc()+" "+doc.parsedTerms.getMaxTf()+System.lineSeparator());
 
                         w.close();
-                        fw.close();
 
 
                         // docsContainer not full yet

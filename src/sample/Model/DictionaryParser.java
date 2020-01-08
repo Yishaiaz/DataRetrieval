@@ -93,8 +93,7 @@ public class DictionaryParser implements Runnable {
                         currentIndex = singleDocEnd;
                     }
                     singleTermTotalNumberOfApperance = sum;
-                    // todo: here we have everything about the single term to write to the dictionary.
-//                    bufferedWriter.write(String.format("%s,%d,%d,%d" + System.lineSeparator(), singleTerm,singleTermTotalNumberOfApperance, singleTermNumberOfDocsAppearance, postingLineNumber));
+
                     bufferedWriter.write(String.format("%s,%d,%d,%d" + System.lineSeparator(), singleTerm,singleTermTotalNumberOfApperance, singleTermNumberOfDocsAppearance, postingLineByteOffset));
                     postingLineByteOffset=randomAccessFile.getFilePointer();
 
