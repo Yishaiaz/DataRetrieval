@@ -33,13 +33,19 @@ public class TermHashMapDataStructure {
      * @param weight weight of term
      */
     public void insert(String s, int iDFLocation, double weight) {
+        if(StringUtils.equals(s, "!")){
+            return;
+        }
         if(StringUtils.startsWith(s,"-")){
-            StringUtils.remove(s, "-");
+            s = StringUtils.remove(s, "-");
+        }
+        if(s.length()<=1){
+            return;
         }
         s = StringUtils.removeStartIgnoreCase(s, " ");
         s = StringUtils.removeStartIgnoreCase(s, "'");
         s = s.replaceFirst("^0+(?!$)", "");
-        String entryValue = s;
+
         String key = s.toLowerCase();
         // Term exist in structure.
         if (termsEntries.containsKey(key)) {

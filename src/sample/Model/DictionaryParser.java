@@ -16,19 +16,13 @@ public class DictionaryParser implements Runnable {
      * a class to convert an existing posting file into a dictionary.txt file
      * implements runnable in case we would like to run it as a thread.
      */
-    private String alphabetRangeStart;
-    private String alphabetRangeEnd;
     private String pathToIndex;
     private String pathToDictionaryDirectory;
-    private boolean isNumericParser;
     private boolean isStemming;
 
-    public DictionaryParser(String alphabetRangeStart, String alphabetRangeEnd, String pathToIndex, String pathToDictionaryDirectory, Boolean numericParser, boolean isStemming) {
-        this.alphabetRangeStart = StringUtils.lowerCase(alphabetRangeStart);
-        this.alphabetRangeEnd = StringUtils.lowerCase(alphabetRangeEnd);
+    public DictionaryParser(String pathToIndex, String pathToDictionaryDirectory, boolean isStemming) {
         this.pathToIndex = pathToIndex;
         this.pathToDictionaryDirectory = pathToDictionaryDirectory;
-        this.isNumericParser = numericParser;
         this . isStemming=isStemming;
 
     }
@@ -54,6 +48,8 @@ public class DictionaryParser implements Runnable {
 //        int minTerm=0;
 
         int postingLineNumber = 0;
+        long postingLineByteOffset = 0;
+//      /*  RandomAccessFile randomAccessFile = new RandomAccessFile(new FileReader()) ;*/
         String singleTerm;
         int singleTermNumberOfDocsAppearance;
         int singleTermTotalNumberOfApperance;
@@ -66,7 +62,9 @@ public class DictionaryParser implements Runnable {
                 postingFilePath=getPostingFilePath(getPathToIndex()+File.separator+"notStemmingPostingFile.txt");
             }
 
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(postingFilePath));
+//            BufferedReader bufferedReader = new BufferedReader(new FileReader(postingFilePath));
+            RandomAccessFile randomAccessFile = new RandomAccessFile(postingFilePath, "r") ;
+
             BufferedWriter bufferedWriter=null;
             if (isStemming) {
                 bufferedWriter = new BufferedWriter(new FileWriter(this.pathToDictionaryDirectory + File.separator + "DictionaryStemming.txt"));
@@ -74,7 +72,8 @@ public class DictionaryParser implements Runnable {
             else{
                 bufferedWriter = new BufferedWriter(new FileWriter(this.pathToDictionaryDirectory + File.separator + "DictionaryNoStemming.txt"));
             }
-            String line = bufferedReader.readLine();
+
+            String line = randomAccessFile.readLine();
             bufferedWriter.write("Term Name, Total Corpus Appearances, Docs Appearances, line in posting file\n");
             while (line != null) {
                 int termEndIndex = StringUtils.indexOf(line, "|");
@@ -95,7 +94,9 @@ public class DictionaryParser implements Runnable {
                     }
                     singleTermTotalNumberOfApperance = sum;
                     // todo: here we have everything about the single term to write to the dictionary.
-                    bufferedWriter.write(String.format("%s,%d,%d,%d" + System.lineSeparator(), singleTerm,singleTermTotalNumberOfApperance, singleTermNumberOfDocsAppearance, postingLineNumber));
+//                    bufferedWriter.write(String.format("%s,%d,%d,%d" + System.lineSeparator(), singleTerm,singleTermTotalNumberOfApperance, singleTermNumberOfDocsAppearance, postingLineNumber));
+                    bufferedWriter.write(String.format("%s,%d,%d,%d" + System.lineSeparator(), singleTerm,singleTermTotalNumberOfApperance, singleTermNumberOfDocsAppearance, postingLineByteOffset));
+                    postingLineByteOffset=randomAccessFile.getFilePointer();
 
                     // ---- for finding top 10 :
 //                    if (singleTermTotalNumberOfApperance>minTerm){
@@ -110,11 +111,12 @@ public class DictionaryParser implements Runnable {
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
-                line = bufferedReader.readLine();
+
+                line = randomAccessFile.readLine();
                 postingLineNumber += 1;
             }
 
-            bufferedReader.close();
+            randomAccessFile.close();
             bufferedWriter.close();
 
             //------ for finding top 10:

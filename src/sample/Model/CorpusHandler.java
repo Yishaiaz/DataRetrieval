@@ -105,7 +105,7 @@ public class CorpusHandler {
         start_time = System.currentTimeMillis();
         readFile.indexer.mergeFiles();
         System.out.println(String.format("Total time to merge : %d seconds", (System.currentTimeMillis() - start_time)/1000));
-        DictionaryParser dicParser = new DictionaryParser("a","z",postingFilesPath,corpusPath,true,withStemming);
+        DictionaryParser dicParser = new DictionaryParser(postingFilesPath,corpusPath,withStemming);
         dicParser.run();
 
     }

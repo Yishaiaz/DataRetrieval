@@ -99,9 +99,16 @@ public class tries {
 //        }
 ////        ranker.fakeRankQuery(someTerms);
 //        System.out.println("s");
-        char c = 'f';
-        System.out.println(String.valueOf((char)(c+1)));
+//        char c = 'f';
+//        System.out.println(String.valueOf((char)(c+1)));
+        String pathToIndex = "d:\\documents\\users\\benbsaha\\Downloads\\post";
+        String pathToDictionaryDirectory = "d:\\documents\\users\\benbsaha\\Downloads\\post";
+        boolean isStemming = true;
 
+
+
+        DictionaryParser dictPars = new DictionaryParser(pathToIndex, pathToDictionaryDirectory, isStemming);
+        dictPars.run();
 
 
     }

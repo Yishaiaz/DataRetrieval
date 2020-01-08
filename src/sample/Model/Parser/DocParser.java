@@ -79,6 +79,13 @@ public class DocParser implements IParser{
                 docData[2] = temp.toString();
                 termHashMapDataStructure.insert(docData[2], termLocationIterator, 2);
                 termLocationIterator += 1;
+                // inserting single parts of the title as seperate terms
+                for (String word :
+                        clean) {
+                    if (StringUtils.isAlphanumeric(word)) {
+                        termHashMapDataStructure.insert(word, 1, 1.7);
+                    }
+                }
             }
 
 
@@ -86,10 +93,6 @@ public class DocParser implements IParser{
 
             doc = new Document(docData[0], docData[1], docData[2], docData[3]);
         }
-        //todo: end of if NOT query
-        // todo: if is query, build 'doc = new Document(queryNumber, "","","")
-        // todo: also extract the text you want to parse from the query (title, narrative, etc.)
-        // todo: and insert it to full doc.
 
        else if (isQuery){
 
