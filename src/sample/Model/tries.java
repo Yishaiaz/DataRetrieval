@@ -95,7 +95,7 @@ public class tries {
             RankedDocumentsStructure rm = ranker.rankDocsForQuery(fakeTermHashMap, "asdfasdf");
             System.out.println(rm);
         }catch(Exception e){
-
+            e.printStackTrace();
         }
 //        ranker.fakeRankQuery(someTerms);
         System.out.println("s");

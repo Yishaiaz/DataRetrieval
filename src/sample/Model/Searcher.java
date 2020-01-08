@@ -47,7 +47,7 @@ public class Searcher {
 
         try {
             numOfDocs = Files.lines(Paths.get(pathToDocsInfo)).count();
-            Ranker ranker = new Ranker(dictionaryPath, postingFilesPath, pathToDocsInfo, (int) numOfDocs, 250);
+                Ranker ranker = new Ranker(dictionaryPath, postingFilesPath, pathToDocsInfo, (int) numOfDocs, 250);
 
             if (withSemantic) {
                 Document queryWithSemantic = useSemanticTreat(query, isStemming);
@@ -58,7 +58,7 @@ public class Searcher {
             }
             rankedDocumentsStructure.onlyBest50(); // leave only best 50 docs.
             writeResultsToFile(rankedDocumentsStructure); //write final results to file
-        }catch (IOException e) {
+        }catch (Exception e) {
             e.printStackTrace();
         }
     }
