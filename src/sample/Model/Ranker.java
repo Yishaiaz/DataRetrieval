@@ -30,7 +30,8 @@ public class Ranker {
     private HashMap<Long, String> lineInMemoryHash = new HashMap<>();// contains line number, and the line string value
     private HashMap<String, Integer> docsMaxTFMemoryHash = new HashMap<>();// contains docID, Doc max tf integer
     private HashMap<String, Map <Pair<String, String>, ArrayList>> termsMapToDocsDataInMemoryHash = new HashMap<>();// contains docID, Doc max tf integer
-    private HashMap<String, Long> dictionaryInMemoryHash = new HashMap<>();
+    private HashMap<String, Long> dictionaryTermsAndOffsetPointerInMemoryHash = new HashMap<>();
+    private HashMap<String, Integer> dictionaryDocsMaxTFPointerInMemoryHash = new HashMap<>();
     private BufferedReader termDictionaryReader;
     private int postingLineCtr = 0;
 
@@ -64,10 +65,36 @@ public class Ranker {
         String line = bufferedReader.readLine();
         while(line!=""&&line!=null){
             String[] lineData = line.split(",");
-            String termName = lineData[0];
-            long termPostingLine = Long.parseLong(lineData[3]);
-            this.dictionaryInMemoryHash.put(termName, termPostingLine);
+            if(!StringUtils.equals(lineData[0],"Term Name")) {
+                String termName = lineData[0];
+                try{
+                    int toSplitBy = lineData.length -1;
+                    long termPostingLine = Long.parseLong(lineData[toSplitBy]);
+                    this.dictionaryTermsAndOffsetPointerInMemoryHash.put(StringUtils.lowerCase(StringUtils.removeEnd(termName, " ")), termPostingLine);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+            }
+            line = bufferedReader.readLine();
         }
+        bufferedReader.close();
+
+        // gathering MaxTf For each Doc
+        BufferedReader bufferedReaderForDocsInfo = new BufferedReader(new FileReader(pathToDocInfo));
+        line = bufferedReaderForDocsInfo.readLine();
+        while(line!=""&&line!=null){
+            String[] lineData = line.split(" ");
+            try{
+                String docName = lineData[0];
+                int toSplitBy = lineData.length -1;
+                int termPostingLine = Integer.parseInt(lineData[toSplitBy]);
+                this.dictionaryDocsMaxTFPointerInMemoryHash.put(StringUtils.lowerCase(StringUtils.removeEnd(docName, " ")), termPostingLine);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            line = bufferedReaderForDocsInfo.readLine();
+        }
+        bufferedReaderForDocsInfo.close();
     }
 
     /**
@@ -171,7 +198,7 @@ public class Ranker {
      * @return Map<Pair<String, String>, ArrayList>
      */
     private Map<Pair<String, String>, ArrayList> collectTermToDocData(String termIdentifier){
-        long pointerToByteOffset = this.dictionaryInMemoryHash.get(termIdentifier);
+        long pointerToByteOffset = this.dictionaryTermsAndOffsetPointerInMemoryHash.get(StringUtils.lowerCase(StringUtils.removeEnd(termIdentifier, " ")));
         if(pointerToByteOffset<0){
             return null;
         }
@@ -195,6 +222,9 @@ public class Ranker {
                 valuesOfTermToDoc.add(0.75); //bParam - 0.75
                 valuesOfTermToDoc.add((double)numberOfDocContainTerm); //numberOfDocContainTerm - n(qi) counted
                 double docsMaxTF = (double)getDocMaxTF(docID);
+                if(docsMaxTF==-1) {
+                    continue;
+                }
                 valuesOfTermToDoc.add(docsMaxTF==-1? 1: docsMaxTF); //docsAvgLength
                 docToTerm.put(new Pair<>(docID, termIdentifier), valuesOfTermToDoc);
             }
@@ -287,27 +317,31 @@ public class Ranker {
      * @return
      */
     private int getDocMaxTF(String docID){
-        if(this.docsMaxTFMemoryHash.containsKey(docID)){
-            return this.docsMaxTFMemoryHash.get(docID);
-        }
-        try{
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(this.pathToDocInfo));
-            String line = bufferedReader.readLine();
-            while(line!=null){
-                if (StringUtils.startsWith(line, docID)){
-                    this.docsMaxTFMemoryHash.put(docID, Integer.parseInt(StringUtils.split(line," ")[2]));
-                    return Integer.parseInt(StringUtils.split(line," ")[2]);
-                }
-                else{
-                    line = bufferedReader.readLine();
-                }
-            }
-        }catch(IOException e){
-            System.out.println(e);
-            // returns -1 if there was an issue with reading the docs info file.
-            return -1;
-        }
-        return -1; //wasn't found
+//        if(this.dictionaryDocsMaxTFPointerInMemoryHash.get(StringUtils.removeEnd(StringUtils.lowerCase(docID), " "))==null){
+//            return -1;
+//        }
+        return this.dictionaryDocsMaxTFPointerInMemoryHash.get(StringUtils.removeEnd(StringUtils.lowerCase(docID), " "));
+//        if(this.docsMaxTFMemoryHash.containsKey(docID)){
+//            return this.docsMaxTFMemoryHash.get(docID);
+//        }
+//        try{
+//            BufferedReader bufferedReader = new BufferedReader(new FileReader(this.pathToDocInfo));
+//            String line = bufferedReader.readLine();
+//            while(line!=null){
+//                if (StringUtils.startsWith(line, docID)){
+//                    this.docsMaxTFMemoryHash.put(docID, Integer.parseInt(StringUtils.split(line," ")[2]));
+//                    return Integer.parseInt(StringUtils.split(line," ")[2]);
+//                }
+//                else{
+//                    line = bufferedReader.readLine();
+//                }
+//            }
+//        }catch(IOException e){
+//            System.out.println(e);
+//            // returns -1 if there was an issue with reading the docs info file.
+//            return -1;
+//        }
+//        return -1; //wasn't found
     }
 
     /**
