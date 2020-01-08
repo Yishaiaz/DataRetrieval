@@ -28,7 +28,8 @@ public class Ranker {
     private double docsAvgLength;
     private HashMap<Integer, String> lineInMemoryHash = new HashMap<>();// contains line number, and the line string value
     private HashMap<String, Integer> docsMaxTFMemoryHash = new HashMap<>();// contains docID, Doc max tf integer
-    private HashMap<String, Map<Pair<String, String>, ArrayList>> termsMapToDocsDataInMemoryHash = new HashMap<>();// contains docID, Doc max tf integer
+    private HashMap<String, Map <Pair<String, String>, ArrayList>> termsMapToDocsDataInMemoryHash = new HashMap<>();// contains docID, Doc max tf integer
+    private BufferedReader termDictionaryReader;
 
 
     /**
@@ -36,18 +37,24 @@ public class Ranker {
      * such as dictionary, posting, and documents' info.
      * it also receives the total number of documents in the corpus,
      * and the avg document length
+     * todo: write here
      * @param pathToDictionary - String
      * @param pathToPosting - String
      * @param pathToDocInfo - String
      * @param totalNumOfDocs - int
      * @param docsAvgLength - double
      */
-    public Ranker(String pathToDictionary, String pathToPosting, String pathToDocInfo, int totalNumOfDocs, double docsAvgLength) {
+    public Ranker(String pathToDictionary, String pathToPosting, String pathToDocInfo, int totalNumOfDocs, double docsAvgLength) throws Exception{
         this.pathToDictionary = pathToDictionary;
         this.pathToPosting = pathToPosting;
         this.pathToDocInfo = pathToDocInfo;
         this.totalNumOfDocs = totalNumOfDocs;
         this.docsAvgLength = docsAvgLength;
+        try{
+            this.termDictionaryReader = new BufferedReader(new FileReader(pathToDictionary));
+        }catch(IOException e){
+            throw new Exception("can't load dictionary");
+        }
     }
 
     /**
@@ -154,9 +161,9 @@ public class Ranker {
         if(this.termsMapToDocsDataInMemoryHash.containsKey(termIdentifier)){
             return this.termsMapToDocsDataInMemoryHash.get(termIdentifier);
         }
-        BufferedReader br = null;
+        BufferedReader br = this.termDictionaryReader;
         try{
-            br = new BufferedReader(new FileReader(this.pathToDictionary));
+//            br = new BufferedReader(new FileReader(this.pathToDictionary));
             String line = br.readLine();
             while(line!=null){
                 String[] splitLine = StringUtils.split(line, ",");
