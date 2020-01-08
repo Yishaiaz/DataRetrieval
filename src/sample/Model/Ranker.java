@@ -30,6 +30,8 @@ public class Ranker {
     private HashMap<String, Integer> docsMaxTFMemoryHash = new HashMap<>();// contains docID, Doc max tf integer
     private HashMap<String, Map <Pair<String, String>, ArrayList>> termsMapToDocsDataInMemoryHash = new HashMap<>();// contains docID, Doc max tf integer
     private BufferedReader termDictionaryReader;
+    private BufferedReader termPostingReader;
+    private int postingLineCtr = 0;
 
 
     /**
@@ -53,6 +55,7 @@ public class Ranker {
         this.docsAvgLength = docsAvgLength;
         try{
             this.termDictionaryReader = new BufferedReader(new FileReader(pathToDictionary));
+            this.termPostingReader = new BufferedReader(new FileReader(pathToPosting));
         }catch(IOException e){
             throw new Exception("can't load dictionary");
         }
@@ -216,14 +219,15 @@ public class Ranker {
         if(this.lineInMemoryHash.containsKey(pointerToLine)){
             return lineInMemoryHash.get(pointerToLine);
         }
-        BufferedReader bufferedReader = null;
+        BufferedReader bufferedReader = this.termPostingReader;
         try{
-            bufferedReader = new BufferedReader(new FileReader(this.pathToPosting));
+//            bufferedReader = new BufferedReader(new FileReader(this.pathToPosting));
             String line = bufferedReader.readLine();
-            int currentLineNum = 0;
+            int currentLineNum = this.postingLineCtr;
             while(line!=null){
                 if(currentLineNum==pointerToLine){
                     this.lineInMemoryHash.put(pointerToLine, line);
+                    this.postingLineCtr = currentLineNum + 1;
                     return line;
                 }
                 line = bufferedReader.readLine();
