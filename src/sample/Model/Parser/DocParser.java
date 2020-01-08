@@ -203,26 +203,42 @@ public class DocParser implements IParser{
                     stringBuilder.append(" ");
                     stringBuilder.append(docText[textIterator + 2]);
                     termHashMapDataStructure.insert(stringBuilder.toString(), termLocationIterator, 1.7);
-
                     termLocationIterator += 1;
+                    if(!this.stopWords.contains(docText[textIterator])) {
+                        termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.7);
+                        termLocationIterator+=1;
+                    }
+                    if(!this.stopWords.contains(docText[textIterator+1])) {
+                        termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.7);
+                        termLocationIterator+=1;
+                    }
+                    if(!this.stopWords.contains(docText[textIterator+2])) {
+                        termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.7);
+                        termLocationIterator+=1;
+                    }
+
                     textIterator += 3;
+
                 } else if (textIterator + 1 < docText.length &&
                         Character.isUpperCase(docText[textIterator].charAt(0)) && (!StringUtils.equals(docText[textIterator + 1], "")) &&
                         Character.isUpperCase(docText[textIterator + 1].charAt(0))) {
                     // Emtities - Llll Llll , capital letter at both words 1st and 2rd.
-                    // adding each word as a seperate term
-//                    termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.7);
-//                    termLocationIterator += 1;
-//                    termHashMapDataStructure.insert(docText[textIterator + 1], termLocationIterator, 1.7);
-//                    termLocationIterator += 1;
                     // adding the entire entity as a term
                     stringBuilder.append(docText[textIterator]);
                     stringBuilder.append(" ");
                     stringBuilder.append(docText[textIterator + 1]);
                     termHashMapDataStructure.insert(stringBuilder.toString(), termLocationIterator, 1.7);
-
                     termLocationIterator += 1;
+                    if(!this.stopWords.contains(docText[textIterator])) {
+                        termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.7);
+                        termLocationIterator+=1;
+                    }
+                    if(!this.stopWords.contains(docText[textIterator+1])) {
+                        termHashMapDataStructure.insert(docText[textIterator], termLocationIterator, 1.7);
+                        termLocationIterator+=1;
+                    }
                     textIterator += 2;
+
                 }
 
                 ////////////////// DATES ///////////////////// this is for the MM DD / MM YYYY format, NOT the DD MM format
