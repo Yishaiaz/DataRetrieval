@@ -37,7 +37,8 @@ public class Ranker {
      * such as dictionary, posting, and documents' info.
      * it also receives the total number of documents in the corpus,
      * and the avg document length
-     * todo: write here
+     * now initializes the dictionary reader, this helps avoid re-reading the entire dictionary every term.
+     * @important this means it must receive in method rankDocsForQuery a SORTED TermHashMapDataStructure.
      * @param pathToDictionary - String
      * @param pathToPosting - String
      * @param pathToDocInfo - String
