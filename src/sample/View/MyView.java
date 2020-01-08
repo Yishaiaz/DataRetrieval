@@ -39,6 +39,7 @@ public class MyView {
     public javafx.scene.control.Button btn_browse;
     public javafx.scene.control.Button btn_parse;
     public javafx.scene.control.CheckBox stemming_cp;
+    public javafx.scene.control.CheckBox cb_searchEntities;
     public javafx.scene.control.CheckBox cb_semantic;
     public javafx.scene.control.TextField txtField_postingFilesInput;
     public javafx.scene.control.TextField txtField_corpusPath;
@@ -62,7 +63,7 @@ public class MyView {
         if (f != null) {
             txtField_corpusPath.appendText(f.getPath());
             controller.setCorpusPath(f.getPath());
-            controller.update(controller, "corpusPath");
+
         } else {
             Alert a = new Alert(Alert.AlertType.ERROR, "Not found file.");
             Optional<ButtonType> result = a.showAndWait();
@@ -83,7 +84,7 @@ public class MyView {
         if (f != null) {
             txtField_postingFilesInput.appendText(f.getPath());
             controller.setPostingFilesPath(f.getPath());
-            controller.update(controller, "postingFilesPath");
+
         } else {
             Alert a = new Alert(Alert.AlertType.ERROR, "Not found file.");
             Optional<ButtonType> result = a.showAndWait();
@@ -132,7 +133,8 @@ public class MyView {
 
         //check both paths are fill up
         if (!txtField_postingFilesInput.getText().equals("") && !txtField_corpusPath.getText().equals("")) {
-
+            controller.update(controller, "corpusPath");
+            controller.update(controller, "postingFilesPath");
             long start_time = System.currentTimeMillis();
 
             if (stemming_cp.isSelected()) {
@@ -387,6 +389,8 @@ public class MyView {
                 alert.setContentText("For searching need to fill 'free typing search' OR insert path for query file. not both.");
                 alert.showAndWait();
             } else if (!txtField_queryPath.getText().equals("")) {
+                controller.update(controller, "corpusPath2");
+                controller.update(controller, "postingFilesPath");
                 String queryPath = txtField_queryPath.getText();
                 controller.setQueryPath(queryPath);
                 controller.setIsWithSemantic(cb_semantic.isSelected());
@@ -400,6 +404,8 @@ public class MyView {
                 results_btn.setDisable(false);
 
             } else if (!txtField_freeSearch.getText().equals("")) {
+                controller.update(controller, "corpusPath2");
+                controller.update(controller, "postingFilesPath");
                 controller.setFreeTypingQuery(txtField_freeSearch.getText());
                 controller.setIsWithSemantic(cb_semantic.isSelected());
                 controller.update(controller, "searchFreeTyping");

@@ -16,7 +16,7 @@ public class MyModel extends Observable {
      * @param path
      */
     public void testInitFileOfTest(String path){
-        corpusHandler=new CorpusHandler(path);
+        createCorpusHandler(path);
         corpusHandler.initListOfFilesPaths();
 
 
@@ -56,5 +56,9 @@ public class MyModel extends Observable {
 
     public void setResultPath(String resultPath) {
         this.resultPath=resultPath;
+    }
+
+    public void createCorpusHandler(String corpusPath) {
+        corpusHandler=new CorpusHandler(corpusPath);
     }
 }
