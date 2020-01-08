@@ -56,9 +56,9 @@ public class DocParser implements IParser{
         int textIterator = 0;
         int termLocationIterator = 0;
 
-            //creating a regex to recognize american phone numbers
-            String regexForAmericanPhoneNumbers = "^\\(?([0-9]{3})\\)?[-.\\s]?([0-9]{3})[-.\\s]?([0-9]{4})$";
-            Pattern patternForAmericanPhoneNumbers = Pattern.compile(regexForAmericanPhoneNumbers);
+        //creating a regex to recognize american phone numbers
+        String regexForAmericanPhoneNumbers = "^\\(?([0-9]{3})\\)?[-.\\s]?([0-9]{3})[-.\\s]?([0-9]{4})$";
+        Pattern patternForAmericanPhoneNumbers = Pattern.compile(regexForAmericanPhoneNumbers);
         if (!isQuery) {
             //<TERM,IMPORTANCE>
             String[] docData = getDocData(fullDoc);
@@ -94,13 +94,13 @@ public class DocParser implements IParser{
             doc = new Document(docData[0], docData[1], docData[2], docData[3]);
         }
 
-       else if (isQuery){
+        else if (isQuery){
 
             String queryId= getQueryData(fullDoc);
             doc=new Document(queryId,"","",String.valueOf(fullDoc.length()));
 
             //only if query not typed - cut according tags.
-            if (!queryId.startsWith("free")){
+            if (!StringUtils.startsWith(queryId, "free")){
                 fullDoc = StringUtils.substring(fullDoc, StringUtils.indexOf(fullDoc, "<title>") + 7, StringUtils.indexOf(fullDoc, "<desc>"));
             }
         }
@@ -269,13 +269,13 @@ public class DocParser implements IParser{
 
                 /////////////////numbers, percentages and prices/////////////////
                 ////DOLLAR NUMBERS/////
-                else if (docText[textIterator].startsWith("$")) {
+                else if (StringUtils.startsWith(docText[textIterator], "$")) {
                     //remove the '$' sign
                     String replace_with = docText[textIterator].replace("$", "");
                     docText[textIterator] = replace_with;
                     //evaluate the number and transform if necessary
                     if ((docText[textIterator].contains("bn") || docText[textIterator].contains("m") || docText[textIterator].contains("B") || docText[textIterator].contains("M"))
-                            && startsWithNum(docText[textIterator])) {
+                            && StringUtils.isNumeric(StringUtils.substring(docText[textIterator],0,1))) {
                         if (StringUtils.endsWith(docText[textIterator], "bn") ||
                                 StringUtils.endsWith(docText[textIterator], "B") ||
                                 StringUtils.endsWith(docText[textIterator], "b")) {
@@ -306,27 +306,27 @@ public class DocParser implements IParser{
                     } else if (textIterator + 1 < docText.length) {
                         if (StringUtils.equals(StringUtils.lowerCase(docText[textIterator + 1]), "million")) {
                             try {
-    //                            $price million
+                                //                            $price million
                                 double num = Double.parseDouble(docText[textIterator].replaceAll(",", "")) * Math.pow(10, 6);
                                 String toConcat = this.transformNumber(num, false);
                                 stringNumberBuilder.append(toConcat);
                                 textIterator += 2;
                             } catch (Exception e) {
                                 // wasn't a number
-    //                            System.out.println(e);
+                                //                            System.out.println(e);
                                 textIterator += 1;
                             }
 
                         } else if (StringUtils.equals(StringUtils.lowerCase(docText[textIterator + 1]), "billion")) {
                             try {
-    //                            $price billion
+                                //                            $price billion
                                 double num = Double.parseDouble(docText[textIterator].replaceAll(",", "")) * Math.pow(10, 9);
                                 String toConcat = this.transformNumber(num, false);
                                 stringNumberBuilder.append(toConcat);
                                 textIterator += 2;
                             } catch (Exception e) {
                                 // wasn't a number
-    //                            System.out.println(e);
+                                //                            System.out.println(e);
                                 textIterator += 1;
                             }
                         } else {
@@ -353,7 +353,7 @@ public class DocParser implements IParser{
                 }else if (StringUtils.isNumeric(docText[textIterator])&&
                         textIterator + 1 < docText.length &&
                         (StringUtils.equals(StringUtils.lowerCase(docText[textIterator + 1]), "percent") ||
-                        StringUtils.equals(StringUtils.lowerCase(docText[textIterator + 1]), "percentage"))) {
+                                StringUtils.equals(StringUtils.lowerCase(docText[textIterator + 1]), "percentage"))) {
                     // Number percent /percentage
                     String replace_with = "";
                     double num = 1;
@@ -368,12 +368,12 @@ public class DocParser implements IParser{
                         stringNumberBuilder.append("%");
                     } catch (NumberFormatException e) {
                         // NOT A NUMBER
-    //                    System.out.println(e);
+                        //                    System.out.println(e);
                         textIterator += 1;
                     }
                     termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.3);
                     termLocationIterator += 1;
-                }else if ((docText[textIterator].contains("bn") || docText[textIterator].contains("m")) && startsWithNum(docText[textIterator])) {
+                }else if ((docText[textIterator].contains("bn") || docText[textIterator].contains("m")) && StringUtils.isNumeric(StringUtils.substring(docText[textIterator],0,1))) {
                     // Number[m/bn]
                     String replace_with = "";
                     double num = 1;
@@ -414,7 +414,7 @@ public class DocParser implements IParser{
                 }else if (StringUtils.isNumeric(docText[textIterator])&&
                         textIterator + 1 < docText.length &&
                         (docText[textIterator + 1].contains("/") &&
-                                startsWithNum(docText[textIterator + 1])) &&
+                                StringUtils.isNumeric(StringUtils.substring(docText[textIterator+1],0,1))) &&
                         StringUtils.isNumeric(docText[textIterator])) {
                     // Number fraction dollars
                     stringNumberBuilder.append(isANumber(docText[textIterator]));
@@ -444,7 +444,7 @@ public class DocParser implements IParser{
                         stringNumberBuilder.append(toConcat);
                     } catch (NumberFormatException e) {
                         // NOT A NUMBER
-    //                    System.out.println(e);
+                        //                    System.out.println(e);
                         textIterator += 1;
                     }
                     termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.1);
@@ -464,7 +464,7 @@ public class DocParser implements IParser{
                         stringNumberBuilder.append(toConcat);
                     } catch (NumberFormatException e) {
                         // NOT A NUMBER
-    //                    System.out.println(e);
+                        //                    System.out.println(e);
                         textIterator += 1;
                     }
                     termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.3);
@@ -499,7 +499,7 @@ public class DocParser implements IParser{
                         stringNumberBuilder.append(toConcat);
                     } catch (NumberFormatException e) {
                         // NOT A NUMBER
-    //                    System.out.println(e);
+                        //                    System.out.println(e);
                         textIterator += 1;
                     }
                     termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.1);
@@ -537,7 +537,7 @@ public class DocParser implements IParser{
                         stringNumberBuilder.append(toConcat);
                     } catch (NumberFormatException e) {
                         // NOT A NUMBER
-    //                    System.out.println(e);
+                        //                    System.out.println(e);
                         textIterator += 1;
                     }
                     termHashMapDataStructure.insert(stringNumberBuilder.toString(), termLocationIterator, 1.1);
@@ -615,55 +615,48 @@ public class DocParser implements IParser{
                     }
                 }
             }catch(Exception e){
-                    textIterator+=1;
+                textIterator+=1;
             }
         }
 //        System.out.println(String.format("time to parse %d", System.currentTimeMillis() - start));
         //adding it into the Document object.
         doc.setParsedTerms(termHashMapDataStructure);
 
-       //get best 5 entities
-    if (!isQuery) {
-        HashMap <String,Integer> entities=doc.getParsedTerms().getOnlyEntities();
-        HashMap<String, Double> topEntities = new HashMap<>();
-        List<Integer> occurences = new ArrayList<>(); //contain all scores from documents.
-        occurences.addAll(entities.values());
-        Collections.sort(occurences, Collections.reverseOrder()); // sort in decanting
+        //get best 5 entities
+        if (!isQuery) {
+            HashMap <String,Integer> entities=doc.getParsedTerms().getOnlyEntities();
+            HashMap<String, Double> topEntities = new HashMap<>();
+            List<Integer> occurences = new ArrayList<>(); //contain all scores from documents.
+            occurences.addAll(entities.values());
+            Collections.sort(occurences, Collections.reverseOrder()); // sort in decanting
 
-        int size;
-        //if there are less then 5 entities in doc.
-    if(occurences.size()<5)
-        size=occurences.size();
-    else
-        size=5;
+            int size;
+            //if there are less then 5 entities in doc.
+            if(occurences.size()<5)
+                size=occurences.size();
+            else
+                size=5;
 
-    for (int i = 0; i < size; i++) {
-        double curOccurrence = occurences.get(i);
-        String key = getKeyWithSpecificValue(entities, curOccurrence);
-        //normalize : tf/maxTfInDoc
-        topEntities.put(key, curOccurrence/doc.parsedTerms.getMaxTf());
-        entities.remove(key);
-    }
+            for (int i = 0; i < size; i++) {
+                double curOccurrence = occurences.get(i);
+                String key = getKeyWithSpecificValue(entities, curOccurrence);
+                //normalize : tf/maxTfInDoc
+                topEntities.put(key, curOccurrence/doc.parsedTerms.getMaxTf());
+                entities.remove(key);
+            }
 
-        File docsEntities=new File(Paths.get("").toAbsolutePath().toString() + File.separator + "docsEntities.txt");
+            File docsEntities = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "docsEntities.txt");
 
-        FileWriter fw = new FileWriter(docsEntities,true);
-        BufferedWriter w = new BufferedWriter(fw);
-        String info=topEntities.toString();
-        info=StringUtils.remove(info,'{');
-        info=StringUtils.remove(info,'}');
+            FileWriter fw = new FileWriter(docsEntities,true);
+            BufferedWriter w = new BufferedWriter(fw);
+            String info=topEntities.toString();
+            info=StringUtils.remove(info,'{');
+            info=StringUtils.remove(info,'}');
 
-        w.write(doc.DocNo+"|"+info+System.lineSeparator());
+            w.write(doc.DocNo+"|"+info+System.lineSeparator());
 
-        w.close();
-        fw.close();
-
-
-
-
-
-
-}
+            w.close();
+        }
 
         return doc;
     }
@@ -675,8 +668,8 @@ public class DocParser implements IParser{
      */
     private String getKeyWithSpecificValue(HashMap<String,Integer> map,Double value){
         for (String curKey: map.keySet()){
-                return curKey;
-            }
+            return curKey;
+        }
         return null;
     }
 
@@ -713,7 +706,7 @@ public class DocParser implements IParser{
      * @return
      */
     private String[] getDocData(String fullDoc){
-    //DOCNO tag info
+        //DOCNO tag info
         int startIndex = StringUtils.indexOf(fullDoc, "<DOCNO>")+7;
         int endIndex = StringUtils.indexOf(fullDoc, "</DOCNO>");
         String docNo;
@@ -753,20 +746,6 @@ public class DocParser implements IParser{
         docData[2] = docTI;
         docData[3] = String.valueOf(fullDoc.length());
         return docData;
-    }
-
-    /**
-     * checks if the first char of the string is a number
-     * @param s
-     * @return
-     */
-    private Boolean startsWithNum(String s){
-        try{
-            Double.parseDouble(StringUtils.substring(s,0,1));
-            return true;
-        }catch(NumberFormatException e){
-            return false;
-        }
     }
 
     /**
