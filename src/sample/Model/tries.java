@@ -1,6 +1,7 @@
 package sample.Model;
 
 
+import org.apache.commons.lang3.StringUtils;
 import sample.Model.DataStructures.TermHashMapDataStructure;
 import sample.Model.TasksPoolsRunners.MergeTasksPool;
 
@@ -101,14 +102,22 @@ public class tries {
 //        System.out.println("s");
 //        char c = 'f';
 //        System.out.println(String.valueOf((char)(c+1)));
-        String pathToIndex = "d:\\documents\\users\\benbsaha\\Downloads\\post";
-        String pathToDictionaryDirectory = "d:\\documents\\users\\benbsaha\\Downloads\\post";
-        boolean isStemming = true;
-
-
-
-        DictionaryParser dictPars = new DictionaryParser(pathToIndex, pathToDictionaryDirectory, isStemming);
-        dictPars.run();
+        String line = "termName|5|<LA050989-0101 ,1,1.0><LA100190-0025 ,1,1.0><LA122690-0116 ,1,1.0><LA061790-0171 ,1,1.0><LA022490-0118 ,1,1.0>";
+        line = StringUtils.substring(line, StringUtils.indexOf(line, "|<")+1);
+        int termOccurSum = 0;
+        for (String sa :
+                StringUtils.split(line, "<>")) {
+            termOccurSum += Integer.parseInt(StringUtils.split(sa, ",")[1]);
+        }
+        System.out.println(termOccurSum);
+//        String pathToIndex = "d:\\documents\\users\\benbsaha\\Downloads\\post";
+//        String pathToDictionaryDirectory = "d:\\documents\\users\\benbsaha\\Downloads\\post";
+//        boolean isStemming = true;
+//
+//
+//
+//        DictionaryParser dictPars = new DictionaryParser(pathToIndex, pathToDictionaryDirectory, isStemming);
+//        dictPars.run();
 
 
     }

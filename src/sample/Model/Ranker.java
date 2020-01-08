@@ -30,6 +30,7 @@ public class Ranker {
     private HashMap<Long, String> lineInMemoryHash = new HashMap<>();// contains line number, and the line string value
     private HashMap<String, Integer> docsMaxTFMemoryHash = new HashMap<>();// contains docID, Doc max tf integer
     private HashMap<String, Map <Pair<String, String>, ArrayList>> termsMapToDocsDataInMemoryHash = new HashMap<>();// contains docID, Doc max tf integer
+    private HashMap<String, Long> dictionaryInMemoryHash = new HashMap<>();
     private BufferedReader termDictionaryReader;
     private int postingLineCtr = 0;
 
@@ -57,6 +58,15 @@ public class Ranker {
             this.termDictionaryReader = new BufferedReader(new FileReader(pathToDictionary));
         }catch(IOException e){
             throw new Exception("can't load dictionary");
+        }
+        // load entire dictionary to memory
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(pathToDictionary));
+        String line = bufferedReader.readLine();
+        while(line!=""&&line!=null){
+            String[] lineData = line.split(",");
+            String termName = lineData[0];
+            long termPostingLine = Long.parseLong(lineData[3]);
+            this.dictionaryInMemoryHash.put(termName, termPostingLine);
         }
     }
 
@@ -161,58 +171,92 @@ public class Ranker {
      * @return Map<Pair<String, String>, ArrayList>
      */
     private Map<Pair<String, String>, ArrayList> collectTermToDocData(String termIdentifier){
-        if(this.termsMapToDocsDataInMemoryHash.containsKey(termIdentifier)){
-            return this.termsMapToDocsDataInMemoryHash.get(termIdentifier);
+        long pointerToByteOffset = this.dictionaryInMemoryHash.get(termIdentifier);
+        if(pointerToByteOffset<0){
+            return null;
         }
-        BufferedReader br = this.termDictionaryReader;
-        try{
-//            br = new BufferedReader(new FileReader(this.pathToDictionary));
-            String line = br.readLine();
-            while(line!=null){
-                String[] splitLine = StringUtils.split(line, ",");
-                // if we haven't found the term in our dictionary
-                if(StringUtils.startsWith(splitLine[0].toLowerCase(), String.valueOf((char)(termIdentifier.toCharArray()[0]+1)))){
-                    br.close();
-                    this.termDictionaryReader = new BufferedReader(new FileReader(this.pathToDictionary));
-                    return null;
-                }
-                if (StringUtils.equals(termIdentifier, splitLine[0].toLowerCase())){
-                    long pointerToByteOffset = Long.parseLong(splitLine[3]); // extracting the pointer
-                    String lineData = this.getPostingLine(pointerToByteOffset);
-                    String[] singleTermPostingData = StringUtils.split(lineData, "|");
-                        int termTotalDocsTF = Integer.parseInt(singleTermPostingData[1]);
-                    String[] termDocAppearanceData = StringUtils.split(singleTermPostingData[2], "<>");
-                    int numberOfDocContainTerm = termDocAppearanceData.length;
+        else{
+            String lineData = this.getPostingLine(pointerToByteOffset);
+            String[] singleTermPostingData = StringUtils.split(lineData, "|");
+            int termTotalDocsTF = Integer.parseInt(singleTermPostingData[1]);
+            String[] termDocAppearanceData = StringUtils.split(singleTermPostingData[2], "<>");
+            int numberOfDocContainTerm = termDocAppearanceData.length;
 
-                    Map<Pair<String, String>, ArrayList> docToTerm = new HashMap<>();
-                    // calc the score to each doc in termDocAppearanceData
-                    for (int i = 0; i < termDocAppearanceData.length; i++) {
-                        String[] singleDocData = StringUtils.split(termDocAppearanceData[i],",");
-                        String docID = singleDocData[0];
-                        int docTermTf = Integer.parseInt(singleDocData[1]);
-                        double termWeightInDoc = Double.parseDouble(singleDocData[2]);
-                        ArrayList<Double> valuesOfTermToDoc = new ArrayList<>();
-                        valuesOfTermToDoc.add((double)docTermTf); //termFreqInDoc
-                        valuesOfTermToDoc.add(termWeightInDoc); //kParam = term weight
-                        valuesOfTermToDoc.add(0.75); //bParam - 0.75
-                        valuesOfTermToDoc.add((double)numberOfDocContainTerm); //numberOfDocContainTerm - n(qi) counted
-                        double docsMaxTF = (double)getDocMaxTF(docID);
-                        valuesOfTermToDoc.add(docsMaxTF==-1? 1: docsMaxTF); //docsAvgLength
-                        docToTerm.put(new Pair<>(docID, termIdentifier), valuesOfTermToDoc);
-                    }
-                    // docID - TermID :
-                    this.termsMapToDocsDataInMemoryHash.put(termIdentifier, docToTerm);
-                    return docToTerm;
-                }
-                else{
-                    line = br.readLine();
-                }
+            Map<Pair<String, String>, ArrayList> docToTerm = new HashMap<>();
+            // calc the score to each doc in termDocAppearanceData
+            for (int i = 0; i < termDocAppearanceData.length; i++) {
+                String[] singleDocData = StringUtils.split(termDocAppearanceData[i],",");
+                String docID = singleDocData[0];
+                int docTermTf = Integer.parseInt(singleDocData[1]);
+                double termWeightInDoc = Double.parseDouble(singleDocData[2]);
+                ArrayList<Double> valuesOfTermToDoc = new ArrayList<>();
+                valuesOfTermToDoc.add((double)docTermTf); //termFreqInDoc
+                valuesOfTermToDoc.add(termWeightInDoc); //kParam = term weight
+                valuesOfTermToDoc.add(0.75); //bParam - 0.75
+                valuesOfTermToDoc.add((double)numberOfDocContainTerm); //numberOfDocContainTerm - n(qi) counted
+                double docsMaxTF = (double)getDocMaxTF(docID);
+                valuesOfTermToDoc.add(docsMaxTF==-1? 1: docsMaxTF); //docsAvgLength
+                docToTerm.put(new Pair<>(docID, termIdentifier), valuesOfTermToDoc);
             }
-
-        }catch(IOException e){
-            System.out.println(e);
+            // docID - TermID :
+            this.termsMapToDocsDataInMemoryHash.put(termIdentifier, docToTerm);
+            return docToTerm;
         }
-        return null;
+
+//
+//
+//        if(this.termsMapToDocsDataInMemoryHash.containsKey(termIdentifier)){
+//            return this.termsMapToDocsDataInMemoryHash.get(termIdentifier);
+//        }
+//        BufferedReader br = this.termDictionaryReader;
+//        try{
+////            br = new BufferedReader(new FileReader(this.pathToDictionary));
+//            String line = br.readLine();
+//            while(line!=null){
+//                String[] splitLine = StringUtils.split(line, ",");
+//                // if we haven't found the term in our dictionary
+//                if(StringUtils.startsWith(splitLine[0].toLowerCase(), String.valueOf((char)(termIdentifier.toCharArray()[0]+1)))){
+//                    br.close();
+//                    this.termDictionaryReader = new BufferedReader(new FileReader(this.pathToDictionary));
+//                    return null;
+//                }
+//                if (StringUtils.equals(termIdentifier, splitLine[0].toLowerCase())){
+//                    long pointerToByteOffset = Long.parseLong(splitLine[3]); // extracting the pointer
+//                    String lineData = this.getPostingLine(pointerToByteOffset);
+//                    String[] singleTermPostingData = StringUtils.split(lineData, "|");
+//                        int termTotalDocsTF = Integer.parseInt(singleTermPostingData[1]);
+//                    String[] termDocAppearanceData = StringUtils.split(singleTermPostingData[2], "<>");
+//                    int numberOfDocContainTerm = termDocAppearanceData.length;
+//
+//                    Map<Pair<String, String>, ArrayList> docToTerm = new HashMap<>();
+//                    // calc the score to each doc in termDocAppearanceData
+//                    for (int i = 0; i < termDocAppearanceData.length; i++) {
+//                        String[] singleDocData = StringUtils.split(termDocAppearanceData[i],",");
+//                        String docID = singleDocData[0];
+//                        int docTermTf = Integer.parseInt(singleDocData[1]);
+//                        double termWeightInDoc = Double.parseDouble(singleDocData[2]);
+//                        ArrayList<Double> valuesOfTermToDoc = new ArrayList<>();
+//                        valuesOfTermToDoc.add((double)docTermTf); //termFreqInDoc
+//                        valuesOfTermToDoc.add(termWeightInDoc); //kParam = term weight
+//                        valuesOfTermToDoc.add(0.75); //bParam - 0.75
+//                        valuesOfTermToDoc.add((double)numberOfDocContainTerm); //numberOfDocContainTerm - n(qi) counted
+//                        double docsMaxTF = (double)getDocMaxTF(docID);
+//                        valuesOfTermToDoc.add(docsMaxTF==-1? 1: docsMaxTF); //docsAvgLength
+//                        docToTerm.put(new Pair<>(docID, termIdentifier), valuesOfTermToDoc);
+//                    }
+//                    // docID - TermID :
+//                    this.termsMapToDocsDataInMemoryHash.put(termIdentifier, docToTerm);
+//                    return docToTerm;
+//                }
+//                else{
+//                    line = br.readLine();
+//                }
+//            }
+//
+//        }catch(IOException e){
+//            System.out.println(e);
+//        }
+//        return null;
     }
 
     /**
@@ -228,19 +272,6 @@ public class Ranker {
             RandomAccessFile randomAccessFile = new RandomAccessFile(this.pathToPosting, "r");
             randomAccessFile.seek(pointerToByteOffset);
             return randomAccessFile.readLine();
-//            bufferedReader = new BufferedReader(new FileReader(this.pathToPosting));
-//            String line = bufferedReader.readLine();
-//            int currentLineNum = this.postingLineCtr;
-//            while(line!=null){
-//                if(currentLineNum==pointerToByteOffset){
-//                    this.lineInMemoryHash.put(pointerToByteOffset, line);
-//                    this.postingLineCtr = currentLineNum + 1;
-//                    return line;
-//                }
-//                line = bufferedReader.readLine();
-//                currentLineNum += 1;
-//            }
-
         }catch(IOException e){
             System.out.println(e);
         }

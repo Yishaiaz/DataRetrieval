@@ -83,30 +83,27 @@ public class DictionaryParser implements Runnable {
                 try {
                     singleTermNumberOfDocsAppearance = Integer.parseInt(StringUtils.substring(line, termEndIndex + 1, StringUtils.indexOf(line, "|", termEndIndex + 1)));
                     // calculating entire appearances
-                    int sum = 0;
-                    int currentIndex = termEndIndex + 2;
-                    while (currentIndex + 1 < line.length()) {
-                        int singleDocStart = StringUtils.indexOf(line, "<", currentIndex) + 1;
-                        int singleDocEnd = StringUtils.indexOf(line, ">", currentIndex + 1);
-                        int amountInDoc = Integer.parseInt(StringUtils.split(StringUtils.substring(line, singleDocStart, singleDocEnd), ",")[1]);
-                        sum += amountInDoc;
-                        currentIndex = singleDocEnd;
+//                    int sum = 0;
+//                    int currentIndex = termEndIndex + 2;
+//                    while (currentIndex + 1 < line.length()) {
+//                        int singleDocStart = StringUtils.indexOf(line, "<", currentIndex) + 1;
+//                        int singleDocEnd = StringUtils.indexOf(line, ">", currentIndex + 1);
+//                        int amountInDoc = Integer.parseInt(StringUtils.split(StringUtils.substring(line, singleDocStart, singleDocEnd), ",")[1]);
+//                        sum += amountInDoc;
+//                        currentIndex = singleDocEnd;
+//                    }
+//                    singleTermTotalNumberOfApperance = sum;
+                    line = StringUtils.substring(line, StringUtils.indexOf(line, "|<")+1);
+                    int termOccurSum = 0;
+                    for (String singleDocToTerm :
+                            StringUtils.split(line, "<>")) {
+                        termOccurSum += Integer.parseInt(StringUtils.split(singleDocToTerm, ",")[1]);
                     }
-                    singleTermTotalNumberOfApperance = sum;
+                    singleTermTotalNumberOfApperance = termOccurSum;
 
                     bufferedWriter.write(String.format("%s,%d,%d,%d" + System.lineSeparator(), singleTerm,singleTermTotalNumberOfApperance, singleTermNumberOfDocsAppearance, postingLineByteOffset));
                     postingLineByteOffset=randomAccessFile.getFilePointer();
 
-                    // ---- for finding top 10 :
-//                    if (singleTermTotalNumberOfApperance>minTerm){
-//                        topTerms.remove(getKeyWithSpecificValue(topTerms,minTerm));
-//                        topTerms.put(singleTerm,singleTermTotalNumberOfApperance);
-//                        minTerm=getMin(topTerms.values());
-//                    }
-
-
-
-//                    System.out.println(String.format("Term Name: %s - in Number Of Docs %d with total appearances %d line number in posting file %d", singleTerm, singleTermNumberOfDocsAppearance, singleTermTotalNumberOfApperance, postingLineNumber));
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
                 }
