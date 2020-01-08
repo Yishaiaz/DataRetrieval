@@ -10,6 +10,7 @@ import sample.Model.RankingAlgorithms.IRankingAlgorithm;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -26,11 +27,10 @@ public class Ranker {
     private String pathToDocInfo;
     private int totalNumOfDocs;
     private double docsAvgLength;
-    private HashMap<Integer, String> lineInMemoryHash = new HashMap<>();// contains line number, and the line string value
+    private HashMap<Long, String> lineInMemoryHash = new HashMap<>();// contains line number, and the line string value
     private HashMap<String, Integer> docsMaxTFMemoryHash = new HashMap<>();// contains docID, Doc max tf integer
     private HashMap<String, Map <Pair<String, String>, ArrayList>> termsMapToDocsDataInMemoryHash = new HashMap<>();// contains docID, Doc max tf integer
     private BufferedReader termDictionaryReader;
-    private BufferedReader termPostingReader;
     private int postingLineCtr = 0;
 
 
@@ -55,7 +55,6 @@ public class Ranker {
         this.docsAvgLength = docsAvgLength;
         try{
             this.termDictionaryReader = new BufferedReader(new FileReader(pathToDictionary));
-            this.termPostingReader = new BufferedReader(new FileReader(pathToPosting));
         }catch(IOException e){
             throw new Exception("can't load dictionary");
         }
@@ -171,11 +170,17 @@ public class Ranker {
             String line = br.readLine();
             while(line!=null){
                 String[] splitLine = StringUtils.split(line, ",");
+                // if we haven't found the term in our dictionary
+                if(StringUtils.startsWith(splitLine[0].toLowerCase(), String.valueOf((char)(termIdentifier.toCharArray()[0]+1)))){
+                    br.close();
+                    this.termDictionaryReader = new BufferedReader(new FileReader(this.pathToDictionary));
+                    return null;
+                }
                 if (StringUtils.equals(termIdentifier, splitLine[0].toLowerCase())){
-                    int pointerToLine = Integer.parseInt(splitLine[3]); // extracting the pointer
-                    String lineData = this.getPostingLine(pointerToLine);
+                    long pointerToByteOffset = Long.parseLong(splitLine[3]); // extracting the pointer
+                    String lineData = this.getPostingLine(pointerToByteOffset);
                     String[] singleTermPostingData = StringUtils.split(lineData, "|");
-                    int termTotalDocsTF = Integer.parseInt(singleTermPostingData[1]);
+                        int termTotalDocsTF = Integer.parseInt(singleTermPostingData[1]);
                     String[] termDocAppearanceData = StringUtils.split(singleTermPostingData[2], "<>");
                     int numberOfDocContainTerm = termDocAppearanceData.length;
 
@@ -212,27 +217,29 @@ public class Ranker {
 
     /**
      * private function, retrieves the posting line from the posting file.
-     * @param pointerToLine - int, the line's number (starts counting from zero)
+     * @param pointerToByteOffset - int, the line's number (starts counting from zero)
      * @return
      */
-    private String getPostingLine(int pointerToLine){
-        if(this.lineInMemoryHash.containsKey(pointerToLine)){
-            return lineInMemoryHash.get(pointerToLine);
+    private String getPostingLine(long pointerToByteOffset){
+        if(this.lineInMemoryHash.containsKey(pointerToByteOffset)){
+            return lineInMemoryHash.get(pointerToByteOffset);
         }
-        BufferedReader bufferedReader = this.termPostingReader;
         try{
+            RandomAccessFile randomAccessFile = new RandomAccessFile(this.pathToPosting, "r");
+            randomAccessFile.seek(pointerToByteOffset);
+            return randomAccessFile.readLine();
 //            bufferedReader = new BufferedReader(new FileReader(this.pathToPosting));
-            String line = bufferedReader.readLine();
-            int currentLineNum = this.postingLineCtr;
-            while(line!=null){
-                if(currentLineNum==pointerToLine){
-                    this.lineInMemoryHash.put(pointerToLine, line);
-                    this.postingLineCtr = currentLineNum + 1;
-                    return line;
-                }
-                line = bufferedReader.readLine();
-                currentLineNum += 1;
-            }
+//            String line = bufferedReader.readLine();
+//            int currentLineNum = this.postingLineCtr;
+//            while(line!=null){
+//                if(currentLineNum==pointerToByteOffset){
+//                    this.lineInMemoryHash.put(pointerToByteOffset, line);
+//                    this.postingLineCtr = currentLineNum + 1;
+//                    return line;
+//                }
+//                line = bufferedReader.readLine();
+//                currentLineNum += 1;
+//            }
 
         }catch(IOException e){
             System.out.println(e);
