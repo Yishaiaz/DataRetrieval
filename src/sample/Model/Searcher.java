@@ -3,7 +3,6 @@ package sample.Model;
 import org.apache.commons.lang3.text.StrBuilder;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import sample.Model.DataStructures.TermHashMapDataStructure;
 import sample.Model.DataStructures.TermHashMapEntry;
 import sample.Model.Parser.Stemmer;
 
@@ -15,10 +14,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
-import static java.lang.String.CASE_INSENSITIVE_ORDER;
-import static java.lang.String.valueOf;
 
-
+/**
+ * responsible to pass the Ranker parsed query and get from it RankedDocumentStructure with relevant docs.
+ * extract top50 and write to result file.
+ */
 public class Searcher {
     private final String resultPath;
     String corpusPath;
@@ -90,6 +90,15 @@ public class Searcher {
         }
     }
 
+    /**
+     * connect to DataMuse API and send terms from query .
+     * API return synonyms.
+     * insert only synonyms that exist in dictionary .
+     * @param query
+     * @param isStemming
+     * @return
+     * @throws IOException
+     */
     public Document useSemanticTreat(Document query, boolean isStemming) throws IOException {
         this.isStemming=isStemming;
         readDictionary(); //read dictionary to memory.

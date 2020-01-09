@@ -16,12 +16,13 @@ import org.apache.commons.lang3.text.StrBuilder;
 import sample.Controller.Controller;
 
 
-
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -30,7 +31,6 @@ import java.util.stream.Stream;
  */
 public class MyView {
     private Controller controller;
-    // private String dictionaryContent="";
     private ObservableList<String> dictionaryContent;
     private ObservableList<String> resultContent;
     private long timeOfProcess = 0;
@@ -45,7 +45,6 @@ public class MyView {
     public javafx.scene.control.TextField txtField_corpusPath;
     public javafx.scene.control.TextField txtField_queryPath;
     public javafx.scene.control.TextField txtField_freeSearch;
-    //public javafx.scene.control.TextArea textAreaDic1;
     public ListView listView_dic;
     public ListView listView_result;
     public javafx.scene.control.Button results_btn;
@@ -104,10 +103,10 @@ public class MyView {
             if (result.get() == ButtonType.OK) {
                 a.close();
             }
-        }
-        else
+        } else
             txtField_queryPath.appendText(f.getPath());
     }
+
     public void chooseResultPath() {
         DirectoryChooser chooser = new DirectoryChooser();
         File f = chooser.showDialog(null);
@@ -363,7 +362,7 @@ public class MyView {
 
     public void search() {
 
-        if (txtField_corpusPath.getText().equals("") || txtField_postingFilesInput.getText().equals("")|| result_path.getText().equals("")) {
+        if (txtField_corpusPath.getText().equals("") || txtField_postingFilesInput.getText().equals("") || result_path.getText().equals("")) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Information Dialog");
             alert.setHeaderText(null);
@@ -421,54 +420,115 @@ public class MyView {
     }
 
     public void presentSearchResults() {
-        this.resultContent=FXCollections.observableArrayList();
+        this.resultContent = FXCollections.observableArrayList();
         File resultsFile = new File(result_path.getText() + File.separator + "results.txt");
         String str = "";
-        String[] line=null;
+        String[] line = null;
+
         try {
-            BufferedReader br = new BufferedReader(new FileReader(resultsFile));
-            int numOfQueries=0;
+            //without entities
+            if (cb_searchEntities.isSelected() == false) {
 
-            String queryId="";
-            int counter=0;
-            while ((str = br.readLine()) != null && (!str.equals(""))) {
-                 line = str.split(" ");
-                if (queryId.equals(line[0])) {
-                    counter++;
-                    this.resultContent.add("\t" + line[2] +" "+ line[3]);
-                } else {
-                    if (numOfQueries > 0)
-                        resultContent.add("Total Documents: " + counter + System.lineSeparator());  //for prev query
+                BufferedReader brResults = new BufferedReader(new FileReader(resultsFile));
+                int numOfQueries = 0;
 
-                    queryId = line[0];
-                    counter = 1;
-                    numOfQueries++;
-                    resultContent.add(queryId);
-                    resultContent.add("\t" + line[2] +" "+ line[3]);
+                String queryId = "";
+                int counter = 0;
+                while ((str = brResults.readLine()) != null && (!str.equals(""))) {
+                    line = str.split(" ");
+                    if (queryId.equals(line[0])) {
+                        counter++;
+                        this.resultContent.add("\t" + line[2] + " " + line[3]);
+                    } else {
+                        if (numOfQueries > 0)
+                            resultContent.add("Total Documents: " + counter + System.lineSeparator());  //for prev query
+
+                        queryId = line[0];
+                        counter = 1;
+                        numOfQueries++;
+                        resultContent.add(queryId);
+                        resultContent.add("\t" + line[2] + " " + line[3]);
+                    }
                 }
+                resultContent.add("Total Documents: " + counter + System.lineSeparator());  //for last query
+                brResults.close();
             }
-            resultContent.add("Total Documents: " + counter + System.lineSeparator());  //for last query
-            br.close();
-                    FXMLLoader fxmlLoader1 = new FXMLLoader(getClass().getResource("results.fxml"));
-                    Parent root = fxmlLoader1.load();
-                    Stage secondaryStage = new Stage();
-                    secondaryStage.setTitle("Search Results");
-                    Scene scene = new Scene(root, 600, 400);
-                    secondaryStage.setScene(scene);
-                    secondaryStage.show();
 
-                 listView_result = (javafx.scene.control.ListView) scene.lookup("#result_listView");
-                 listView_result.setItems(resultContent);
+            //with entities
+            else {
+
+                File docsEntities;
+
+                docsEntities = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "docsEntities.txt");
 
 
-            } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-        } catch (IOException ex) {
-            ex.printStackTrace();
+                //read all docs and their entities to hash map
+                BufferedReader brEntities = new BufferedReader(new FileReader(docsEntities));
+                String lineOfEntitiesDoc = "";
+                HashMap<String, String> docsEntitiesHash = new HashMap<>();
+                while ((lineOfEntitiesDoc = brEntities.readLine()) != null && (!lineOfEntitiesDoc.equals(""))) {
+                    line = lineOfEntitiesDoc.split(Pattern.quote("|"));
+                    docsEntitiesHash.put(line[0],line[1]);
+                }
+                brEntities.close();
+
+                //read results
+                BufferedReader brResults = new BufferedReader(new FileReader(resultsFile));
+                int numOfQueries = 0;
+
+                String queryId = "";
+                int counter = 0;
+                while ((str = brResults.readLine()) != null && (!str.equals(""))) {
+                    line = str.split(" ");
+                    if (queryId.equals(line[0])) {
+                        counter++;
+                        this.resultContent.add("\t" + line[2] + " " + line[3] + "  ->"+ docsEntitiesHash.get(line[2]));
+                    } else {
+                        if (numOfQueries > 0)
+                            resultContent.add("Total Documents: " + counter + System.lineSeparator());  //for prev query
+
+                        queryId = line[0];
+                        counter = 1;
+                        numOfQueries++;
+                        resultContent.add(queryId);
+                        this.resultContent.add("\t" + line[2] + " " + line[3] + "  ->"+ docsEntitiesHash.get(line[2]));
+                    }
+                }
+                resultContent.add("Total Documents: " + counter + System.lineSeparator());  //for last query
+                brResults.close();
+
+
+
+            }
+            //present in window
+            FXMLLoader fxmlLoader1 = new FXMLLoader(getClass().getResource("results.fxml"));
+            Parent root = null;
+            root = fxmlLoader1.load();
+
+            Stage secondaryStage = new Stage();
+            secondaryStage.setTitle("Search Results");
+            Scene scene = new Scene(root, 700, 600);
+            secondaryStage.setScene(scene);
+            secondaryStage.show();
+
+
+
+
+            listView_result = (javafx.scene.control.ListView) scene.lookup("#result_listView");
+            listView_result.setItems(resultContent);
+
+
+        }catch (IOException e){
+            e.printStackTrace();
         }
-
-
     }
+}
 
-    }
+
+
+
+
+
+
+
 

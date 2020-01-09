@@ -2,6 +2,9 @@ package sample.Model;
 
 import java.util.*;
 
+/**
+ * Structure that holds Query' relevant docs and their score.
+ */
 public class RankedDocumentsStructure {
     public String queryId;
     public HashMap<String, Double> documents = new HashMap<>();
@@ -48,6 +51,7 @@ public class RankedDocumentsStructure {
 
     /**
      * place only top 50 relevant docs in 'documents'
+     * sort them from higher score to lower
      */
     public void onlyBest50(){
         List<Double> scores = new ArrayList<>(); //contain all scores from documents.
@@ -65,7 +69,7 @@ public class RankedDocumentsStructure {
             Pair pair=new Pair (key,curScore);
             topRankedDocs.add(pair);
         }
-         Collections.sort(topRankedDocs,new rankingComperaor());
+         Collections.sort(topRankedDocs,new scoreComparator());
 
     }
 
@@ -94,9 +98,12 @@ public class RankedDocumentsStructure {
         }
     }
 
-    class rankingComperaor implements Comparator<Pair> {
+    /**
+     * compere to relevant doc by their score.
+     */
+    class scoreComparator implements Comparator<Pair> {
         /**
-         *  compares between two strings according to CASE_INSENSITIVE_ORDER, default by Java.
+         *  compere to relevant doc by their score. higher score wins.
          * @param o1 - String
          * @param o2 - String
          * @return int [>1,0,<-1]
