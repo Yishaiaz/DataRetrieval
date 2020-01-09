@@ -198,7 +198,15 @@ public class Ranker {
      * @return Map<Pair<String, String>, ArrayList>
      */
     private Map<Pair<String, String>, ArrayList> collectTermToDocData(String termIdentifier){
-        long pointerToByteOffset = this.dictionaryTermsAndOffsetPointerInMemoryHash.get(StringUtils.lowerCase(StringUtils.removeEnd(termIdentifier, " ")));
+        long pointerToByteOffset=0;
+
+            if (dictionaryTermsAndOffsetPointerInMemoryHash.containsKey(termIdentifier))
+             pointerToByteOffset = this.dictionaryTermsAndOffsetPointerInMemoryHash.get(StringUtils.lowerCase(StringUtils.removeEnd(termIdentifier, " ")));
+
+            else
+                pointerToByteOffset=-1;
+
+
         if(pointerToByteOffset<0){
             return null;
         }
