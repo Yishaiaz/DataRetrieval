@@ -52,6 +52,12 @@ public class Controller extends Observable implements Observer {
                 model.setIsWithSemantic(withSemantic);
                 model.search(queryPath);
                 break;
+            case "updateStemming":
+                model.withStemming=true;
+                break;
+            case "updateNoStemming":
+                model.withStemming=false;
+                break;
             case "searchFreeTyping":
                 try {
                     model.setIsWithSemantic(withSemantic);

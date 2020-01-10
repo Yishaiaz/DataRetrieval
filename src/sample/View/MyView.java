@@ -388,6 +388,11 @@ public class MyView {
                 alert.setContentText("For searching need to fill 'free typing search' OR insert path for query file. not both.");
                 alert.showAndWait();
             } else if (!txtField_queryPath.getText().equals("")) {
+                if (stemming_cp.isSelected()) {
+                    controller.update(controller, "updateStemming");
+                } else {
+                    controller.update(controller, "updateNoStemming");
+                }
                 controller.update(controller, "corpusPath2");
                 controller.update(controller, "postingFilesPath");
                 String queryPath = txtField_queryPath.getText();
@@ -403,6 +408,11 @@ public class MyView {
                 results_btn.setDisable(false);
 
             } else if (!txtField_freeSearch.getText().equals("")) {
+                if (stemming_cp.isSelected()) {
+                    controller.update(controller, "updateStemming");
+                } else {
+                    controller.update(controller, "updateNoStemming");
+                }
                 controller.update(controller, "corpusPath2");
                 controller.update(controller, "postingFilesPath");
                 controller.setFreeTypingQuery(txtField_freeSearch.getText());

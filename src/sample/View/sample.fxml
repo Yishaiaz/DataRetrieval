@@ -16,7 +16,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<GridPane alignment="center" hgap="10" prefHeight="600.0" prefWidth="900.0" vgap="10" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.View.MyView">
+<GridPane alignment="center" hgap="10" prefHeight="600.0" prefWidth="900.0" vgap="10" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.View.MyView">
    <children>
       <BorderPane prefHeight="600.0" prefWidth="900.0">
          <left>
@@ -104,7 +104,6 @@
                   <TextField fx:id="txtField_freeSearch" layoutX="195.0" layoutY="430.0" prefHeight="26.0" prefWidth="618.0" />
                   <CheckBox fx:id="cb_searchEntities" layoutX="37.0" layoutY="489.0" mnemonicParsing="false" text="Search Entities" />
                   <CheckBox fx:id="cb_semantic" layoutX="41.0" layoutY="517.0" mnemonicParsing="false" text="Semantic Treatment" />
-                  <CheckBox fx:id="cb_clickstream" layoutX="41.0" layoutY="550.0" mnemonicParsing="false" text="ClickStream Data" />
                   <Button fx:id="search_btn" layoutX="228.0" layoutY="514.0" mnemonicParsing="false" onAction="#search" prefHeight="41.0" prefWidth="96.0" text="Search">
                      <font>
                         <Font name="System Bold Italic" size="12.0" />

@@ -7,6 +7,7 @@ import java.util.Observable;
  * model according MVC
  */
 public class MyModel extends Observable {
+    public boolean withStemming;
     CorpusHandler corpusHandler;
     public Boolean withSemantic;
     private String resultPath;
@@ -43,11 +44,11 @@ public class MyModel extends Observable {
     }
 
     public void search(String queryPath) {
-        corpusHandler.search(queryPath,withSemantic,resultPath);
+        corpusHandler.search(queryPath,withSemantic,resultPath,withStemming);
     }
 
     public void searchFreeTyping(String freeTypingQuery) throws Exception {
-        corpusHandler.searchFreeTyping(freeTypingQuery,withSemantic,resultPath);
+        corpusHandler.searchFreeTyping(freeTypingQuery,withSemantic,resultPath,withStemming);
     }
 
     public void setIsWithSemantic(Boolean withSemantic) {

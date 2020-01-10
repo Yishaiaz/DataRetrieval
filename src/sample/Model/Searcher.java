@@ -42,7 +42,12 @@ public class Searcher {
     public void search(Document query, boolean isStemming,Boolean withSemantic) {
         /** will hold the result ->relevant documents in decreasing order.*/
         RankedDocumentsStructure rankedDocumentsStructure ;
-        String pathToDocsInfo = Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoNoStemming.txt";
+        String pathToDocsInfo="";
+        if (isStemming==false)
+         pathToDocsInfo = Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoNoStemming.txt";
+        else{
+             pathToDocsInfo = Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoStemming.txt";
+        }
         long numOfDocs = 0;
 
         try {

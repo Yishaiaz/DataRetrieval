@@ -133,7 +133,7 @@ public class CorpusHandler {
         return stopWords;
     }
 
-    public void search(String queryPath,Boolean withSemantic,String resultPath){
+    public void search(String queryPath,Boolean withSemantic,String resultPath,boolean isStemming){
         try {
             readFile= new ReadFile(corpusPath,stopWords,months,isStemming,postingFilesPath,resultPath);
             readFile.prepareDocOfQueriesToParse(queryPath,withSemantic);
@@ -143,7 +143,7 @@ public class CorpusHandler {
         }
     }
 
-    public void searchFreeTyping(String query,Boolean withSemantic,String resultPath)  {
+    public void searchFreeTyping(String query,Boolean withSemantic,String resultPath,boolean isStemming)  {
         try {
             readFile= new ReadFile(corpusPath,stopWords,months,isStemming,postingFilesPath,resultPath);
             readFile.prepareFreeTypingQueryParse(query,withSemantic);
