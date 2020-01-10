@@ -478,6 +478,7 @@ public class MyView {
                 HashMap<String, String> docsEntitiesHash = new HashMap<>();
                 while ((lineOfEntitiesDoc = brEntities.readLine()) != null && (!lineOfEntitiesDoc.equals(""))) {
                     line = lineOfEntitiesDoc.split(Pattern.quote("|"));
+                    if(line.length==2)
                     docsEntitiesHash.put(line[0],line[1]);
                 }
                 brEntities.close();
