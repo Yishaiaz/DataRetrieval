@@ -9,7 +9,7 @@ import java.util.Observable;
 public class MyModel extends Observable {
     public boolean withStemming;
     CorpusHandler corpusHandler;
-    public Boolean withSemantic;
+    public int withSemantic;
     private String resultPath;
 
     /**
@@ -51,7 +51,7 @@ public class MyModel extends Observable {
         corpusHandler.searchFreeTyping(freeTypingQuery,withSemantic,resultPath,withStemming);
     }
 
-    public void setIsWithSemantic(Boolean withSemantic) {
+    public void setIsWithSemantic(int withSemantic) {
         this.withSemantic=withSemantic;
     }
 
