@@ -40,7 +40,8 @@ public class MyView {
     public javafx.scene.control.Button btn_parse;
     public javafx.scene.control.CheckBox stemming_cp;
     public javafx.scene.control.CheckBox cb_searchEntities;
-    public javafx.scene.control.CheckBox cb_semantic;
+    public javafx.scene.control.CheckBox cb_semanticOnline;
+    public javafx.scene.control.CheckBox cb_semanticOffline;
     public javafx.scene.control.TextField txtField_postingFilesInput;
     public javafx.scene.control.TextField txtField_corpusPath;
     public javafx.scene.control.TextField txtField_queryPath;
@@ -397,7 +398,12 @@ public class MyView {
                 controller.update(controller, "postingFilesPath");
                 String queryPath = txtField_queryPath.getText();
                 controller.setQueryPath(queryPath);
-                controller.setIsWithSemantic(cb_semantic.isSelected());
+                if (!cb_semanticOffline.isSelected() && !cb_semanticOnline.isSelected())
+                    controller.setIsWithSemantic(0);
+                else if (cb_semanticOnline.isSelected())
+                controller.setIsWithSemantic(1);
+                else if ((cb_semanticOffline.isSelected()))
+                    controller.setIsWithSemantic(2);
                 controller.update(controller, "search");
 
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -416,7 +422,12 @@ public class MyView {
                 controller.update(controller, "corpusPath2");
                 controller.update(controller, "postingFilesPath");
                 controller.setFreeTypingQuery(txtField_freeSearch.getText());
-                controller.setIsWithSemantic(cb_semantic.isSelected());
+                if (!cb_semanticOffline.isSelected() && !cb_semanticOnline.isSelected())
+                    controller.setIsWithSemantic(0);
+                else if (cb_semanticOnline.isSelected())
+                    controller.setIsWithSemantic(1);
+                else if ((cb_semanticOffline.isSelected()))
+                    controller.setIsWithSemantic(2);
                 controller.update(controller, "searchFreeTyping");
 
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -532,6 +543,20 @@ public class MyView {
         }catch (IOException e){
             e.printStackTrace();
         }
+    }
+
+    public void semanticTypesOnline(){
+        if (cb_semanticOffline.isSelected())
+            cb_semanticOffline.setSelected(false);
+
+        cb_semanticOnline.setSelected(true);
+    }
+
+    public void semanticTypesOffline(){
+        if (cb_semanticOnline.isSelected())
+            cb_semanticOnline.setSelected(false);
+
+        cb_semanticOffline.setSelected(true);
     }
 }
 

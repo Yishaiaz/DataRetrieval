@@ -17,7 +17,8 @@ public class Controller extends Observable implements Observer {
     public String queryPath;
     public String freeTypingQuery;
     public Boolean withStemming;
-    public Boolean withSemantic;
+   // public Boolean withSemantic;
+    public int withSemantic;
     private String resultPath;
 
     public Controller(MyModel model, MyView view){
@@ -91,7 +92,7 @@ public class Controller extends Observable implements Observer {
         this.freeTypingQuery=text;
     }
 
-    public void setIsWithSemantic(boolean selected) {
+    public void setIsWithSemantic(int selected) {
         this.withSemantic=selected;
     }
 

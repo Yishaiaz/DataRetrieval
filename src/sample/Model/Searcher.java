@@ -1,7 +1,6 @@
 package sample.Model;
 
 import com.google.common.io.Resources;
-import com.medallia.word2vec.Word2VecExamples;
 import com.medallia.word2vec.Word2VecModel;
 import org.apache.commons.lang3.text.StrBuilder;
 import org.json.JSONArray;
@@ -42,7 +41,7 @@ public class Searcher {
             this.postingFilesPath = postingFilesPath+File.separator+"stemmingPostingFile.txt";
         }
     }
-    public void search(Document query, boolean isStemming,Boolean withSemantic) {
+    public void search(Document query, boolean isStemming,int withSemantic) {
         /** will hold the result ->relevant documents in decreasing order.*/
         RankedDocumentsStructure rankedDocumentsStructure ;
         String pathToDocsInfo="";
@@ -57,12 +56,17 @@ public class Searcher {
             numOfDocs = Files.lines(Paths.get(pathToDocsInfo)).count();
                 Ranker ranker = new Ranker(dictionaryPath, postingFilesPath, pathToDocsInfo, (int) numOfDocs, 250);
 
-            if (withSemantic) {
-              //  Document queryWithSemantic = useSemanticTreat(query, isStemming);
+                //semantic online
+            if (withSemantic==1) {
+                Document queryWithSemantic = useSemanticTreat(query, isStemming);
+                rankedDocumentsStructure=ranker.rankDocsForQuery(queryWithSemantic.parsedTerms,query.DocNo);
+            }
+            //semantic offline
+                else if (withSemantic==2){
                 Document queryWithSemantic = useSemanticTreatOffline(query, isStemming);
                 rankedDocumentsStructure=ranker.rankDocsForQuery(queryWithSemantic.parsedTerms,query.DocNo);
-
-            } else {//without semantic treat.
+            }
+             else {//without semantic treat.
                 rankedDocumentsStructure = ranker.rankDocsForQuery(query.parsedTerms, query.DocNo);
             }
             rankedDocumentsStructure.onlyBest50(); // leave only best 50 docs.

@@ -16,10 +16,10 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<GridPane alignment="center" hgap="10" prefHeight="600.0" prefWidth="900.0" vgap="10" xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.View.MyView">
+<GridPane alignment="center" hgap="10" prefHeight="600.0" prefWidth="900.0" vgap="10" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.View.MyView">
    <children>
       <BorderPane prefHeight="600.0" prefWidth="900.0">
-         <left>
+         <bottom>
             <AnchorPane prefHeight="600.0" prefWidth="600.0" BorderPane.alignment="CENTER">
                <children>
                   <Button id="btn_browse" fx:id="btn_browse" layoutX="809.0" layoutY="209.0" mnemonicParsing="false" onAction="#chooseCorpusPath" text="Browse">
@@ -102,9 +102,9 @@
                      </font>
                   </Label>
                   <TextField fx:id="txtField_freeSearch" layoutX="195.0" layoutY="430.0" prefHeight="26.0" prefWidth="618.0" />
-                  <CheckBox fx:id="cb_searchEntities" layoutX="37.0" layoutY="489.0" mnemonicParsing="false" text="Search Entities" />
-                  <CheckBox fx:id="cb_semantic" layoutX="41.0" layoutY="517.0" mnemonicParsing="false" text="Semantic Treatment" />
-                  <Button fx:id="search_btn" layoutX="228.0" layoutY="514.0" mnemonicParsing="false" onAction="#search" prefHeight="41.0" prefWidth="96.0" text="Search">
+                  <CheckBox fx:id="cb_searchEntities" layoutX="25.0" layoutY="495.0" mnemonicParsing="false" text="Search Entities" />
+                  <CheckBox fx:id="cb_semanticOnline" layoutX="32.0" layoutY="525.0" mnemonicParsing="false" onAction="#semanticTypesOnline" text="Semantic Treatment Online" />
+                  <Button fx:id="search_btn" layoutX="276.0" layoutY="513.0" mnemonicParsing="false" onAction="#search" prefHeight="41.0" prefWidth="96.0" text="Run">
                      <font>
                         <Font name="System Bold Italic" size="12.0" />
                      </font>
@@ -119,7 +119,7 @@
                         <Font name="System Bold" size="14.0" />
                      </font>
                   </Label>
-                  <Button fx:id="results_btn" disable="true" layoutX="356.0" layoutY="513.0" mnemonicParsing="false" onAction="#presentSearchResults" prefHeight="42.0" prefWidth="136.0" text="Present Results">
+                  <Button fx:id="results_btn" disable="true" layoutX="382.0" layoutY="513.0" mnemonicParsing="false" onAction="#presentSearchResults" prefHeight="42.0" prefWidth="136.0" text="Present Results">
                      <font>
                         <Font name="System Bold Italic" size="12.0" />
                      </font>
@@ -135,9 +135,10 @@
                         <Font name="System Bold" size="12.0" />
                      </font>
                   </Button>
+                  <CheckBox fx:id="cb_semanticOffline" layoutX="32.0" layoutY="555.0" mnemonicParsing="false" onAction="#semanticTypesOffline" text="Semantic Treatment Offline" />
                </children>
             </AnchorPane>
-         </left>
+         </bottom>
       </BorderPane>
    </children>
    <columnConstraints>

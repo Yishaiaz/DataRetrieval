@@ -114,7 +114,7 @@ public class ReadFile {
      * @param queryPath
      * @throws Exception
      */
-    public void prepareDocOfQueriesToParse(String queryPath,Boolean withSemantic) throws Exception {
+    public void prepareDocOfQueriesToParse(String queryPath,int withSemantic) throws Exception {
         BufferedReader br = null;
         StringBuilder fullDocStringBuilder = new StringBuilder();
         br = new BufferedReader(new InputStreamReader(new FileInputStream(queryPath), "UTF-8"));
@@ -144,7 +144,7 @@ public class ReadFile {
 
     }
 
-    public void prepareFreeTypingQueryParse(String query,Boolean withSemantic) {
+    public void prepareFreeTypingQueryParse(String query,int withSemantic) {
         try {
             Document queryDoc = null;
             queryDoc = this.parser.Parse(query, true);
