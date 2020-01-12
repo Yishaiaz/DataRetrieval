@@ -53,7 +53,6 @@ public class Main extends Application {
     public static void main(String[] args) {
   launch(args);
 
-
 //        DictionaryParser dp= new DictionaryParser("d:\\documents\\users\\benbsaha\\Downloads\\post","d:\\documents\\users\\benbsaha\\Downloads\\corpus",false);
 //     dp.run();
 //     System.exit(0);

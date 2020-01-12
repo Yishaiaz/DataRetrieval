@@ -96,12 +96,38 @@ public class DocParser implements IParser{
 
         else if (isQuery){
 
-            String queryId= getQueryData(fullDoc);
-            doc=new Document(queryId,"","",String.valueOf(fullDoc.length()));
+            String[] queryData= getQueryData(fullDoc);
+            doc=new Document(queryData[0],"",queryData[1],String.valueOf(fullDoc.length()));
 
             //only if query not typed - cut according tags.
-            if (!StringUtils.startsWith(queryId, "free")){
-                fullDoc = StringUtils.substring(fullDoc, StringUtils.indexOf(fullDoc, "<title>") + 7, StringUtils.indexOf(fullDoc, "<desc>"));
+            if (!StringUtils.startsWith(queryData[0], "free")){
+//                fullDoc = StringUtils.substring(fullDoc, StringUtils.indexOf(fullDoc, "<title>") + 7, StringUtils.indexOf(fullDoc, "<desc>"));
+
+
+                // adding query title as a whole term
+                if (!StringUtils.isEmpty(queryData[1])) {
+                    StrBuilder temp = new StrBuilder();
+                    String[] clean = initialBadCharacterRemoval(queryData[1].split(" "));
+                    for (String word :
+                            clean) {
+                        temp.append(word);
+                        temp.append(" ");
+                    }
+                    queryData[1] = temp.toString();
+                    termHashMapDataStructure.insert(queryData[1], termLocationIterator, 2);
+                    termLocationIterator += 1;
+                    // inserting single parts of the title as seperate terms
+                    for (String word :
+                            clean) {
+                        if (StringUtils.isAlphanumeric(word)) {
+                            termHashMapDataStructure.insert(word, 1, 1.7);
+                        }
+                    }
+                }
+
+                fullDoc = StringUtils.substring(fullDoc, StringUtils.indexOf(fullDoc, "<desc>") + 20, StringUtils.indexOf(fullDoc, "<narr>"));
+   //             System.out.println(fullDoc);
+
             }
         }
 
@@ -694,9 +720,12 @@ public class DocParser implements IParser{
      * @param fullDoc
      * @return
      */
-    private String getQueryData(String fullDoc) {
+    private String[] getQueryData(String fullDoc) {
         //QueryId tag info
-        String queryId;
+        String[] queryData=new String[3];
+        String queryId="";
+        String title="";
+        // extract queryId
         if (StringUtils.contains(fullDoc,"<num>")) {
             int startIndex = StringUtils.indexOf(fullDoc, "<num>") + 13;
             int endIndex = StringUtils.indexOf(fullDoc, "<title>");
@@ -705,12 +734,24 @@ public class DocParser implements IParser{
             } else {
                 queryId = StringUtils.substring(fullDoc, startIndex, endIndex).replace(" ", "");
             }
+            //extract title
+            int startIndexTitle = StringUtils.indexOf(fullDoc, "<title>") + 8;
+            int endIndexTitle = StringUtils.indexOf(fullDoc, "<desc>");
+            if (endIndex < 0 || startIndex - 13 < 0) {
+                title = "";
+            } else {
+                title = StringUtils.substring(fullDoc, startIndexTitle, endIndexTitle);
+            }
         }
         else{
             queryId="free"+String.valueOf(typedQueryIdIndex);
             typedQueryIdIndex++;
         }
-        return queryId;
+        queryData[0]=queryId;
+        queryData[1]=title;
+
+
+        return queryData;
     }
 
     /**
