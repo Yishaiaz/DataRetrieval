@@ -25,7 +25,7 @@ public class Searcher {
     String dictionaryPath;
     String postingFilesPath;
     ArrayList<String> dictionaryContent = new ArrayList<>();
-    private int Max_Additional_Terms_API = 4;
+    private int Max_Additional_Terms_API = 2;
     private boolean isStemming=false;
 
     public Searcher(String corpusPath, String postingFilesPath,boolean isStemming,String resultPath) {
