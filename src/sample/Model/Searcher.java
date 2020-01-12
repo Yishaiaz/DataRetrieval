@@ -1,6 +1,5 @@
 package sample.Model;
 
-import com.google.common.io.Resources;
 import com.medallia.word2vec.Word2VecModel;
 import org.apache.commons.lang3.text.StrBuilder;
 import org.json.JSONArray;
@@ -72,7 +71,7 @@ public class Searcher {
             rankedDocumentsStructure.onlyBest50(); // leave only best 50 docs.
             writeResultsToFile(rankedDocumentsStructure); //write final results to file
         }catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
@@ -107,30 +106,37 @@ public class Searcher {
         this.isStemming = isStemming;
         readDictionary(); //read dictionary to memory.
         ArrayList<String> termsFromAPI = new ArrayList<>(); //hold all terms from API
-        String pathToModelFiletxt= Resources.getResource("word2vec.c.output.model.txt").getPath();
+        String pathToModelFiletxt= Paths.get("").toAbsolutePath()+File.separator+ "word2vec.c.output.model.txt";
         Word2VecModel semanticModel=Word2VecModel.fromTextFile(new File(pathToModelFiletxt));
 
         for (String key : query.parsedTerms.termsEntries.keySet()) {
             if (key.contains(" ")) //we will not check terms contain more then one word
                 continue;
             com.medallia.word2vec.Searcher semanticSearcher = semanticModel.forSearch();
-            List<com.medallia.word2vec.Searcher.Match> matches = semanticSearcher.getMatches(key, 3);
-            for (com.medallia.word2vec.Searcher.Match match : matches) {
-                String similarWord = match.match();
-                double distance=match.distance();
-                if (distance>0.95){
-                    if (isStemming) similarWord = stem(similarWord);
-                    boolean isExistInDic = dictionaryContent.contains(similarWord);
-                    if (!isExistInDic)  // try capital term
-                        isExistInDic = dictionaryContent.contains(similarWord.toUpperCase());
-                    if (!isExistInDic)// the term isn't in the corpus
-                        continue;
-
-                    //check if new term not already in query' terms or in API array.
-                    if (query.parsedTerms.termsEntries.get(similarWord) == null && !termsFromAPI.contains(similarWord)) {
-                        termsFromAPI.add(similarWord);
-                    } else continue;
+            List<com.medallia.word2vec.Searcher.Match> matches = null;
+            try {
+                matches = semanticSearcher.getMatches(key, 3);
+            } catch (com.medallia.word2vec.Searcher.UnknownWordException e) {
+               // System.out.println("word- " + key);
             }
+            if (matches != null) {
+                for (com.medallia.word2vec.Searcher.Match match : matches) {
+                    String similarWord = match.match();
+                    double distance = match.distance();
+                    if (distance > 0.95) {
+                        if (isStemming) similarWord = stem(similarWord);
+                        boolean isExistInDic = dictionaryContent.contains(similarWord);
+                        if (!isExistInDic)  // try capital term
+                            isExistInDic = dictionaryContent.contains(similarWord.toUpperCase());
+                        if (!isExistInDic)// the term isn't in the corpus
+                            continue;
+
+                        //check if new term not already in query' terms or in API array.
+                        if (query.parsedTerms.termsEntries.get(similarWord) == null && !termsFromAPI.contains(similarWord)) {
+                            termsFromAPI.add(similarWord);
+                        } else continue;
+                    }
+                }
             }
         }
 
