@@ -53,7 +53,8 @@ public class BM25RankingAlgorithm extends IRankingAlgorithm{
         for (int i = 0; i < allDocsToTermsValues.size(); i++) {
             String docName = allDocsToTermsValues.get(i).left;
             double[] docToTermValues = allDocsToTermsValues.get(i).right;
-            double docNewScore = this.calcSingleTermScoreForDoc((int)docToTermValues[0],
+            double docNewScore = this.calcSingleTermScoreForDoc(
+                    (int)docToTermValues[0],
                     docToTermValues[1],
                     docToTermValues[2],
                     (int)docToTermValues[3],
@@ -72,16 +73,17 @@ public class BM25RankingAlgorithm extends IRankingAlgorithm{
      * calculates using private functions the Idf score
      * and returns its multiplications with the freq result.
      * @param termFreqInDoc - int
-     * @param kParam - double our term-doc specific weight
+     * @param termWeight - double our term-doc specific weight
      * @param bParam - double - a const
      * @param numberOfDocContainTerm - int
      * @param docLength -
      * @return
      */
-    private double calcSingleTermScoreForDoc(int termFreqInDoc, double kParam, double bParam, int numberOfDocContainTerm, int docLength){
+    private double calcSingleTermScoreForDoc(int termFreqInDoc, double termWeight, double bParam, int numberOfDocContainTerm, int docLength){
+        double kParam = 1.4;
         double idfRes = calcIDF(numberOfDocContainTerm);
-        double freq = ((termFreqInDoc) *(kParam + 1)/ (termFreqInDoc + kParam*((1-bParam)+bParam*(docLength/this.avgDocLength))));
-        return idfRes > 0 ? idfRes * freq : freq;
+        double freq = (0.05 * termWeight)*((termFreqInDoc) *(kParam + 1)/ (termFreqInDoc + kParam*((1-bParam)+bParam*(docLength/this.avgDocLength))));
+        return idfRes == 0 ? freq : idfRes * freq;
 
     }
 
