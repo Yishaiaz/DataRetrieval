@@ -66,10 +66,10 @@ public class ReadFile {
                         Document doc = this.parser.Parse(fullDocStringBuilder.toString(),false);
                         File docInfo=null;
                         if (withStemming) {
-                            docInfo = new File(corpusPath + File.separator + "DocsInfoStemming.txt");
+                            docInfo = new File(this.corpusPath + File.separator + "DocsInfoStemming.txt");
                         }
                         else{
-                            docInfo=new File(corpusPath + File.separator + "DocsInfoNoStemming.txt");
+                            docInfo=new File(this.corpusPath + File.separator + "DocsInfoNoStemming.txt");
                         }
 
 
