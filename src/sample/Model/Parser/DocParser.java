@@ -127,9 +127,14 @@ public class DocParser implements IParser{
 
 
 //                fullDoc = StringUtils.substring(fullDoc, StringUtils.indexOf(fullDoc, "<desc>") + 20, StringUtils.indexOf(fullDoc, "<narr>"));
+                String full=fullDoc;
 
                 ////*** only title
                 fullDoc = StringUtils.substring(fullDoc, StringUtils.indexOf(fullDoc, "<title>") + 8, StringUtils.indexOf(fullDoc, "<desc>"));
+                StrBuilder str=new StrBuilder() ;
+                String nar=StringUtils.substring(full,StringUtils.indexOf(full,"<narr>")+17,StringUtils.indexOf(full,"</top>"));
+
+        fullDoc=fullDoc+" "+nar;
 
    //             System.out.println(fullDoc);
 
@@ -727,7 +732,7 @@ public class DocParser implements IParser{
      */
     private String[] getQueryData(String fullDoc) {
         //QueryId tag info
-        String[] queryData=new String[2];
+        String[] queryData=new String[3];
         String queryId="";
         String title="";
         // extract queryId
