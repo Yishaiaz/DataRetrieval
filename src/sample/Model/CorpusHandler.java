@@ -83,13 +83,13 @@ public class CorpusHandler {
         this.isStemming=withStemming;
         long start_time = System.currentTimeMillis();
          readFile = new ReadFile(this.corpusPath, this.stopWords, this.months,withStemming,postingFilesPath,"");
-        File docsEntities = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "docsEntities");
+        File docsEntities = new File(this.corpusPath + File.separator + "docsEntities");
 
         if (withStemming) {
-            File docsInfoFile = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoStemming.txt");
+            File docsInfoFile = new File(this.corpusPath + File.separator + "DocsInfoStemming.txt");
         }
      else if (!withStemming){
-            File docsInfoFile = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoNoStemming");
+            File docsInfoFile = new File(this.corpusPath + File.separator + "DocsInfoNoStemming");
             }
 
         for (String path : filesPaths) {

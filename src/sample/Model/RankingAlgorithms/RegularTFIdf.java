@@ -2,9 +2,12 @@ package sample.Model.RankingAlgorithms;
 
 import org.apache.commons.lang3.Pair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
-public class BM25RankingAlgorithm extends IRankingAlgorithm{
+
+public class RegularTFIdf extends IRankingAlgorithm{
     /**
      * BM25RankingAlgorithm implements the interface IRankingAlgorithm.
      * it is an implementation of the OKAPI BM25 formula to calculate documents
@@ -22,7 +25,7 @@ public class BM25RankingAlgorithm extends IRankingAlgorithm{
         FLOORCONST,
         NONNEGATIVE
     }
-    private IdfFormula useFormala;
+    private sample.Model.RankingAlgorithms.BM25RankingAlgorithm.IdfFormula useFormala;
     private double possibleConst;
 
     /**
@@ -32,7 +35,7 @@ public class BM25RankingAlgorithm extends IRankingAlgorithm{
      * @param avgDocLength
      * @param idfFormula
      */
-    public BM25RankingAlgorithm(int totalNumOfDocs, double avgDocLength, IdfFormula idfFormula) {
+    public RegularTFIdf(int totalNumOfDocs, double avgDocLength, sample.Model.RankingAlgorithms.BM25RankingAlgorithm.IdfFormula idfFormula) {
         this.totalNumOfDocs = totalNumOfDocs;
         this.avgDocLength = avgDocLength;
         this.useFormala = idfFormula;
@@ -50,15 +53,15 @@ public class BM25RankingAlgorithm extends IRankingAlgorithm{
     @Override
     public Map<String, Double> rank(ArrayList<Pair<String, double[]>> allDocsToTermsValues) {
         Map<String, Double> docScores = new HashMap<String, Double>();
-        double bParam = 0.3; // best b = 0.3
-        double kParam = 1.4; // 1 < kParam < Math.inifinity
-        double termWeightInFormula = 0.1;
+        double bParam = 0.9; // 1 > bParam > 0
+        double kParam = 1.8; // 1 < kParam < Math.inifinity
+        double termWeightInFormula = 0.15;
         double tfIDFWeightInFormula = 1 - termWeightInFormula;
         for (int i = 0; i < allDocsToTermsValues.size(); i++) {
             String docName = allDocsToTermsValues.get(i).left;
             double[] docToTermValues = allDocsToTermsValues.get(i).right;
-            double termFreqInDoc = docToTermValues[0]; //term_freq
-            double termWeightInDoc = docToTermValues[1]/2; // term weight
+            double termFreqInDoc = (int)docToTermValues[0]; //term_freq
+            double termWeightInDoc = docToTermValues[1]; // term weight
             double numberOfDocsContainingTerm = docToTermValues[3]; // number of docs containing term
             double docLength = docToTermValues[4];
             double curr_score = 0;
@@ -68,29 +71,14 @@ public class BM25RankingAlgorithm extends IRankingAlgorithm{
                 curr_score = 0;
             }
 
-            double innerNom = (kParam+1)*termFreqInDoc;
-            double innerDinom = termFreqInDoc + kParam*(1- bParam + bParam* docLength/this.avgDocLength);
+            double innerNom = termFreqInDoc;
+            double innerDinom = docLength/this.avgDocLength;
 
-            curr_score += termWeightInFormula*(termWeightInDoc)+tfIDFWeightInFormula*((innerNom / innerDinom) *
-                    Math.log10((this.totalNumOfDocs-numberOfDocsContainingTerm +0.5)/(numberOfDocsContainingTerm+0.5)));
+            curr_score += termWeightInFormula*(termWeightInDoc)+tfIDFWeightInFormula*(termFreqInDoc* Math.log10((this.totalNumOfDocs)/(numberOfDocsContainingTerm+1)));
             docScores.put(docName, curr_score);
         }
 
         return docScores;
-        // result= 108 ; params: b = 0.5,k = 1.4, weightInFormula=0.1
-        // result= 106 ; params: b = 0.75,k = 1.4, weightInFormula=0.1
-        // result=  108; params: b = 0.1,k = 1.4, weightInFormula=0.1
-        // result=  111; params: b = 0.3,k = 1.4, weightInFormula=0.1
-        // result=  109; params: b = 0.4,k = 1.4, weightInFormula=0.1
-
-        // result=  109; params: b = 0.3,k = 1.2, weightInFormula=0.1
-        // result=  109; params: b = 0.3,k = 1.6, weightInFormula=0.1
-        // result=  105; params: b = 0.3,k = 4, weightInFormula=0.1
-        // result=  109; params: b = 0.3,k = 2, weightInFormula=0.1
-        // result=  111; params: b = 0.3,k = 1.4, weightInFormula=0
-        // result=  111; params: b = 0.3,k = 1.4, weightInFormula=0.15 with divide by 2
-        //result = 111; params: b = 0.3,k = 1.4, weightInFormula=0.15 with divide by 2 removed. removed the 0.5 from the idf
-        //result = ; params: b = 0.3,k = 1.4, weightInFormula=0.15 with divide by 2 removed. regular idf => N/n(qi)
     }
 
     /**
@@ -112,3 +100,4 @@ public class BM25RankingAlgorithm extends IRankingAlgorithm{
     }
 
 }
+

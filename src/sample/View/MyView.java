@@ -166,9 +166,9 @@ public class MyView {
         try {
             Path pathToDocsInfo = null;
             if (stemming_cp.isSelected()) {
-                pathToDocsInfo = Paths.get(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoStemming.txt");
+                pathToDocsInfo = Paths.get(this.txtField_corpusPath.getText() + File.separator + "DocsInfoStemming.txt");
             } else {
-                pathToDocsInfo = Paths.get(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoNoStemming.txt");
+                pathToDocsInfo = Paths.get(this.txtField_corpusPath.getText() + File.separator + "DocsInfoNoStemming.txt");
             }
             long numOfDocs = Files.lines(pathToDocsInfo).count();
 
@@ -209,12 +209,12 @@ public class MyView {
         txtField_postingFilesInput.clear();
         txtField_corpusPath.clear();
         stemming_cp.setSelected(false);
-        File docInfoStemming = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoStemming.txt");
+        File docInfoStemming = new File(this.txtField_corpusPath.getText() + File.separator + "DocsInfoStemming.txt");
         if (docInfoStemming.exists())
             docInfoStemming.delete();
 
         //delete docs info
-        File docInfoNoStemming = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoNoStemming.txt");
+        File docInfoNoStemming = new File(this.txtField_corpusPath.getText() + File.separator + "DocsInfoNoStemming.txt");
         if (docInfoNoStemming.exists())
             docInfoNoStemming.delete();
 
@@ -480,7 +480,7 @@ public class MyView {
 
                 File docsEntities;
 
-                docsEntities = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "docsEntities.txt");
+                docsEntities = new File(txtField_corpusPath.getText()+ File.separator + "docsEntities.txt");
 
 
                 //read all docs and their entities to hash map
