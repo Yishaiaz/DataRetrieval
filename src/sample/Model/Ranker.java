@@ -31,7 +31,7 @@ public class Ranker {
     private HashMap<String, Integer> docsMaxTFMemoryHash = new HashMap<>();// contains docID, Doc max tf integer
     private HashMap<String, Map <Pair<String, String>, ArrayList>> termsMapToDocsDataInMemoryHash = new HashMap<>();// contains docID, Doc max tf integer
     private HashMap<String, Long> dictionaryTermsAndOffsetPointerInMemoryHash = new HashMap<>();
-    private HashMap<String, Integer> dictionaryDocsMaxTFPointerInMemoryHash = new HashMap<>();
+    private HashMap<String, Integer> dictionaryDocsLengthPointerInMemoryHash = new HashMap<>();
     private BufferedReader termDictionaryReader;
     private int postingLineCtr = 0;
 
@@ -86,9 +86,9 @@ public class Ranker {
             String[] lineData = line.split(" ");
             try{
                 String docName = lineData[0];
-                int toSplitBy = lineData.length -1;
+                int toSplitBy = lineData.length - 2;
                 int termPostingLine = Integer.parseInt(lineData[toSplitBy]);
-                this.dictionaryDocsMaxTFPointerInMemoryHash.put(StringUtils.lowerCase(StringUtils.removeEnd(docName, " ")), termPostingLine);
+                this.dictionaryDocsLengthPointerInMemoryHash.put(StringUtils.lowerCase(StringUtils.removeEnd(docName, " ")), termPostingLine);
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -111,6 +111,7 @@ public class Ranker {
         Iterator<Entry<String, TermHashMapEntry>> iterator = queryTerms.termsEntries.entrySet().iterator();
         String[] termIDs = new String[queryTerms.termsEntries.size()];
         int i = 0;
+        String previousWord="";
         while (iterator.hasNext()) {
             // getting a single entry data
             Map.Entry<String, TermHashMapEntry> singleTerm = (Map.Entry<String, TermHashMapEntry>) iterator.next();
@@ -121,7 +122,7 @@ public class Ranker {
         ArrayList<Map<Pair<String, String>, ArrayList>> termToDocData = collectAllTermsToDocData(termIDs);
         ArrayList<String> allQueryRelatedDocsID = getAllDocsID(termToDocData);
         // preparing all docs to term calculation values
-        IRankingAlgorithm BM25Ranker = new BM25RankingAlgorithm(this.totalNumOfDocs, this.docsAvgLength, BM25RankingAlgorithm.IdfFormula.OKAPIREGULAR);
+        IRankingAlgorithm rankingAlgorithm = new BM25RankingAlgorithm(this.totalNumOfDocs, this.docsAvgLength, BM25RankingAlgorithm.IdfFormula.OKAPIREGULAR);
         ArrayList<Pair<String, double[]>> relatedDocsToTermValues = new ArrayList<>();
         //for each possible term name
         for (int j = 0; j < allQueryRelatedDocsID.size(); j++) {
@@ -139,7 +140,7 @@ public class Ranker {
                 }
             }
         }
-        Map<String, Double> docsRanking = BM25Ranker.rank(relatedDocsToTermValues);
+        Map<String, Double> docsRanking = rankingAlgorithm.rank(relatedDocsToTermValues);
         RankedDocumentsStructure ans = new RankedDocumentsStructure(queryID);
         Set<String> keySet = docsRanking.keySet();
         for (int j = 0; j < docsRanking.size(); j++) {
@@ -225,15 +226,15 @@ public class Ranker {
                 int docTermTf = Integer.parseInt(singleDocData[1]);
                 double termWeightInDoc = Double.parseDouble(singleDocData[2]);
                 ArrayList<Double> valuesOfTermToDoc = new ArrayList<>();
-                valuesOfTermToDoc.add((double)docTermTf); //termFreqInDoc
-                valuesOfTermToDoc.add(termWeightInDoc); //kParam = term weight
-                valuesOfTermToDoc.add(0.75); //bParam - 0.75
-                valuesOfTermToDoc.add((double)numberOfDocContainTerm); //numberOfDocContainTerm - n(qi) counted
-                double docsMaxTF = (double)getDocMaxTF(docID);
-                if(docsMaxTF==-1) {
+                valuesOfTermToDoc.add((double)docTermTf); //termFreqInDoc  0
+                valuesOfTermToDoc.add(termWeightInDoc); //kParam = term weight  1
+                valuesOfTermToDoc.add(0.75); //bParam - 0.75   2
+                valuesOfTermToDoc.add((double)numberOfDocContainTerm); //numberOfDocContainTerm - n(qi) counted 3
+                double docLength = (double) getDocLength(docID);//4
+                if(docLength==-1) {
                     continue;
                 }
-                valuesOfTermToDoc.add(docsMaxTF==-1? 1: docsMaxTF); //docsAvgLength
+                valuesOfTermToDoc.add(docLength==-1? 1: docLength); //docMaxTF
                 docToTerm.put(new Pair<>(docID, termIdentifier), valuesOfTermToDoc);
             }
             // docID - TermID :
@@ -278,7 +279,7 @@ public class Ranker {
 //                        valuesOfTermToDoc.add(termWeightInDoc); //kParam = term weight
 //                        valuesOfTermToDoc.add(0.75); //bParam - 0.75
 //                        valuesOfTermToDoc.add((double)numberOfDocContainTerm); //numberOfDocContainTerm - n(qi) counted
-//                        double docsMaxTF = (double)getDocMaxTF(docID);
+//                        double docsMaxTF = (double)getDocLength(docID);
 //                        valuesOfTermToDoc.add(docsMaxTF==-1? 1: docsMaxTF); //docsAvgLength
 //                        docToTerm.put(new Pair<>(docID, termIdentifier), valuesOfTermToDoc);
 //                    }
@@ -324,11 +325,11 @@ public class Ranker {
      * @param docID - String, the doc's identification string
      * @return
      */
-    private int getDocMaxTF(String docID){
-//        if(this.dictionaryDocsMaxTFPointerInMemoryHash.get(StringUtils.removeEnd(StringUtils.lowerCase(docID), " "))==null){
+    private int getDocLength(String docID){
+//        if(this.dictionaryDocsLengthPointerInMemoryHash.get(StringUtils.removeEnd(StringUtils.lowerCase(docID), " "))==null){
 //            return -1;
 //        }
-        return this.dictionaryDocsMaxTFPointerInMemoryHash.get(StringUtils.removeEnd(StringUtils.lowerCase(docID), " "));
+        return this.dictionaryDocsLengthPointerInMemoryHash.get(StringUtils.removeEnd(StringUtils.lowerCase(docID), " "));
 //        if(this.docsMaxTFMemoryHash.containsKey(docID)){
 //            return this.docsMaxTFMemoryHash.get(docID);
 //        }

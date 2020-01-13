@@ -95,7 +95,12 @@ public class DocParser implements IParser{
         }
 
         else if (isQuery){
-
+            //inserting pairs pf terms from the query
+//            String[] splitQuery = StringUtils.split(fullDoc,' ');
+//            for (int i = 0; i < splitQuery.length-1; i++) {
+//                termHashMapDataStructure.insert(StringUtils.lowerCase(splitQuery[i]+" "+splitQuery[i+1]),i,1);
+//            }
+            //getting query meta data
             String[] queryData= getQueryData(fullDoc);
             doc=new Document(queryData[0],"",queryData[1],String.valueOf(fullDoc.length()));
 
@@ -131,10 +136,10 @@ public class DocParser implements IParser{
 
                 ////*** only title
                 fullDoc = StringUtils.substring(fullDoc, StringUtils.indexOf(fullDoc, "<title>") + 8, StringUtils.indexOf(fullDoc, "<desc>"));
-                StrBuilder str=new StrBuilder() ;
-                String nar=StringUtils.substring(full,StringUtils.indexOf(full,"<narr>")+17,StringUtils.indexOf(full,"</top>"));
+//                StrBuilder str=new StrBuilder() ;
+//                String nar=StringUtils.substring(full,StringUtils.indexOf(full,"<narr>")+17,StringUtils.indexOf(full,"</top>"));
 
-        fullDoc=fullDoc+" "+nar;
+//                fullDoc=fullDoc+" "+nar;
 
    //             System.out.println(fullDoc);
 
