@@ -103,29 +103,34 @@ public class DocParser implements IParser{
             if (!StringUtils.startsWith(queryData[0], "free")){
 //                fullDoc = StringUtils.substring(fullDoc, StringUtils.indexOf(fullDoc, "<title>") + 7, StringUtils.indexOf(fullDoc, "<desc>"));
 
+                ///////***** for extract the description too.
+//                // adding query title as a whole term
+//                if (!StringUtils.isEmpty(queryData[1])) {
+//                    StrBuilder temp = new StrBuilder();
+//                    String[] clean = initialBadCharacterRemoval(queryData[1].split(" "));
+//                    for (String word :
+//                            clean) {
+//                        temp.append(word);
+//                        temp.append(" ");
+//                    }
+//                    queryData[1] = temp.toString();
+//                    termHashMapDataStructure.insert(queryData[1], termLocationIterator, 2);
+//                    termLocationIterator += 1;
+//                    // inserting single parts of the title as seperate terms
+//                    for (String word :
+//                            clean) {
+//                        if (StringUtils.isAlphanumeric(word)) {
+//                            termHashMapDataStructure.insert(word, 1, 1.7);
+//                        }
+//                    }
+//                }
 
-                // adding query title as a whole term
-                if (!StringUtils.isEmpty(queryData[1])) {
-                    StrBuilder temp = new StrBuilder();
-                    String[] clean = initialBadCharacterRemoval(queryData[1].split(" "));
-                    for (String word :
-                            clean) {
-                        temp.append(word);
-                        temp.append(" ");
-                    }
-                    queryData[1] = temp.toString();
-                    termHashMapDataStructure.insert(queryData[1], termLocationIterator, 2);
-                    termLocationIterator += 1;
-                    // inserting single parts of the title as seperate terms
-                    for (String word :
-                            clean) {
-                        if (StringUtils.isAlphanumeric(word)) {
-                            termHashMapDataStructure.insert(word, 1, 1.7);
-                        }
-                    }
-                }
 
-                fullDoc = StringUtils.substring(fullDoc, StringUtils.indexOf(fullDoc, "<desc>") + 20, StringUtils.indexOf(fullDoc, "<narr>"));
+//                fullDoc = StringUtils.substring(fullDoc, StringUtils.indexOf(fullDoc, "<desc>") + 20, StringUtils.indexOf(fullDoc, "<narr>"));
+
+                ////*** only title
+                fullDoc = StringUtils.substring(fullDoc, StringUtils.indexOf(fullDoc, "<title>") + 8, StringUtils.indexOf(fullDoc, "<desc>"));
+
    //             System.out.println(fullDoc);
 
             }
@@ -716,13 +721,13 @@ public class DocParser implements IParser{
     }
 
     /**
-     * extract only queryId
+     * extract only queryId and title
      * @param fullDoc
      * @return
      */
     private String[] getQueryData(String fullDoc) {
         //QueryId tag info
-        String[] queryData=new String[3];
+        String[] queryData=new String[2];
         String queryId="";
         String title="";
         // extract queryId
@@ -734,14 +739,16 @@ public class DocParser implements IParser{
             } else {
                 queryId = StringUtils.substring(fullDoc, startIndex, endIndex).replace(" ", "");
             }
-            //extract title
-            int startIndexTitle = StringUtils.indexOf(fullDoc, "<title>") + 8;
-            int endIndexTitle = StringUtils.indexOf(fullDoc, "<desc>");
-            if (endIndex < 0 || startIndex - 13 < 0) {
-                title = "";
-            } else {
-                title = StringUtils.substring(fullDoc, startIndexTitle, endIndexTitle);
-            }
+
+            //////********extract with description
+//            //extract title
+//            int startIndexTitle = StringUtils.indexOf(fullDoc, "<title>") + 8;
+//            int endIndexTitle = StringUtils.indexOf(fullDoc, "<desc>");
+//            if (endIndex < 0 || startIndex - 13 < 0) {
+//                title = "";
+//            } else {
+//                title = StringUtils.substring(fullDoc, startIndexTitle, endIndexTitle);
+//            }
         }
         else{
             queryId="free"+String.valueOf(typedQueryIdIndex);
@@ -749,8 +756,6 @@ public class DocParser implements IParser{
         }
         queryData[0]=queryId;
         queryData[1]=title;
-
-
         return queryData;
     }
 
