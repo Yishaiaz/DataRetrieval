@@ -74,17 +74,19 @@ public class BM25RankingAlgorithm extends IRankingAlgorithm{
      * and returns its multiplications with the freq result.
      * @param termFreqInDoc - int
      * @param termWeight - double our term-doc specific weight
-     * @param bParam - double - a const
+     * @param bParameter - double - a const
      * @param numberOfDocContainTerm - int
      * @param docLength -
      * @return
      */
-    private double calcSingleTermScoreForDoc(int termFreqInDoc, double termWeight, double bParam, int numberOfDocContainTerm, int docLength){
-        double kParam = 1.4;
+    private double calcSingleTermScoreForDoc(int termFreqInDoc, double termWeight, double bParameter, int numberOfDocContainTerm, int docLength){
+        double kParam = 1.4; // 1.2<kParam <1.5
+        double bParam = 0.75;// const
+        double termWeightInFormula = 0.15;
+        double tfWeightInFormula = 1 - termWeightInFormula;
         double idfRes = calcIDF(numberOfDocContainTerm);
-        double freq = (0.05 * termWeight)*((termFreqInDoc) *(kParam + 1)/ (termFreqInDoc + kParam*((1-bParam)+bParam*(docLength/this.avgDocLength))));
-        return idfRes == 0 ? freq : idfRes * freq;
-
+        double freq = ((termFreqInDoc) *(kParam + 1)/ (termFreqInDoc + kParam*((1-bParam)+bParam*(docLength/this.avgDocLength))));
+        return (termWeightInFormula * termWeight) + tfWeightInFormula*(idfRes*freq);
     }
 
     /**
@@ -96,7 +98,7 @@ public class BM25RankingAlgorithm extends IRankingAlgorithm{
     private double calcIDF(int numberOfDocsContainingTerm){
         switch(this.useFormala){
             case OKAPIREGULAR:
-                return Math.log((this.totalNumOfDocs - numberOfDocsContainingTerm + 0.5)/ (this.totalNumOfDocs + 0.5));
+                return Math.log((numberOfDocsContainingTerm)/ (this.totalNumOfDocs ));
             case FLOORCONST:
                 return Math.max(this.possibleConst, Math.log((this.totalNumOfDocs - numberOfDocsContainingTerm + 0.5)/ (this.totalNumOfDocs + 0.5)));
             case NONNEGATIVE:

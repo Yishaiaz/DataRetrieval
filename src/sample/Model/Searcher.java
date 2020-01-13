@@ -42,6 +42,7 @@ public class Searcher {
     }
     public void search(Document query, boolean isStemming,int withSemantic) {
         /** will hold the result ->relevant documents in decreasing order.*/
+
         RankedDocumentsStructure rankedDocumentsStructure ;
         String pathToDocsInfo="";
         if (isStemming==false)
