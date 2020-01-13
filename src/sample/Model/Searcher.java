@@ -46,9 +46,9 @@ public class Searcher {
         RankedDocumentsStructure rankedDocumentsStructure ;
         String pathToDocsInfo="";
         if (isStemming==false)
-         pathToDocsInfo = Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoNoStemming.txt";
+         pathToDocsInfo = this.corpusPath + File.separator + "DocsInfoNoStemming.txt";
         else{
-             pathToDocsInfo = Paths.get("").toAbsolutePath().toString() + File.separator + "DocsInfoStemming.txt";
+             pathToDocsInfo = this.corpusPath + File.separator + "DocsInfoStemming.txt";
         }
         long numOfDocs = 0;
 
@@ -107,7 +107,7 @@ public class Searcher {
         this.isStemming = isStemming;
         readDictionary(); //read dictionary to memory.
         ArrayList<String> termsFromAPI = new ArrayList<>(); //hold all terms from API
-        String pathToModelFiletxt= Paths.get("").toAbsolutePath()+File.separator+ "word2vec.c.output.model.txt";
+        String pathToModelFiletxt= this.corpusPath+File.separator+ "word2vec.c.output.model.txt";
         Word2VecModel semanticModel=Word2VecModel.fromTextFile(new File(pathToModelFiletxt));
 
         for (String key : query.parsedTerms.termsEntries.keySet()) {

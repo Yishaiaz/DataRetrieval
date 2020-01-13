@@ -25,14 +25,16 @@ public class DocParser implements IParser{
     private HashSet<String> stopWords;
     private HashSet<String> months;
     private Stemmer stemmer;
+    private String corpusPath;
     public static int typedQueryIdIndex=0;
 
 //    private Document doc;
 
-    public DocParser(Boolean wordStemming, HashSet<String> stopWords, HashSet<String> months) {
+    public DocParser(Boolean wordStemming, HashSet<String> stopWords, HashSet<String> months, String corpusPath) {
         this.wordStemming = wordStemming;
         this.stopWords = stopWords;
         this.months = months;
+        this.corpusPath = corpusPath;
         if(this.wordStemming){
             this.stemmer = new Stemmer();
         }
@@ -702,7 +704,7 @@ public class DocParser implements IParser{
                 entities.remove(key);
             }
 
-            File docsEntities = new File(Paths.get("").toAbsolutePath().toString() + File.separator + "docsEntities.txt");
+            File docsEntities = new File(corpusPath+ File.separator + "docsEntities.txt");
 
             FileWriter fw = new FileWriter(docsEntities,true);
             BufferedWriter w = new BufferedWriter(fw);

@@ -79,7 +79,8 @@ public class Ranker {
         }
         bufferedReader.close();
 
-        // gathering MaxTf For each Doc
+        // gathering doc length For each Doc
+
         BufferedReader bufferedReaderForDocsInfo = new BufferedReader(new FileReader(pathToDocInfo));
         line = bufferedReaderForDocsInfo.readLine();
         while(line!=""&&line!=null){
